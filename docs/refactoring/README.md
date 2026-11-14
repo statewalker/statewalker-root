@@ -38,7 +38,7 @@ Problems referenced as P1–P10 are listed in `docs/projects.md`.
 |---|---|---|---|
 | 1.3 | .github, then statewalker-db, webrun-wire, webrun-sites | Move `tools/consumer-install` into shared scripts (or replace with `tools/npmverify.sh` here); then one ticket per project removes its copy | P8 |
 | 1.6 | root | Extend this repository's CI (`tools/check-docs.mjs`): `repos.json` equals the organization (needs a token that can list the org's private repositories, since the default `GITHUB_TOKEN` and cloud sessions cannot; exempt statewalker-root and the archived ones), skills lint | — |
-| 1.7 | every project | An agent pointer back to this repository: a short `CLAUDE.md` (or a section in the existing one) saying sessions start from statewalker-root, the tracker is there, and the review loop applies | — |
+| 1.7 | every project | An agent pointer back to this repository: a short `CLAUDE.md` (or a section in the existing one) saying sessions start from statewalker-root, the tracker is there, and the merge gate applies | — |
 
 ## Phase 2 — dissolve statewalker-sandbox (one ticket per row; blocked by 0.2 and 0.4)
 

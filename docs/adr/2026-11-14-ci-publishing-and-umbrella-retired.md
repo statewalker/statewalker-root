@@ -20,7 +20,7 @@ agent docs, so a session got two answers to "which projects exist" and "where do
    step; only a project whose `npm` environment requires reviewers waits for a human to approve
    the publish run.
 2. Publishing by hand, or a publish step outside the standard job, is a release-path bypass: the
-   shared CI fails it and the review loop grades it critical. The one exception is a package's
+   shared CI fails it and the merge gate grades it critical. The one exception is a package's
    first version, which a human publishes once, since trusted publishing needs an existing package.
 3. Dependents are updated automatically after a publish, with dependencies declared as version
    ranges so a compatible release only moves lockfiles

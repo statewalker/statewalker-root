@@ -76,7 +76,7 @@ unpublished, what is behind npm, dependency order).
 ## Rules
 
 - **Releases only through CI** (npm trusted publishing from each project's `ci.yml`): changesets
-  open a "version packages" pull request, and merging it, through the review loop like any other,
+  open a "version packages" pull request, and merging it, through the merge gate like any other,
   publishes (`docs/process/README.md` §4). Never `npm publish` or `pnpm publish` by hand, from any
   machine: a publish outside the standard `publish` job is a release-path bypass, a critical
   finding. Exceptions and the transition (a package's first version is published once by a human;
@@ -87,13 +87,15 @@ unpublished, what is behind npm, dependency order).
 - **Code goes to the project's repository** as a pull request, one per repository, linked from
   the ticket; project pull requests reference it in full, `statewalker/statewalker-root#<n>` (a
   bare `#<n>` there points at the project's own issues). Knowledge goes here, as a pull request (`docs/process/sessions.md`).
-- **Before merging any pull request**, run the review loop in `docs/process/merging.md`,
-  automatically, up to three rounds: a separate reviewer agent grades findings (critical = cannot
-  be integrated as is; high = bug; medium and low = improvements); you judge each one real,
-  speculative or cosmetic; fix critical always, the rest when cheap, otherwise open follow-up
-  issues in the pull request's own repository; then **merge automatically** once no critical
-  finding is open, every other open finding is filed, and checks are green. No exceptions: the
-  version pull requests that publish go through the same loop.
+- **Before merging any pull request**, pass the merge gate in `docs/process/merging.md`,
+  automatically: once CI is green, one separate reviewer agent reports only critical findings
+  (the classes and evidence bar of `docs/process/review-rubric.md`) and high findings in the
+  changed lines; you judge each one real or speculative; fix critical always, re-verified on the
+  fix diff only, for at most three passes; fix high when cheap, otherwise file one follow-up issue
+  in the pull request's own repository; post one record comment per pass; then **merge
+  automatically** once no critical finding is open, every high finding is fixed or filed, and
+  checks are green. Only the human, in their own message, overrides a critical finding. No
+  exceptions: the version pull requests that publish pass the same gate.
 - **Do not create files that track state.** Tickets, maps, specs, progress and handoffs are
   GitHub issues and issue comments, not files.
 
@@ -153,4 +155,4 @@ type the command instead.
   `$TMPDIR`, which a cloud container loses.
 - **Reviews follow `docs/process/merging.md`**, which overrides `/code-review`'s "do not rerank"
   and its sub-agent fan-out, and the review steps of `/implement` and `/implement-spec` ("fix all
-  issues", "mark ready for review"): they run the review loop and merge as it says.
+  issues", "mark ready for review"): they pass the merge gate and merge as it says.
