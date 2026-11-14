@@ -15,7 +15,7 @@ node tools/review-metrics.mjs --create        # also file the tickets of firing 
 ```
 
 It reads GitHub with `gh api` (REST), so it reaches only the repositories `gh` can see (in a
-cloud session: the attached ones). Without `--create` it is a dry run: it prints the report,
+cloud session: the attached ones); the others are skipped and listed in the report. Without `--create` it is a dry run: it prints the report,
 which is the weekly comment on the pinned **Review health** issue, and the tickets it would file.
 `--now <date>` moves the window's end. The weekly dispatcher routine runs it.
 
@@ -26,9 +26,9 @@ Over a rolling window of the four weeks before the run, for every pull request m
 | Signal | Computed from |
 |---|---|
 | Gate passes per pull request: median and maximum | the highest `pass` among a pull request's record lines |
-| Critical findings per merge, with downgrades and overrides | the sum of `critical` over all passes, per merged pull request with a record; `downgraded` summed; an override is a record that says "overridden", or a merged pull request whose last pass still had a critical finding |
+| Critical findings per merge, with downgrades and overrides | the sum of `critical` over all passes, per merged pull request with a record; `downgraded` summed; an override is a pull request whose record says "overridden" (its Outcome column, `merging.md`) |
 | Share of findings rejected as speculative | `rejected` / (`critical` + `high` + `rejected`), over all passes |
-| Open deferred bugs per project, plus escalations | open issues labelled `bug` with `review-followup` or `health-review`, per project; open root issues labelled `bug` (escalated bug tickets) |
+| Open deferred bugs per project, plus escalations | open issues labelled `bug` with `review-followup` or `health-review`, per project; open root issues labelled `bug` and `ready-for-agent` that are not deferred bugs themselves (escalated bug tickets, `prevention.md`) |
 | Time to merge: median | from a pull request's creation to its merge |
 
 The record line ends the pass's comment; a footer appended after it by tooling is ignored. A

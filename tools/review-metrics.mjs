@@ -47,7 +47,15 @@ function parseArgs(argv) {
 // ---- GitHub access: live through gh, or recorded fixtures ----
 
 function liveSource() {
-  const gh = (args) => JSON.parse(execFileSync("gh", ["api", ...args], { encoding: "utf8", maxBuffer: 1 << 28 }));
+  const gh = (args) => {
+    try {
+      return JSON.parse(execFileSync("gh", ["api", ...args], { encoding: "utf8", maxBuffer: 1 << 28, stdio: ["ignore", "pipe", "pipe"] }));
+    } catch (e) {
+      const err = new Error(`gh api ${args.join(" ")}: ${(e.stderr || e.message).toString().trim().split("\n").pop()}`);
+      err.unreadable = true; // the repository is skipped, the run goes on
+      throw err;
+    }
+  };
   return {
     // Every page of a list endpoint; stop(item) ends paging early once a page holds an item it accepts.
     list(p, stop = () => false) {
@@ -101,7 +109,18 @@ function read(src, repos, now) {
   const start = new Date(now.getTime() - WEEKS * 7 * DAY);
   const prs = [];
   const deferred = {};
+  const skipped = [];
   for (const repo of repos) {
+    try {
+      readRepo(repo);
+    } catch (e) {
+      if (!e.unreadable) throw e; // a missing fixture is a test error, never a skip
+      skipped.push({ repo, reason: e.message });
+      prs.splice(0, prs.length, ...prs.filter((p) => p.repo !== repo));
+      delete deferred[repo];
+    }
+  }
+  function readRepo(repo) {
     const closed = src.list(`repos/${ORG}/${repo}/pulls?state=closed&sort=updated&direction=desc`, (p) => new Date(p.updated_at) < start);
     for (const p of closed) {
       if (!p.merged_at) continue;
@@ -118,8 +137,11 @@ function read(src, repos, now) {
     }
     deferred[repo] = [...bugs.values()];
   }
-  const rootOpen = (label) => src.list(`repos/${ORG}/${SELF}/issues?state=open&labels=${label}`).filter((i) => !i.pull_request);
-  return { prs, deferred, escalations: rootOpen("bug").length, rootIssues: rootOpen("area:root") };
+  const rootOpen = (labels) => src.list(`repos/${ORG}/${SELF}/issues?state=open&labels=${labels}`).filter((i) => !i.pull_request);
+  // Escalated bug tickets (docs/process/prevention.md): ready-for-agent bugs, not deferred bugs themselves.
+  const deferredLabel = (i) => (i.labels ?? []).some((l) => ["review-followup", "health-review"].includes(l.name ?? l));
+  const escalations = rootOpen("bug,ready-for-agent").filter((i) => !deferredLabel(i)).length;
+  return { prs, deferred, skipped, escalations, rootIssues: rootOpen("area:root") };
 }
 
 // ---- computing ----
@@ -135,12 +157,13 @@ const sum = (xs, f) => xs.reduce((n, x) => n + f(x), 0);
 /** Week index of a date: 0 = the latest seven days before now, 3 = the oldest in the window. */
 const weekOf = (d, now) => Math.floor((now - d) / (7 * DAY));
 
-export function compute({ prs, deferred, escalations, rootIssues }, now) {
+export function compute({ prs, deferred, skipped = [], escalations, rootIssues }, now) {
   const recorded = prs.filter((p) => p.records.length);
   const total = (p, k) => sum(p.records, (r) => r[k]);
   const passes = recorded.map((p) => Math.max(...p.records.map((r) => r.pass)));
-  // An override: the record says so, or the last pass still had a critical finding and the PR merged.
-  const overridden = (p) => p.records.some((r) => r.override) || p.records.reduce((a, r) => (r.pass >= a.pass ? r : a)).critical > 0;
+  // An override: a record says "overridden" (merging.md, "Record of a pass"). A critical count alone
+  // does not tell, since it counts real critical findings whether fixed or not.
+  const overridden = (p) => p.records.some((r) => r.override);
   const critical = sum(recorded, (p) => total(p, "critical"));
   const findings = sum(recorded, (p) => total(p, "critical") + total(p, "high") + total(p, "rejected"));
   const rejected = sum(recorded, (p) => total(p, "rejected"));
@@ -169,6 +192,7 @@ export function compute({ prs, deferred, escalations, rootIssues }, now) {
     withRecord: recorded.length,
     withoutRecord: prs.filter((p) => !p.records.length).map((p) => `${p.repo}#${p.number}`),
     malformedRecords: sum(prs, (p) => p.malformed),
+    skippedRepos: skipped,
     passes: { median: median(passes), max: passes.length ? Math.max(...passes) : null },
     critical: { total: critical, perMerge: round(recorded.length ? critical / recorded.length : null), downgraded: sum(recorded, (p) => total(p, "downgraded")), overrides: recorded.filter(overridden).length },
     speculative: { rejected, findings, share: round(findings ? rejected / findings : null) },
@@ -218,6 +242,8 @@ function markdown(r) {
     `| Time to merge | median ${v(s.timeToMergeHours.median, " h")} |`,
     "",
   ];
+  if (s.skippedRepos.length)
+    lines.push(`Not readable, skipped: ${s.skippedRepos.map((x) => x.repo).join(", ")}.`, "");
   if (s.withoutRecord.length || s.malformedRecords)
     lines.push(`Missing gate records: ${s.withoutRecord.join(", ") || "none"}; malformed record lines: ${s.malformedRecords}.`, "");
   lines.push(r.thresholds.length ? "**Thresholds firing:**" : "No threshold fires.");

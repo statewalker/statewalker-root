@@ -3,6 +3,8 @@
 import { test } from "node:test";
 import assert from "node:assert/strict";
 import { spawnSync } from "node:child_process";
+import fs from "node:fs";
+import os from "node:os";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
 
@@ -28,10 +30,11 @@ test("busy: the five signals", () => {
   const { signals: s } = json("busy", "webrun-files,statewalker-db");
   assert.equal(s.merged, 8); // closed-unmerged and pre-window PRs excluded
   assert.deepEqual(s.passes, { median: 1, max: 3 });
-  assert.deepEqual(s.critical, { total: 4, perMerge: 0.67, downgraded: 1, overrides: 1 });
-  assert.deepEqual(s.speculative, { rejected: 2, findings: 7, share: 0.29 });
+  assert.deepEqual(s.critical, { total: 5, perMerge: 0.83, downgraded: 1, overrides: 1 });
+  assert.deepEqual(s.speculative, { rejected: 2, findings: 8, share: 0.25 });
   assert.deepEqual(s.deferredBugs, { "webrun-files": 4, "statewalker-db": 1 });
-  assert.equal(s.escalations, 1); // the open root PR labelled bug is not an issue
+  assert.equal(s.escalations, 1); // neither the root PR nor the root deferred bug counts
+  assert.deepEqual(s.skippedRepos, []);
   assert.deepEqual(s.timeToMergeHours, { median: 9 });
 });
 
@@ -45,8 +48,8 @@ test("busy: a missing record and a malformed record line are reported, not count
 test("busy: a PR with several passes counts its highest pass and every critical once", () => {
   const rep = json("busy", "statewalker-db");
   assert.deepEqual(rep.signals.passes, { median: 2, max: 3 });
-  assert.equal(rep.signals.critical.total, 2);
-  assert.equal(rep.signals.critical.overrides, 0); // last pass clean: no override
+  assert.equal(rep.signals.critical.total, 3);
+  assert.equal(rep.signals.critical.overrides, 0); // a critical fixed in pass 3 is not an override
 });
 
 test("busy: thresholds — critical rising and deferred growth fire where they should, nowhere else", () => {
@@ -57,6 +60,7 @@ test("busy: thresholds — critical rising and deferred growth fire where they s
   ]);
   assert.deepEqual(rep.perProject["statewalker-db"].deferredHistory, [1, 2, 2, 1]); // not growing
   assert.equal(rep.perProject["statewalker-db"].criticalPerMergeLater, 0); // falling, not rising
+  assert.equal(rep.perProject["statewalker-db"].criticalPerMergeEarlier, 3);
 });
 
 test("busy: duplicate check against open area:root issues", () => {
@@ -105,4 +109,38 @@ test("--create is refused with fixtures", () => {
   const r = run("empty", "statewalker-fsm", "--create");
   assert.equal(r.status, 1);
   assert.match(r.stderr, /--create cannot be used with --fixtures/);
+});
+
+// The live path, through a fake `gh` on PATH (tools/test/fixtures/fake-gh.mjs): still no network.
+function live(fixture, repos, { deny = "", extra = [] } = {}) {
+  const bin = fs.mkdtempSync(path.join(os.tmpdir(), "fake-gh-"));
+  fs.symlinkSync(path.join(HERE, "fixtures", "fake-gh.mjs"), path.join(bin, "gh"));
+  const log = path.join(bin, "posts.log");
+  fs.writeFileSync(log, "");
+  const r = spawnSync("node", [TOOL, "--now", NOW, "--repos", repos, ...extra], {
+    encoding: "utf8",
+    env: { ...process.env, PATH: `${bin}${path.delimiter}${process.env.PATH}`, FAKE_GH_FIXTURES: path.join(HERE, "fixtures", `review-metrics-${fixture}.json`), FAKE_GH_DENY: deny, FAKE_GH_LOG: log },
+  });
+  return { ...r, posts: fs.readFileSync(log, "utf8").trim().split("\n").filter(Boolean).map((l) => JSON.parse(l)) };
+}
+
+test("live: an unreadable repository is skipped and reported; the others are still measured", () => {
+  const r = live("busy", "webrun-files,statewalker-db", { deny: "statewalker-db", extra: ["--json"] });
+  assert.equal(r.status, 0, r.stderr);
+  const rep = JSON.parse(r.stdout);
+  assert.deepEqual(rep.signals.skippedRepos.map((x) => x.repo), ["statewalker-db"]);
+  assert.equal(rep.signals.merged, 6);
+  assert.deepEqual(Object.keys(rep.perProject), ["webrun-files"]);
+  assert.match(live("busy", "webrun-files,statewalker-db", { deny: "statewalker-db" }).stdout, /Not readable, skipped: statewalker-db\./);
+});
+
+test("live --create files only the thresholds not already open, with area:root and needs-triage", () => {
+  const r = live("busy", "webrun-files,statewalker-db", { extra: ["--create"] });
+  assert.equal(r.status, 0, r.stderr);
+  assert.deepEqual(r.posts.map((p) => [p.path, p.title, p.labels]), [
+    ["repos/statewalker/statewalker-root/issues", "Review metrics: deferred bugs growing in webrun-files", ["area:root", "needs-triage"]],
+  ]);
+  assert.match(r.posts[0].body, /open deferred bugs 1 → 2 → 3 → 4/);
+  assert.match(r.stdout, /deferred bugs growing in webrun-files: .*Filed: #901\./);
+  assert.match(r.stdout, /critical findings rising in webrun-files: .*Already filed: #40\./);
 });

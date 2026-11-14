@@ -48,7 +48,7 @@
  ],
  "repos/statewalker/httpeers/issues?state=all&labels=bug,review-followup": [],
  "repos/statewalker/httpeers/issues?state=all&labels=bug,health-review": [],
- "repos/statewalker/statewalker-root/issues?state=open&labels=bug": [],
+ "repos/statewalker/statewalker-root/issues?state=open&labels=bug,ready-for-agent": [],
  "repos/statewalker/statewalker-root/issues?state=open&labels=area:root": [
   {
    "number": 60,
