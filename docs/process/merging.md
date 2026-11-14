@@ -89,7 +89,7 @@ selected or attached).
   project's **deferred bugs** (every open `bug` there, `prevention.md`).
 - Title `Review: <the defect>`; body: the finding, its evidence (file and line at the pull
   request's head commit), the proposed fix, links to the pull request and the pass's record, and
-  the root ticket in full (`statewalker/statewalker-root#<n>`).
+  the ticket the pull request works on, in full (`statewalker/<repo>#<n>`).
 
 **No duplicates.** Before filing, search the repository's open issues for the defect
 (`docs/agents/issue-tracker.md`). When it is already filed, do not open another: update the
@@ -148,8 +148,8 @@ scope; a [health review](health-review.md) uses the **Health review** scope inst
 >   answers "no merge base" (a shallow clone), run `git -C <checkout> fetch --deepen=200 origin`
 >   and retry. For a re-verification pass: only `git -C <checkout> diff <last-reviewed-commit>..HEAD`;
 >   the earlier records are attached, and findings they already handled are not reported again.
-> - **Spec**: ticket `statewalker-root#<n>` (read it and its comments), plus what the pull request
->   says it does.
+> - **Spec**: ticket `statewalker/<repo>#<n>`, in root or in the project (read it and its
+>   comments), plus what the pull request says it does.
 > - **Axes**: apply both axes of `/code-review` yourself, without spawning sub-agents:
 >   *Standards* (the project's documented coding standards, its `CLAUDE.md`, this repository's
 >   rules, and the smell baseline) and *Spec* (does the change do what the ticket asks, and
