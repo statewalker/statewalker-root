@@ -28,8 +28,9 @@ below. Code changes are committed in the project's own repository, never here.
 
 This file and `docs/` win over a project's own agent docs and over the vendored skills where they
 disagree. In particular: **the issue tracker is always `statewalker/statewalker-root`**, whatever a
-project's docs say (umbrella's still name `statewalker/umbrella`), and the overrides listed under
-**Agent skills** below apply.
+project's docs say (umbrella's still name `statewalker/umbrella`), with one exception: review
+follow-up issues go to the repository of the pull request they come from (`docs/process/merging.md`).
+The overrides listed under **Agent skills** below apply.
 
 ## Projects
 
@@ -84,7 +85,8 @@ Archived, do not change: `statewalker-content`, `statewalker-ai-legacy`. Private
   automatically, up to three rounds: a separate reviewer agent grades findings (critical = cannot
   be integrated as is; high = bug; medium and low = improvements); you judge each one real,
   speculative or cosmetic; fix critical always, the rest when cheap, otherwise open follow-up
-  issues; merge only when checks are green and no critical finding is open. The only exception is
+  issues in the pull request's own repository; then **merge automatically** once no critical
+  finding is open, every other open finding is filed, and checks are green. The only exception is
   the commits `sw.mjs` pushes to `main` during `update`, `release` and `cascade`.
 - **Do not create files that track state.** Tickets, maps, specs, progress and handoffs are
   GitHub issues and issue comments, not files.
@@ -139,7 +141,7 @@ type the command instead.
   once its project pull request has merged (no closing keywords; they would not reach issues in
   this repository from a project repository anyway).
 - **Triage's `.out-of-scope/<concept>.md` files** live at this repository's root
-  (`.out-of-scope/`) and need human review to merge.
+  (`.out-of-scope/`).
 - **A handoff is a comment on the ticket**, not the `/handoff` skill's file: that file lands in
   `$TMPDIR`, which a cloud container loses.
 - **Reviews follow `docs/process/merging.md`**, which overrides `/code-review`'s "do not rerank"

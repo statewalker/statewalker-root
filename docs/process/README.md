@@ -40,7 +40,7 @@ Rules that make parallel sessions work:
   tickets, or order them with a blocking edge.
 - **Large refactors and renames go first,** before parallel work branches off them.
 - **The session that wrote a change merges it** and resolves its conflicts: it knows the intent.
-  Pull requests that need human review are merged by the human (`merging.md`).
+  Merging is automatic once the review loop's conditions hold (`merging.md`).
 
 ## 3. Changes across projects
 

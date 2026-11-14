@@ -31,22 +31,13 @@ Every session contributes through **its own pull request**, never by pushing to 
 - Branch: the session branch (cloud, named by the harness) or `<ticket-number>-<slug>` (local).
 - Title: `root: <ticket title>`; body links the ticket (`Part of #<n>`, bare is fine here) and the
   project PRs.
-- **Merge it when the session ends** if it is in the first category below, even if the project
-  PRs are still in review. Short-lived pull requests are what keep conflicts rare.
-- Before merging: the review loop in `merging.md`. Rebase onto `main`; resolve conflicts
-  yourself. Squash merge.
-
-Two merge categories:
-
-- **Merges once the loop passes**: changes confined to new files in `docs/adr/` and
-  `docs/research/`, new entries in `GLOSSARY.md`, and appended index lines.
-- **Needs human review**: everything else, including edits to existing glossary entries,
-  `docs/projects.md`, `docs/refactoring/**`, `README.md`, `skills-lock.json`, `CLAUDE.md`,
-  `AGENTS.md`, `.claude/**`, `docs/process/**`, `docs/agents/**`, `tools/**`, `.github/**` and
-  `repos.json`, and `.out-of-scope/`. When unsure, it needs review. Sessions act as the human's
-  own GitHub account, so GitHub approvals cannot express this: the session takes the pull request
-  through the review loop, leaves it open, and **the human approves by merging it, or by telling a
-  session in their own message to merge it** (`merging.md`).
+- **Merge it when the session ends**, even if the project PRs are still in review. Short-lived
+  pull requests are what keep conflicts rare.
+- Before merging: the review loop in `merging.md`, run automatically. The session merges as soon
+  as the loop's merge conditions hold (no open critical finding, every other open finding filed
+  as a follow-up issue, checks green), with no human approval step. Rebase onto `main`; resolve
+  conflicts yourself. Squash merge. The human reads the round records and the follow-up issues,
+  and reverts or reopens if needed.
 
 A session with nothing to contribute here opens no pull request; its trace is the ticket.
 
@@ -121,6 +112,6 @@ dev-server ports.
    resolved; otherwise comment `Released: <why>` and remove the assignee, or
    `Waiting on human: <what>` when the next step is the human's.
 3. New work discovered → new tickets (with blocking edges), not notes in files.
-4. This repository's PR rebased, through the review loop, and merged (or left for review if it is
-   in the review-required set).
+4. This repository's PR rebased, through the review loop, and merged automatically (or left open
+   with `Waiting on human` if the loop stopped on a critical finding).
 5. Locally: `git worktree remove` the workspace's worktrees once their branches are merged.

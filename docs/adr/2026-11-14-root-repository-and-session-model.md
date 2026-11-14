@@ -17,15 +17,17 @@ addresses this; `umbrella` already covers registry and release tooling but not t
    It holds no product code.
 2. **State lives in GitHub issues on this repository**: tickets, Wayfinder maps, specs, progress
    and handoffs. Never in files.
-3. **Every session contributes through its own pull request**, merged when the session ends,
-   after the review loop (`docs/process/merging.md`). No direct pushes to `main`. New ADRs,
-   research files and glossary entries merge once the loop passes; everything else needs human
-   review (`docs/process/sessions.md`).
+3. **Every session contributes through its own pull request**, merged automatically when the
+   session ends, once the review loop's conditions hold (`docs/process/merging.md`): no open
+   critical finding, every other open finding filed as a follow-up issue in that pull request's
+   repository, checks green. No direct pushes to `main`, and no human approval step; the human
+   audits through the round records and follow-up issues.
 4. ADRs are named `YYYY-MM-DD-<slug>.md`, not numbered, so parallel sessions never collide. This
    overrides the vendored `domain-modeling` skill (stated in `CLAUDE.md`).
 5. Code changes are pull requests in the project repositories, one per project, merged lowest
    layer first; releases stay with umbrella's `tools/sw.mjs`, run locally by a human.
-6. The issue tracker is always this repository; `repos.json` here is the source of truth for the
+6. The issue tracker is always this repository, except review follow-up issues, which go to the
+   repository of the pull request they come from; `repos.json` here is the source of truth for the
    managed projects.
 
 ## Consequences

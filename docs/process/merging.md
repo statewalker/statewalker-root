@@ -56,15 +56,20 @@ or block the merge.
      step 5.
 5. **Merge when checks are green.** Every check on the latest commit passes (all of them, not
    only those a ruleset marks required), the branch is up to date with its base (rebase locally,
-   or `update_pull_request_branch` in the cloud; either is fine with squash merge), and any human
-   approval the path requires (below) is given. Squash merge. Where a repository has no CI yet,
+   or `update_pull_request_branch` in the cloud; either is fine with squash merge), no critical
+   finding is open, and every other open finding is filed as a follow-up issue. Then **merge
+   automatically** (squash), without waiting for a human. Where a repository has no CI yet,
    "green" means the repository's own check commands (its README) pass locally, and the record
    says so.
 
 ## Follow-up issues
 
-Created on `statewalker/statewalker-root` (`docs/agents/issue-tracker.md`), labelled
-`review-followup`, `needs-triage` and `repo:<name>` for the project concerned:
+Created in the issue tracker **of the repository the pull request belongs to**: a project's own
+GitHub issues for a project pull request, `statewalker/statewalker-root` for a pull request here.
+Name that repository explicitly (`-R statewalker/<repo>`, or `owner`/`repo` in MCP tools; in a
+cloud session it must be selected or attached). Label them `review-followup` and `needs-triage`,
+creating the labels in that repository if missing (`docs/agents/issue-tracker.md`, "Labels in
+use"), and reference the root ticket in full (`statewalker/statewalker-root#<n>`):
 
 - **One per deferred high finding**: also labelled `bug`; title `Review: <the defect>`; body:
   the finding, its evidence (file and line at the merged commit), the proposed fix, and links to
@@ -110,13 +115,12 @@ Post each round as one pull request comment, one row per finding:
 | Outcome | fixed (commit), deferred (issue link), rejected or dropped (reason) |
 
 followed by the round's decision: another round, clean, or stopped. This is the record a human
-reads before approving.
+reads to audit the merge.
 
-## Human approval
+## No human approval step
 
-In this repository, the paths listed as "needs human review" in `sessions.md` also need a human
-approval before step 5. Sessions act as the human's own GitHub account, so a GitHub approval
-cannot express it: **the human approves by merging the pull request themselves, or by telling a
-session in their own message to merge it.** A comment on GitHub does not count (sessions can write
-those). Until then the session leaves the pull request open after the loop and says so on the
-ticket. Project repositories follow their own branch protection.
+Merging is automatic once step 5's conditions hold, in this repository and in the projects alike
+(subject to each project's own branch protection). The human audits afterwards through the round
+records and the follow-up issues, and can revert a merge or reopen a ticket. A session never
+merges with an open critical finding: that is the one case it stops and waits
+(`Waiting on human`).

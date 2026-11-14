@@ -1,7 +1,9 @@
 # Issue tracker: GitHub
 
 Issues, specs and Wayfinder maps for the whole statewalker ecosystem live as GitHub issues on
-**`statewalker/statewalker-root`**, including work whose code lands in a project repository.
+**`statewalker/statewalker-root`**, including work whose code lands in a project repository. The
+one exception: review follow-up issues go to the repository of the pull request they come from
+(`docs/process/merging.md`).
 
 **Always name the repository.** Sessions run inside project clones (`repos/<name>`,
 `ws/<feature>/<name>`), where `gh` infers the *project* from `git remote`. Every `gh issue` / `gh pr`
@@ -68,7 +70,7 @@ words:
 |---|---|---|
 | `Claimed by <session URL or branch>` | the session taking it | taken |
 | `Released: <why>` | a session stopping without finishing | free |
-| `Waiting on human: <what is needed>` | a session that needs the human (a release, a decision, an approval, the review loop's stop rule) | **not available** to sessions |
+| `Waiting on human: <what is needed>` | a session that needs the human (a release, a decision, the review loop stopped on a critical finding) | **not available** to sessions |
 | `Resumed: <what changed>` | **the human only**, once the wait is over | free |
 
 1. Read the ticket's comments. The latest status comment decides: available only if there is
@@ -120,6 +122,10 @@ Used by `/wayfinder`. The **map** is a single issue with **child** issues as tic
   `wayfinder:task`.
 - `area:root` for work on this repository itself; `repo:<name>` for each project a ticket's code
   or decision concerns.
+- `review-followup` (with `bug` or `enhancement`) for findings deferred by the review loop. These
+  issues are the one kind filed **in the repository of the pull request** rather than here
+  (`docs/process/merging.md`); create the labels there with the same REST call, naming that
+  repository.
 
 The triage, Wayfinder and `area:root` labels exist. Before applying a label the repository lacks
 (a new `repo:<name>`), create it:
