@@ -18,7 +18,8 @@ agent docs, so a session got two answers to "which projects exist" and "where do
    request, and merging it publishes. That pull request goes through the merge gate
    (`docs/process/merging.md`) like any other, so a session can release without the human.
 2. Publishing by hand, or a publish step outside the standard job, is a release-path bypass: the
-   shared CI fails it and the review loop grades it critical.
+   shared CI fails it and the review loop grades it critical. The one exception is a package's
+   first version, which a human publishes once, since trusted publishing needs an existing package.
 3. Dependents are updated automatically after a publish, with dependencies declared as version
    ranges so a compatible release only moves lockfiles
    ([#15](https://github.com/statewalker/statewalker-root/issues/15)).
@@ -32,5 +33,7 @@ agent docs, so a session got two answers to "which projects exist" and "where do
 - No human release step between layers: a change spanning layers lands bottom-up as project pull
   request, version pull request, then the next layer (`docs/process/README.md` §3).
 - Releases carry npm provenance, and CI needs no long-lived npm token (OIDC).
-- A project whose CI does not publish yet cannot release until its CI-publishing ticket lands.
+- A project whose CI does not publish yet cannot release until its CI-publishing ticket lands; a
+  project that still publishes on every merge to `main` moves to the version pull request the same
+  way.
 - Umbrella's open issues stay in the archived repository (private, read-only); they were not moved.

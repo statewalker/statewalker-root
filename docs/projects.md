@@ -55,7 +55,7 @@ The refactoring plan (`docs/refactoring/README.md`) turns each of these into wor
 - **P1.** Resolved: `cellb.dev` was missing from umbrella's registry and workspace; umbrella is archived
   and this repository's `repos.json` and `tools/ws.mjs` include it.
 - **P2.** Resolved: umbrella's combined workspace left out `httpeers`; `tools/ws.mjs new --libraries`
-  links every project's `packages/*`.
+  links the `packages/*` of every cloned project that publishes.
 - **P3.** Two packages are named `@statewalker/httpeers-conformance` (sandbox and httpeers). The
   sandbox's `httpeers.core` is an older parallel line of the published `httpeers-core`.
 - **P4.** statewalker-sandbox's CI needs a sibling checkout of webrun-wire: not self-contained.

@@ -79,7 +79,8 @@ unpublished, what is behind npm, dependency order).
   open a "version packages" pull request, and merging it, through the review loop like any other,
   publishes (`docs/process/README.md` §4). Never `npm publish` or `pnpm publish` by hand, from any
   machine: a publish outside the standard `publish` job is a release-path bypass, a critical
-  finding.
+  finding. Exceptions and the transition (a package's first version is published once by a human;
+  some projects still publish on every merge to `main`): §4.
 - **Lower layers first.** A change spanning layers merges and releases bottom-up: the lower
   project's version pull request merges and publishes before the upper project moves to the new
   version (`docs/process/README.md` §3).

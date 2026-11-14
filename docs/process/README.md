@@ -58,7 +58,8 @@ Rules that make parallel sessions work:
    1. Take the lowest project's pull request, with a changeset (`pnpm changeset`) for each package
       it changes, through the review loop (`merging.md`) and merge it.
    2. CI opens or updates that project's "version packages" pull request (§4). Take it through the
-      review loop and merge it: CI publishes.
+      review loop and merge it: CI publishes. In a project that still publishes on every merge
+      (§4, "Transition"), step 1's merge already published: skip this step.
    3. Once npm serves the new versions (`node tools/packages.mjs status <project>`), raise the upper
       project's catalog range where the new version falls outside it, get its checks green, take
       it through the review loop and merge it.
@@ -81,7 +82,18 @@ through the review loop like any other, so a session can release without the hum
 
 - **Never publish by hand**, from any machine, and never add a publish step outside the standard
   `publish` job: the shared CI fails such a pull request, and the review loop grades it a
-  release-path bypass (critical).
+  release-path bypass (critical). **One exception: a package's first version.** Trusted publishing
+  needs a package that already exists on npm, so the `publish` job skips a new package with a
+  warning. A human publishes its first version once, with their 2FA, and adds the trusted
+  publisher; a session that adds a package comments `Waiting on human: first publish of <package>`
+  on the ticket.
+- **Transition.** Not every project has the version-pull-request shape yet. A project whose
+  `ci.yml` says "Every merge to main publishes" (webrun-sites, statewalker-ai, and per
+  [#10](https://github.com/statewalker/statewalker-root/issues/10) statewalker-kernel and
+  statewalker-knowledge) versions and publishes straight from `main` after each merge: there,
+  merging any pull request with a changeset or a changed package publishes, with no version pull
+  request to review. Read a project's `ci.yml` header before merging. Each moves to the version
+  pull request through its CI-publishing ticket.
 - To check what a project has not published, or which references are behind npm:
   `node tools/packages.mjs status [project…]` over the clones in `repos/`
   (`node tools/repos.mjs clone`, later `pull`).

@@ -164,7 +164,8 @@ if (command === "new") {
   const ws = wsOf(feature);
   fs.mkdirSync(ws, { recursive: true });
   const self = path.join(ws, SELF);
-  console.log(`${SELF}: ${addWorktree(ROOT, self, feature, "HEAD")}`);
+  git(ROOT, "fetch", "-q", "--prune", "origin");
+  console.log(`${SELF}: ${addWorktree(ROOT, self, feature, "origin/main")}`);
   const wanted = [...projects];
   const meta = readMeta(feature);
   if (flags.has("--libraries")) {
