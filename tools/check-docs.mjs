@@ -9,7 +9,7 @@ import path from "node:path";
 import { fileURLToPath } from "node:url";
 
 const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "..");
-const SKIP = new Set([".git", "node_modules", "repos", "ws"]);
+const SKIP = new Set([".git", "node_modules", "repos", "ws", "notes"]);
 const problems = [];
 
 function markdownFiles(dir) {

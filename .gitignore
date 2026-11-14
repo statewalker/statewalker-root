@@ -2,6 +2,9 @@
 repos/
 ws/
 
+# The personal notes archive, checked out here locally; it is its own repository.
+notes/
+
 node_modules/
 .env
 .env.*
