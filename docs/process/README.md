@@ -45,7 +45,8 @@ Rules that make parallel sessions work:
    in the cloud, by cloning the projects side by side under `repos/` and linking with
    `pnpm` overrides or umbrella's `tools/workspace.mjs`.
 3. One pull request per project, each linking the ticket; the ticket lists them.
-4. Merge **lowest layer first**, then release (below), then update the next layer's branch.
+4. Take each pull request through the review loop (`merging.md`), then merge **lowest layer
+   first**, release (below), and update the next layer's branch.
 
 ## 4. Release
 

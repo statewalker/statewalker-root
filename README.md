@@ -9,6 +9,7 @@ development session starts, human or agent. No product code lives here.
 | Projects: layers, inventory, known problems | [`docs/projects.md`](docs/projects.md) |
 | How work flows: routes, parallel work, releases | [`docs/process/README.md`](docs/process/README.md) |
 | How to start, run and end a session; how sessions contribute here | [`docs/process/sessions.md`](docs/process/sessions.md) |
+| How every pull request is reviewed and merged | [`docs/process/merging.md`](docs/process/merging.md) |
 | The reorganization plan | [`docs/refactoring/README.md`](docs/refactoring/README.md) |
 | Shared vocabulary and decisions | [`GLOSSARY.md`](GLOSSARY.md), [`docs/adr/`](docs/adr/README.md) |
 | Agent skills (from [mattpocock/skills](https://github.com/mattpocock/skills)) | [`.claude/skills/`](.claude/skills), pinned in `skills-lock.json` |

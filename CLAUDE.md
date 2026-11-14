@@ -54,6 +54,9 @@ Archived, do not change: `statewalker-content`, `statewalker-ai-legacy`.
 - **Lower layers first.** A change spanning layers merges and releases bottom-up.
 - **Code goes to the project's repository** as a pull request, one per repository, linked from
   the ticket. Knowledge goes here, as a pull request (`docs/process/sessions.md`).
+- **Before merging any pull request**, run the review loop in `docs/process/merging.md`: review
+  by a separate agent with findings graded critical / high / medium / low, fix them all, review
+  again while critical or high remain, merge only when CI is green.
 - **Do not create files that track state.** Tickets, maps, specs, progress and handoffs are
   GitHub issues and issue comments, not files.
 

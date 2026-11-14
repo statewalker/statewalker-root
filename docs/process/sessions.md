@@ -30,7 +30,9 @@ Every session contributes through **its own pull request**, never by pushing to 
 - Title: `root: <ticket title>`; body links the ticket (`Part of #<n>`) and the project PRs.
 - **Merge it when the session ends**, even if the project PRs are still in review. Short-lived
   pull requests are what keep conflicts rare.
-- Squash merge. Before merging: rebase onto `main`; resolve conflicts yourself.
+- Before merging: the review loop in `merging.md` (separate reviewer agent, severities, fix all,
+  re-review on critical or high, CI green). Rebase onto `main`; resolve conflicts yourself.
+  Squash merge.
 - **Merges on green**: changes confined to `docs/adr/`, `docs/research/`, additions to
   `GLOSSARY.md`, and appended index lines.
 - **Needs human review**: anything that changes how agents behave: `CLAUDE.md`, `AGENTS.md`,
@@ -82,7 +84,8 @@ A `tools/ws.mjs` that creates, lists, syncs and removes workspaces is planned
 
 ## End a session
 
-1. Project PRs opened (or merged, lowest layer first), each linking the ticket.
+1. Project PRs opened, each linking the ticket, and taken through the review loop in
+   `merging.md` before merging (lowest layer first).
 2. **Handoff comment** on the ticket: what was done, links to every PR, what is left, anything
    the next session must know. Close the ticket if it is resolved.
 3. New work discovered → new tickets (with blocking edges), not notes in files.
