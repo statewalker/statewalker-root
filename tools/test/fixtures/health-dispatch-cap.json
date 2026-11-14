@@ -97,36 +97,30 @@
  "repos/statewalker/q1/commits/main": {
   "sha": "dddddddddddddddddddddddddddddddddddddddd"
  },
- "repos/statewalker/q1/issues?state=open&labels=bug,review-followup": [],
- "repos/statewalker/q1/issues?state=open&labels=bug,health-review": [],
+ "repos/statewalker/q1/issues?state=open&labels=bug": [],
  "repos/statewalker/statewalker-root/issues/301/comments": [],
  "repos/statewalker/q2/commits/main": {
   "sha": "dddddddddddddddddddddddddddddddddddddddd"
  },
- "repos/statewalker/q2/issues?state=open&labels=bug,review-followup": [],
- "repos/statewalker/q2/issues?state=open&labels=bug,health-review": [],
+ "repos/statewalker/q2/issues?state=open&labels=bug": [],
  "repos/statewalker/statewalker-root/issues/302/comments": [],
  "repos/statewalker/q3/commits/main": {
   "sha": "dddddddddddddddddddddddddddddddddddddddd"
  },
- "repos/statewalker/q3/issues?state=open&labels=bug,review-followup": [],
- "repos/statewalker/q3/issues?state=open&labels=bug,health-review": [],
+ "repos/statewalker/q3/issues?state=open&labels=bug": [],
  "repos/statewalker/statewalker-root/issues/303/comments": [],
  "repos/statewalker/q4/commits/main": {
   "sha": "dddddddddddddddddddddddddddddddddddddddd"
  },
- "repos/statewalker/q4/issues?state=open&labels=bug,review-followup": [],
- "repos/statewalker/q4/issues?state=open&labels=bug,health-review": [],
+ "repos/statewalker/q4/issues?state=open&labels=bug": [],
  "repos/statewalker/statewalker-root/issues/304/comments": [],
  "repos/statewalker/q5/commits/main": {
   "sha": "dddddddddddddddddddddddddddddddddddddddd"
  },
- "repos/statewalker/q5/issues?state=open&labels=bug,review-followup": [],
- "repos/statewalker/q5/issues?state=open&labels=bug,health-review": [],
+ "repos/statewalker/q5/issues?state=open&labels=bug": [],
  "repos/statewalker/statewalker-root/issues/305/comments": [],
  "repos/statewalker/q6/commits/main": {
   "sha": "dddddddddddddddddddddddddddddddddddddddd"
  },
- "repos/statewalker/q6/issues?state=open&labels=bug,review-followup": [],
- "repos/statewalker/q6/issues?state=open&labels=bug,health-review": []
+ "repos/statewalker/q6/issues?state=open&labels=bug": []
 }

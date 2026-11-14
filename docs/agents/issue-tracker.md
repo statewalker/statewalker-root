@@ -1,22 +1,32 @@
 # Issue tracker: GitHub
 
-Issues, specs and Wayfinder maps for the whole statewalker ecosystem live as GitHub issues on
-**`statewalker/statewalker-root`**, including work whose code lands in a project repository. Two
-exceptions: review follow-up issues go to the repository of the pull request they come from
-(`docs/process/merging.md`), and a health review's findings go to the reviewed project's own
-tracker (`docs/process/health-review.md`; its record ticket stays here).
+Issues are GitHub issues, **placed by subject**, so that everything known about one project is in
+one tracker and every safety net (deferred bugs, escalation, health review) sees it:
+
+| The issue is about… | Tracker |
+|---|---|
+| One project alone: a bug, a design or architecture question, an improvement, a review follow-up (`docs/process/merging.md`), a health review's finding (`docs/process/health-review.md`), a CI baseline gap | **that project's own repository** |
+| Several projects, or the plan: Wayfinder maps and their tickets, specs and the tickets they break into (even when all of them touch one project: sub-issues and blocking edges stay in one repository) | **`statewalker/statewalker-root`** |
+| The process or this repository (`area:root`), health-review record tickets, escalated bug tickets (which link the project's issue) | **`statewalker/statewalker-root`** |
+
+When unsure, ask: could a session fix it with one pull request in one project, without a decision
+from the plan? Then it belongs to that project. A project issue that turns out to need a decision
+across projects gets a root ticket (or a Wayfinder ticket) that links it; the project issue stays
+where it is.
 
 **Always name the repository.** Sessions run inside project clones (`repos/<name>`,
 `ws/<feature>/<name>`), where `gh` infers the *project* from `git remote`:
 
-- **Issue operations** (tickets, maps, specs): every `gh issue` command carries
-  `-R statewalker/statewalker-root`, every `gh api` path names it literally, every MCP call passes
-  `owner: statewalker`, `repo: statewalker-root`.
-- **Pull-request operations** (open, read checks, comment the review record, update, merge) and
-  **review follow-up issues** name **the pull request's own repository**: `-R statewalker/<project>`,
-  or `repo: <project>` in MCP calls. A pull-request number means nothing in another repository.
+- **Root issue operations** (maps, specs, their tickets, process tickets): every `gh issue`
+  command carries `-R statewalker/statewalker-root`, every `gh api` path names it literally, every
+  MCP call passes `owner: statewalker`, `repo: statewalker-root`.
+- **Project issue operations** and **pull-request operations** (open, read checks, comment the
+  review record, update, merge) name **the project's repository**: `-R statewalker/<project>`, or
+  `repo: <project>` in MCP calls. An issue or pull-request number means nothing in another
+  repository; in a cloud session the project must be selected or attached.
 
-File issues nowhere else, and never into `mattpocock/skills`.
+The commands below show `statewalker/statewalker-root`; for a project issue, name the project
+instead. File issues nowhere else, and never into `mattpocock/skills`.
 
 **Before creating any issue, check that it is not already filed.** Search the target repository's
 open issues for the same defect or question (`gh api 'search/issues?q=repo:statewalker/<repo>+is:issue+is:open+<keywords>'`,
@@ -108,7 +118,18 @@ requests; `/triage` reads this flag.)_
 
 ## When a skill says "publish to the issue tracker"
 
-Create a GitHub issue on `statewalker/statewalker-root`.
+Create a GitHub issue in the tracker its subject belongs to (the table at the top): a map, spec or
+its tickets on `statewalker/statewalker-root`; a standalone issue about one project in that
+project's repository.
+
+## Working a ticket in a project's tracker
+
+A ticket in a project's repository is claimed, released and handed back exactly as in **Claiming
+a ticket**, with the comments on that issue. The session's pull request in the same repository
+links it as `#<n>`; a ticket in root is linked in full, `statewalker/statewalker-root#<n>`. As for
+root tickets, no closing keywords: the session closes the issue with a comment once its pull
+request has merged. Labels the project lacks (the triage labels, `bug`) are created there first,
+as in **Labels in use**.
 
 ## When a skill says "fetch the relevant ticket"
 
@@ -129,12 +150,11 @@ Used by `/wayfinder`. The **map** is a single issue with **child** issues as tic
 - **Resolve**: comment the answer, close the ticket, append a context pointer (gist + link) to the
   map's Decisions so far.
 
-## Review follow-ups in project repositories
+## Issues in project repositories
 
-Follow-up issues filed in project repositories (`docs/process/merging.md`) are part of the plan
-too. When triaging, also sweep them: for each project in `repos.json`,
-`gh api 'repos/statewalker/<repo>/issues?state=open&labels=review-followup'`. Every follow-up issue
-is also linked from the gate's pass record and from the ticket's handoff comment, so the ticket that
+Project issues are part of the plan too. When triaging, also sweep each project in `repos.json`:
+`gh api 'repos/statewalker/<repo>/issues?state=open&labels=needs-triage'`. Every review follow-up is
+also linked from the gate's pass record and from the ticket's handoff comment, so the ticket that
 caused it leads to it.
 
 ## Labels in use
@@ -150,8 +170,10 @@ caused it leads to it.
   (`docs/process/merging.md`); create the labels there with the same REST call, naming that
   repository.
 - `health-review`: here, on a health review's record ticket; in a project, on that review's
-  findings, with `bug` or `enhancement` (`docs/process/health-review.md`). Open issues labelled
-  `bug` with `review-followup` or `health-review` are the project's **deferred bugs**.
+  findings, with `bug` or `enhancement` (`docs/process/health-review.md`).
+- `bug`: in a project, every open issue with it is one of the project's **deferred bugs**, whatever
+  filed it (`docs/process/prevention.md`); here, on escalated bug tickets and on follow-ups from
+  this repository's own pull requests.
 - `ci-baseline`: in a project, one issue per missing CI baseline measure (`docs/process/prevention.md`).
 
 The triage, Wayfinder and `area:root` labels exist. Before applying a label the repository lacks

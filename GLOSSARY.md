@@ -46,5 +46,6 @@ reproduction.
 The one kind of finding that blocks a merge (`docs/process/review-rubric.md`).
 _Avoid_: blocker, showstopper.
 
-**Deferred bug**: a real bug found by a review and not fixed in the pull request where it was
-found: an open issue labelled `bug` with `review-followup` or `health-review`.
+**Deferred bug**: a known bug in a project, not yet fixed: an open issue labelled `bug` in the
+project's own tracker, whatever filed it (a merge-gate follow-up, a health review, a session that
+found it while working).

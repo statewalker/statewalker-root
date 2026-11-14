@@ -20,7 +20,8 @@ Whatever the route: tickets reach `ready-for-agent` only with acceptance criteri
 new behaviour carry tests, and a session lists a project's deferred bugs before changing it
 ([prevention.md](prevention.md)).
 
-Every route ends in issues on this repository (`docs/agents/issue-tracker.md`). Specs, tickets
+Every route ends in issues: maps, specs and their tickets on this repository, a bug or other issue
+about one project alone in that project's tracker (`docs/agents/issue-tracker.md`). Specs, tickets
 and Wayfinder tickets carry `repo:<name>` labels naming the projects they concern.
 
 ## 2. Parallel work

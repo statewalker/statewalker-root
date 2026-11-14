@@ -91,11 +91,9 @@ function read(src, repos, now) {
       }
       const openRecords = open.map((r) => ({ number: r.number, created: new Date(r.created_at), status: statusOf(src.list(`repos/${ORG}/${SELF}/issues/${r.number}/comments`)) }));
       const head = src.get(`repos/${ORG}/${repo}/commits/main`);
-      const bugs = new Map();
-      for (const label of ["review-followup", "health-review"]) {
-        for (const i of src.list(`repos/${ORG}/${repo}/issues?state=open&labels=bug,${label}`)) if (!i.pull_request) bugs.set(i.number, i);
-      }
-      projects.push({ repo, last, openRecords, head: head.sha, bugs: [...bugs.values()] });
+      // Deferred bugs: every open issue labelled bug in the project's tracker (docs/process/prevention.md).
+      const bugs = src.list(`repos/${ORG}/${repo}/issues?state=open&labels=bug`).filter((i) => !i.pull_request);
+      projects.push({ repo, last, openRecords, head: head.sha, bugs });
     } catch (e) {
       if (!e.unreadable) throw e;
       skipped.push({ repo, reason: e.message });
