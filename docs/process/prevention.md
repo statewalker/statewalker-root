@@ -47,8 +47,8 @@ links the issue, and the session closes it with a comment once the pull request 
 
 When a session picks its own work (no ticket given, or a frontier to choose from), it takes
 **escalated bug tickets before feature tickets, oldest first**. An escalated bug ticket is an open
-`ready-for-agent` issue here labelled `bug`, which links a deferred bug that stayed open for four
-weeks. Availability still follows the claim rules (`docs/agents/issue-tracker.md`, "Claiming a
+`ready-for-agent` issue here labelled `bug` and `repo:<project>`, which links a deferred bug that
+stayed open for four weeks; the weekly dispatcher creates it. Availability still follows the claim rules (`docs/agents/issue-tracker.md`, "Claiming a
 ticket").
 
 ## Git guardrails

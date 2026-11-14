@@ -30,8 +30,9 @@ below. Code changes are committed in the project's own repository, never here.
 
 This file and `docs/` win over a project's own agent docs and over the vendored skills where they
 disagree. In particular: **the issue tracker is always `statewalker/statewalker-root`**, whatever a
-project's docs say, with one exception: review follow-up issues go to the repository of the pull
-request they come from (`docs/process/merging.md`).
+project's docs say, with two exceptions: review follow-up issues go to the repository of the pull
+request they come from (`docs/process/merging.md`), and a health review's findings go to the
+reviewed project's tracker (`docs/process/health-review.md`).
 The overrides listed under **Agent skills** below apply.
 
 ## Projects

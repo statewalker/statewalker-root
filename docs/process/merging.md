@@ -97,7 +97,7 @@ The pass's record and the ticket's handoff comment list every follow-up issue, n
 ## Reviewer brief
 
 Pass this to the reviewer, with the placeholders filled. At the merge gate, keep the **Gate**
-scope; a health review uses the **Health review** scope instead.
+scope; a [health review](health-review.md) uses the **Health review** scope instead.
 
 > You are an independent reviewer; you did not write this change. Do not modify files, push or
 > comment on GitHub.
