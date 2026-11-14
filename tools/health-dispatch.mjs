@@ -3,7 +3,7 @@
 // no dependencies.
 //
 //   node tools/health-dispatch.mjs [--now <ISO date>] [--repos a,b,...] [--layers <file.json>]
-//                                  [--json] [--create] [--fixtures <file.json>]
+//                                  [--json] [--md <file>] [--create] [--fixtures <file.json>]
 //
 // Decides, from the record tickets here, each project's latest commit on main and the open
 // deferred bugs:
@@ -27,16 +27,18 @@ const CAP = 5;
 const ESCALATE_AFTER_DAYS = 28;
 const RECORD_LINE = /<!--\s*health-review:\s*project=(\S+)\s+commit=([0-9a-f]{7,40})\s*-->/;
 const STATUS = /^(Claimed by|Released:|Waiting on human:|Resumed:)/;
+const HEALTH_ISSUE = 36; // the pinned "Review health" issue
 const HERE = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "..");
 
 function parseArgs(argv) {
-  const a = { now: new Date(), repos: null, layers: null, json: false, create: false, fixtures: null };
+  const a = { now: new Date(), repos: null, layers: null, json: false, md: null, create: false, fixtures: null };
   for (let i = 0; i < argv.length; i++) {
     const k = argv[i];
     if (k === "--now") a.now = new Date(argv[++i]);
     else if (k === "--repos") a.repos = argv[++i].split(",").filter(Boolean);
     else if (k === "--layers") a.layers = JSON.parse(fs.readFileSync(argv[++i], "utf8"));
     else if (k === "--json") a.json = true;
+    else if (k === "--md") a.md = argv[++i];
     else if (k === "--create") a.create = true;
     else if (k === "--fixtures") a.fixtures = argv[++i];
     else throw new Error(`unknown argument ${k}`);
@@ -45,6 +47,17 @@ function parseArgs(argv) {
   if (a.create && a.fixtures) throw new Error("--create cannot be used with --fixtures");
   return a;
 }
+
+/** The ISO 8601 week of a date, e.g. "2026-W46": the guard against a second run in one week. */
+export function isoWeek(d) {
+  const t = new Date(Date.UTC(d.getUTCFullYear(), d.getUTCMonth(), d.getUTCDate()));
+  const day = t.getUTCDay() || 7;
+  t.setUTCDate(t.getUTCDate() + 4 - day); // the Thursday of this week decides the year
+  const year = t.getUTCFullYear();
+  const week = Math.ceil(((t - Date.UTC(year, 0, 1)) / DAY + 1) / 7);
+  return `${year}-W${String(week).padStart(2, "0")}`;
+}
+const weekMarker = (week) => `<!-- review-health: week=${week} -->`;
 
 /** { project: layer number } from CLAUDE.md's project table (`| L3 | webrun-vcs | … |`). */
 export function layersFromClaudeMd(text) {
@@ -173,7 +186,8 @@ function escalationBody(e) {
 }
 
 function markdown(p) {
-  const lines = [`## Health reviews, week of ${p.now.slice(0, 10)}`, ""];
+  const lines = [`## Health reviews, week ${p.week} (${p.now.slice(0, 10)})`, ""];
+  if (p.alreadyPlanned) return [...lines, `Already planned this week (#${HEALTH_ISSUE} has the marker): nothing to do.`].join("\n");
   lines.push(p.review.length ? `**Review** (${p.review.length} of at most ${p.cap}):` : "Nothing to review this week.");
   for (const r of p.review) {
     if (r.action === "resume") lines.push(`- ${r.repo}: resume #${r.record}${r.start ? "" : ` (not started: ${r.status})`}`);
@@ -186,6 +200,7 @@ function markdown(p) {
     lines.push("", "**Deferred bugs to escalate** (open four weeks or more):");
     for (const e of p.escalate) lines.push(`- ${e.repo}#${e.issue} (${e.ageDays} days): ${e.duplicateOf ? `already escalated in #${e.duplicateOf}` : e.created ? `escalated in #${e.created}` : "to escalate"}`);
   }
+  lines.push("", weekMarker(p.week));
   return lines.join("\n");
 }
 
@@ -202,8 +217,14 @@ export function main(argv) {
   const src = args.fixtures ? fixtureSource(args.fixtures) : liveSource();
   const repos = args.repos ?? [...Object.keys(JSON.parse(fs.readFileSync(path.join(HERE, "repos.json"), "utf8"))), SELF];
   const layers = args.layers ?? layersFromClaudeMd(fs.readFileSync(path.join(HERE, "CLAUDE.md"), "utf8"));
-  const p = plan(read(src, repos, args.now), layers, args.now);
-  if (args.create) {
+  // The weekly routine posts the plan on the Review health issue, ending with this week's marker:
+  // once it is there, this week's runs are planned, and a second run plans nothing.
+  const week = isoWeek(args.now);
+  const ran = src.list(`repos/${ORG}/${SELF}/issues/${HEALTH_ISSUE}/comments`).some((c) => (c.body ?? "").includes(weekMarker(week)));
+  const p = ran
+    ? { now: args.now.toISOString(), week, alreadyPlanned: true, cap: CAP, review: [], waiting: [], unchanged: [], skippedRepos: [], escalate: [] }
+    : { week, alreadyPlanned: false, ...plan(read(src, repos, args.now), layers, args.now) };
+  if (args.create && !ran) {
     for (const r of p.review.filter((x) => x.action === "create")) {
       ensureLabel(src, `repo:${r.repo}`);
       r.created = src.create(`repos/${ORG}/${SELF}/issues`, { title: r.title, body: recordBody(r), labels: ["health-review", `repo:${r.repo}`] }).number;
@@ -213,6 +234,7 @@ export function main(argv) {
       e.created = src.create(`repos/${ORG}/${SELF}/issues`, { title: `Deferred bug: ${e.repo}#${e.issue} ${e.title}`, body: escalationBody(e), labels: ["bug", "ready-for-agent", `repo:${e.repo}`] }).number;
     }
   }
+  if (args.md) fs.writeFileSync(args.md, `${markdown(p)}\n`);
   return args.json ? JSON.stringify(p, null, 2) : markdown(p);
 }
 

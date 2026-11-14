@@ -13,7 +13,7 @@ follows it (`CLAUDE.md`, "Skills only a human can start").
 | A clear feature | `/grill-with-docs` → `/to-spec` → `/to-tickets` → `/implement` (one ticket) or `/implement-spec` (whole spec, parallel subagents; claims every ticket, `CLAUDE.md` overrides) |
 | A bug or regression | `/diagnosing-bugs`, with `/tdd` for the regression test |
 | A design question | `/prototype` (throwaway) or a `wayfinder:prototype` ticket |
-| Code-health survey | A health review of one project: weekly from the dispatcher, or on demand ([health-review.md](health-review.md)); `/improve-codebase-architecture` for a survey alone |
+| Code-health survey | A health review of one project: weekly from the routine ([weekly-routine.md](weekly-routine.md)), or on demand ([health-review.md](health-review.md)); `/improve-codebase-architecture` for a survey alone |
 | After a session | `/retro`: findings become `area:root` tickets |
 
 Whatever the route: tickets reach `ready-for-agent` only with acceptance criteria, bug fixes and

@@ -70,6 +70,35 @@ test("more unfinished runs than the cap: the five oldest are resumed, the rest w
   assert.deepEqual(p.waiting, ["q6"]);
 });
 
+test("a second run in the same week plans and files nothing", () => {
+  const r = run([...BASE, "--fixtures", FX("health-dispatch-planned.json"), "--json"]);
+  assert.equal(r.status, 0, r.stderr);
+  const p = JSON.parse(r.stdout);
+  assert.equal(p.week, "2026-W46");
+  assert.equal(p.alreadyPlanned, true);
+  assert.deepEqual([p.review, p.escalate], [[], []]);
+  const created = live(BASE.concat("--create"), "", "health-dispatch-planned.json");
+  assert.equal(created.status, 0, created.stderr);
+  assert.deepEqual(created.posts, []);
+  assert.match(created.stdout, /Already planned this week/);
+});
+
+test("the week marker: ISO weeks, and the plan ends with it", async () => {
+  const out = run([...BASE, "--fixtures", FX("health-dispatch.json")]).stdout;
+  assert.match(out, /<!-- review-health: week=2026-W46 -->\n$/);
+  const { isoWeek } = await import(TOOL);
+  assert.equal(isoWeek(new Date("2027-01-01T12:00:00Z")), "2026-W53"); // a Friday: still 2026's last week
+  assert.equal(isoWeek(new Date("2026-12-28T00:00:00Z")), "2026-W53");
+  assert.equal(isoWeek(new Date("2027-01-04T00:00:00Z")), "2027-W01");
+});
+
+test("--md writes the Markdown plan next to the JSON output", () => {
+  const md = path.join(fs.mkdtempSync(path.join(os.tmpdir(), "plan-")), "plan.md");
+  const r = run([...BASE, "--fixtures", FX("health-dispatch.json"), "--json", "--md", md]);
+  assert.equal(JSON.parse(r.stdout).week, "2026-W46");
+  assert.match(fs.readFileSync(md, "utf8"), /^## Health reviews, week 2026-W46[\s\S]*<!-- review-health: week=2026-W46 -->\n$/);
+});
+
 test("the Markdown plan", () => {
   const out = run([...BASE, "--fixtures", FX("health-dispatch.json")]).stdout;
   assert.match(out, /- p-claimed: resume #102 \(not started: Claimed\)/);
@@ -91,12 +120,12 @@ test("a request without a recorded response fails instead of reaching the networ
 });
 
 // The live path through a fake gh (fixtures/fake-gh.mjs): skipping and --create, still no network.
-function live(args, deny = "") {
+function live(args, deny = "", fixture = "health-dispatch.json") {
   const bin = fs.mkdtempSync(path.join(os.tmpdir(), "fake-gh-"));
   fs.symlinkSync(FX("fake-gh.mjs"), path.join(bin, "gh"));
   const log = path.join(bin, "posts.log");
   fs.writeFileSync(log, "");
-  const r = run(args, { PATH: `${bin}${path.delimiter}${process.env.PATH}`, FAKE_GH_FIXTURES: FX("health-dispatch.json"), FAKE_GH_DENY: deny, FAKE_GH_LOG: log });
+  const r = run(args, { PATH: `${bin}${path.delimiter}${process.env.PATH}`, FAKE_GH_FIXTURES: FX(fixture), FAKE_GH_DENY: deny, FAKE_GH_LOG: log });
   return { ...r, posts: fs.readFileSync(log, "utf8").trim().split("\n").filter(Boolean).map((l) => JSON.parse(l)) };
 }
 
