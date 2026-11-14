@@ -56,8 +56,8 @@ Rules that make parallel sessions work:
 2. **Build and test together** before anything is released, in one pnpm workspace over all the
    projects (`sessions.md`, "Linking the projects"): locally in `ws/<feature>/`
    (`node tools/ws.mjs new <feature> <project…>`), in the cloud over the session's checkouts.
-3. **One pull request per project**, each referencing the ticket in full
-   (`statewalker/statewalker-root#<n>`); the ticket lists them.
+3. **One pull request per project**, each referencing the ticket (a root ticket in full,
+   `statewalker/statewalker-root#<n>`); the ticket lists them.
 4. **Land bottom-up, with a publish between layers.** Each project resolves `@statewalker/*` from
    npm through its catalog, so an upper project can only go green against a published lower one:
    1. Take the lowest project's pull request, with a changeset (`pnpm changeset`) for each package
