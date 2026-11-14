@@ -22,7 +22,9 @@ below. Code changes are committed in the project's own repository, never here.
    - **local**: work in worktrees under `ws/<feature>/`; `repos/` holds clean clones that are
      never edited (`docs/process/sessions.md`).
 
-   Read each project's own `CLAUDE.md` / `README.md` before changing it.
+   Read each project's own `CLAUDE.md` / `README.md` before changing it, and list its open
+   deferred bugs; fix those in the code you touch in the same pull request when cheap
+   (`docs/process/prevention.md`).
 
 ## Precedence
 
@@ -96,6 +98,12 @@ unpublished, what is behind npm, dependency order).
   automatically** once no critical finding is open, every high finding is fixed or filed, and
   checks are green. Only the human, in their own message, overrides a critical finding. No
   exceptions: the version pull requests that publish pass the same gate.
+- **Tests first.** A bug fix carries a regression test; new behaviour carries tests (`/tdd`).
+- **Picking your own work:** escalated bug tickets before feature tickets, oldest first
+  (`docs/process/prevention.md`).
+- **Git guardrails.** `.claude/settings.json` runs a hook that refuses force-pushing `main`,
+  `git reset --hard` and deleting branches. Never work around it; the human runs such commands
+  themselves.
 - **Do not create files that track state.** Tickets, maps, specs, progress and handoffs are
   GitHub issues and issue comments, not files.
 
@@ -149,6 +157,11 @@ type the command instead.
   session. Tickets do not close through pull requests: the session closes each one with a comment
   once its project pull request has merged (no closing keywords; they would not reach issues in
   this repository from a project repository anyway).
+- **`/triage` and `/to-tickets` set `ready-for-agent` only on a ticket with explicit acceptance
+  criteria**, and, for a ticket touching storage formats, migrations or sync, a migration and
+  rollback note in them; otherwise the ticket stays `needs-triage` or `needs-info`
+  (`docs/process/prevention.md`). This overrides `/to-tickets`' "apply `ready-for-agent` unless
+  instructed otherwise".
 - **Triage's `.out-of-scope/<concept>.md` files** live at this repository's root
   (`.out-of-scope/`).
 - **A handoff is a comment on the ticket**, not the `/handoff` skill's file: that file lands in
