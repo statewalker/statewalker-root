@@ -12,7 +12,8 @@ are placed where concurrent edits do not collide:
 
 | Artifact | Where | Why it does not collide |
 |---|---|---|
-| Tickets, Wayfinder maps, specs | Issues here | Not files. Claimed with assignee + claim comment |
+| Wayfinder maps, specs, their tickets | Issues here | Not files. Claimed with assignee + claim comment |
+| Bugs and other issues about one project | Issues in that project (`docs/agents/issue-tracker.md`) | Not files. Claimed the same way |
 | Progress, handoff, decisions in flight | Comments on the ticket | Append-only |
 | Code | Pull requests in the project repositories | Never in this repository |
 | ADRs | `docs/adr/YYYY-MM-DD-<slug>.md`, one file each | New files never conflict |

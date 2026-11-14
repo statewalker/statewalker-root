@@ -46,8 +46,7 @@
    "body": "## Merge gate: pass 1\n\n| # | Proposed / judged | Verdict | Outcome |\n|---|---|---|---|\n\n\n<!-- gate: pass=1 critical=0 downgraded=0 high=1 rejected=0 -->"
   }
  ],
- "repos/statewalker/httpeers/issues?state=all&labels=bug,review-followup": [],
- "repos/statewalker/httpeers/issues?state=all&labels=bug,health-review": [],
+ "repos/statewalker/httpeers/issues?state=all&labels=bug": [],
  "repos/statewalker/statewalker-root/issues?state=open&labels=bug,ready-for-agent": [],
  "repos/statewalker/statewalker-root/issues?state=open&labels=area:root": [
   {

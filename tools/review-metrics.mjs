@@ -8,7 +8,7 @@
 // Reads, over the four weeks before --now (default: now):
 //   - merged pull requests of every project in repos.json and of statewalker-root (--repos narrows);
 //   - their gate record lines, `<!-- gate: pass=<n> critical=<n> downgraded=<n> high=<n> rejected=<n> -->`;
-//   - deferred bugs (issues labelled bug + review-followup or health-review) per project;
+//   - deferred bugs (issues labelled bug in the project's tracker) per project;
 //   - escalated bug tickets (open root issues labelled bug) and open area:root issues (duplicate check).
 // Prints a Markdown report (the weekly "Review health" comment) or, with --json, the same as JSON.
 // Each firing threshold is a root ticket to create; dry run unless --create, and never when an
@@ -118,13 +118,11 @@ function read(src, repos, now) {
       const comments = src.list(`repos/${ORG}/${repo}/issues/${p.number}/comments`);
       prs.push({ repo, number: p.number, title: p.title, created: new Date(p.created_at), merged, ...gateRecords(comments, p.head?.sha) });
     }
-    const bugs = new Map();
-    for (const label of ["review-followup", "health-review"]) {
-      for (const i of src.list(`repos/${ORG}/${repo}/issues?state=all&labels=bug,${label}`)) {
-        if (!i.pull_request) bugs.set(i.number, { number: i.number, created: new Date(i.created_at), closed: i.closed_at ? new Date(i.closed_at) : null });
-      }
-    }
-    deferred[repo] = [...bugs.values()];
+    // Deferred bugs: every issue labelled bug in the project's tracker (docs/process/prevention.md).
+    deferred[repo] = src
+      .list(`repos/${ORG}/${repo}/issues?state=all&labels=bug`)
+      .filter((i) => !i.pull_request)
+      .map((i) => ({ number: i.number, created: new Date(i.created_at), closed: i.closed_at ? new Date(i.closed_at) : null }));
   }
   const rootOpen = (labels) => src.list(`repos/${ORG}/${SELF}/issues?state=open&labels=${labels}`).filter((i) => !i.pull_request);
   // Escalated bug tickets (docs/process/prevention.md): ready-for-agent bugs, not deferred bugs themselves.

@@ -55,10 +55,11 @@ test("a first run has no base; a later run starts from the last finished record,
   assert.equal(byRepo["p-old"].lastRecord, 91); // not the later, abandoned #93
 });
 
-test("escalation at exactly four weeks and not before; an already escalated bug is a duplicate", () => {
+test("escalation: every open bug in the project, at exactly four weeks and not before; an already escalated bug is a duplicate", () => {
   assert.deepEqual(planOf().escalate.map((e) => [e.repo, e.issue, e.ageDays, e.duplicateOf]), [
-    ["p-first", 3, 60, 200],
-    ["p-old", 7, 28, null], // 27.9 days old #8 is not escalated; #7 under two labels counts once; root #201 links #70, not #7
+    ["p-first", 3, 60, 200], // the pull request #4 is not an issue
+    ["p-first-low", 9, 35, null], // a bug without review-followup or health-review is a deferred bug too
+    ["p-old", 7, 28, null], // 27.9 days old #8 is not escalated; root #201 links #70, not #7
   ]);
 });
 
@@ -137,7 +138,7 @@ test("live: an unreadable project is skipped and reported", () => {
   assert.deepEqual(p.review.map((x) => x.repo), ["p-released", "p-claimed", "p-first", "p-old", "p-recent"]);
 });
 
-test("live --create: record tickets and the one new escalation, with their labels", () => {
+test("live --create: record tickets and the new escalations, with their labels", () => {
   const r = live(BASE.concat("--create"));
   assert.equal(r.status, 0, r.stderr);
   const issues = r.posts.filter((p) => p.path.endsWith("/issues"));
@@ -145,12 +146,13 @@ test("live --create: record tickets and the one new escalation, with their label
     ["Health review: p-first-low", ["health-review", "repo:p-first-low"]],
     ["Health review: p-first", ["health-review", "repo:p-first"]],
     ["Health review: p-old", ["health-review", "repo:p-old"]],
+    ["Deferred bug: p-first-low#9 Filed by hand, no review label", ["bug", "ready-for-agent", "repo:p-first-low"]],
     ["Deferred bug: p-old#7 Exactly four weeks", ["bug", "ready-for-agent", "repo:p-old"]],
   ]);
   assert.match(issues[2].body, /Base commit\*\*: `b{40}` \(reviewed in #91\)/);
   assert.match(issues[0].body, /first run: review the whole project/);
-  assert.match(issues[3].body, /https:\/\/github\.com\/statewalker\/p-old\/issues\/7/);
-  assert.match(issues[3].body, /## Acceptance criteria/);
+  assert.match(issues[4].body, /https:\/\/github\.com\/statewalker\/p-old\/issues\/7/);
+  assert.match(issues[4].body, /## Acceptance criteria/);
   assert.ok(r.posts.some((p) => p.path.endsWith("/labels") && p.name === "repo:p-old"));
   assert.match(r.stdout, /p-old: new record ticket, since bbbbbbb \(#\d+\)/);
 });

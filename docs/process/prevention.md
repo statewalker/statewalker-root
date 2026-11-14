@@ -31,12 +31,11 @@ a high finding at the merge gate (missing tests), fixed in the pull request when
 
 ## Deferred bugs before starting
 
-Before changing a project, a session lists that project's open **deferred bugs**: issues in the
-project's own repository labelled `bug` with `review-followup` or `health-review`:
+Before changing a project, a session lists that project's open **deferred bugs**: every open issue
+in the project's own repository labelled `bug`, whatever filed it:
 
 ```sh
-gh api 'repos/statewalker/<project>/issues?state=open&labels=bug,review-followup' --jq '.[]|"#\(.number) \(.title)"'
-gh api 'repos/statewalker/<project>/issues?state=open&labels=bug,health-review' --jq '.[]|"#\(.number) \(.title)"'
+gh api 'repos/statewalker/<project>/issues?state=open&labels=bug' --jq '.[]|select(.pull_request|not)|"#\(.number) \(.title)"'
 ```
 
 A deferred bug in the code the session is changing anyway is fixed in the same pull request when

@@ -32,7 +32,7 @@ test("busy: the five signals", () => {
   assert.deepEqual(s.passes, { median: 1, max: 3 });
   assert.deepEqual(s.critical, { total: 5, perMerge: 0.83, downgraded: 1, overrides: 1 });
   assert.deepEqual(s.speculative, { rejected: 2, findings: 8, share: 0.25 });
-  assert.deepEqual(s.deferredBugs, { "webrun-files": 4, "statewalker-db": 1 });
+  assert.deepEqual(s.deferredBugs, { "webrun-files": 4, "statewalker-db": 2 }); // every open bug, review label or not
   assert.equal(s.escalations, 1); // neither the root PR nor the root deferred bug counts
   assert.deepEqual(s.skippedRepos, []);
   assert.deepEqual(s.timeToMergeHours, { median: 9 });
@@ -58,7 +58,7 @@ test("busy: thresholds — critical rising and deferred growth fire where they s
     "Review metrics: critical findings rising in webrun-files",
     "Review metrics: deferred bugs growing in webrun-files",
   ]);
-  assert.deepEqual(rep.perProject["statewalker-db"].deferredHistory, [1, 2, 2, 1]); // not growing
+  assert.deepEqual(rep.perProject["statewalker-db"].deferredHistory, [1, 2, 2, 2]); // not growing
   assert.equal(rep.perProject["statewalker-db"].criticalPerMergeLater, 0); // falling, not rising
   assert.equal(rep.perProject["statewalker-db"].criticalPerMergeEarlier, 3);
 });

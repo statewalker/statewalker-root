@@ -56,8 +56,8 @@ Repositories `gh` cannot read (in a cloud session: unattached ones) are skipped 
 1. **The change since the base commit.** Note the project's `main` head when the run starts: it
    is the **reviewed commit**. Review `git diff <base>..<reviewed>`; on a first run, the whole
    project at the reviewed commit.
-2. **The open deferred bugs and follow-ups** in the project's tracker: issues labelled
-   `review-followup` or `health-review` (`prevention.md`, "Deferred bugs before starting").
+2. **The open deferred bugs** in the project's tracker: every open issue labelled `bug`
+   (`prevention.md`, "Deferred bugs before starting").
 3. **An architecture survey**: `/improve-codebase-architecture` on the project (a human-started
    skill: read `.claude/skills/improve-codebase-architecture/SKILL.md` and follow its exploration
    and candidate list, without the interactive grilling), weighted towards what the change touched.

@@ -85,8 +85,8 @@ explicitly (`-R statewalker/<repo>`, or `owner`/`repo` in MCP tools; in a cloud 
 selected or attached).
 
 - Labels: `review-followup`, `bug` and `needs-triage`, creating the labels in that repository if
-  missing (`docs/agents/issue-tracker.md`, "Labels in use"). An open issue with these labels is a
-  **deferred bug**.
+  missing (`docs/agents/issue-tracker.md`, "Labels in use"). In a project, it is one of the
+  project's **deferred bugs** (every open `bug` there, `prevention.md`).
 - Title `Review: <the defect>`; body: the finding, its evidence (file and line at the pull
   request's head commit), the proposed fix, links to the pull request and the pass's record, and
   the root ticket in full (`statewalker/statewalker-root#<n>`).

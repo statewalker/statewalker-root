@@ -29,10 +29,12 @@ below. Code changes are committed in the project's own repository, never here.
 ## Precedence
 
 This file and `docs/` win over a project's own agent docs and over the vendored skills where they
-disagree. In particular: **the issue tracker is always `statewalker/statewalker-root`**, whatever a
-project's docs say, with two exceptions: review follow-up issues go to the repository of the pull
-request they come from (`docs/process/merging.md`), and a health review's findings go to the
-reviewed project's tracker (`docs/process/health-review.md`).
+disagree. In particular, **issues are placed by subject**, whatever a project's docs say: an issue
+about one project alone (a bug, a design question, an improvement, a review follow-up, a health
+review's finding) goes to **that project's tracker**; plans and the process go to
+**`statewalker/statewalker-root`**: Wayfinder maps and their tickets, specs and the tickets they
+break into (even for one project), `area:root` tickets, health-review record tickets and
+escalations (`docs/agents/issue-tracker.md`).
 The overrides listed under **Agent skills** below apply.
 
 ## Projects
@@ -112,11 +114,13 @@ unpublished, what is behind npm, dependency order).
 
 ### Issue tracker
 
-GitHub issues on `statewalker/statewalker-root`, including Wayfinder maps. Always name the
-repository explicitly (`-R statewalker/statewalker-root`, or `owner`/`repo` in MCP tools): sessions
-run inside project clones, where `gh` would otherwise pick the project. Pull-request operations and review follow-up issues name the pull request's own repository
-instead. Before creating any issue, check it is not already filed (update the existing one only if
-the new finding changes its scope). See `docs/agents/issue-tracker.md`.
+GitHub issues, placed by subject (**Precedence** above): plans, Wayfinder maps, specs and the
+process on `statewalker/statewalker-root`; an issue about one project alone in that project's
+tracker. Always name the repository explicitly (`-R statewalker/<repo>`, or `owner`/`repo` in MCP
+tools): sessions run inside project clones, where `gh` would otherwise pick the project.
+Pull-request operations name the pull request's own repository. Before creating any issue, check
+it is not already filed (update the existing one only if the new finding changes its scope). See
+`docs/agents/issue-tracker.md`.
 
 ### Triage labels
 

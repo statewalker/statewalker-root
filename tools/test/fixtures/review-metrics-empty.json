@@ -8,8 +8,7 @@
    "merged_at": "2026-09-30T00:00:00.000Z"
   }
  ],
- "repos/statewalker/statewalker-fsm/issues?state=all&labels=bug,review-followup": [],
- "repos/statewalker/statewalker-fsm/issues?state=all&labels=bug,health-review": [],
+ "repos/statewalker/statewalker-fsm/issues?state=all&labels=bug": [],
  "repos/statewalker/statewalker-root/issues?state=open&labels=bug,ready-for-agent": [],
  "repos/statewalker/statewalker-root/issues?state=open&labels=area:root": []
 }

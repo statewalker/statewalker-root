@@ -194,17 +194,11 @@
  "repos/statewalker/p-recent/commits/main": {
   "sha": "6666666666666666666666666666666666666666"
  },
- "repos/statewalker/p-released/issues?state=open&labels=bug,review-followup": [],
- "repos/statewalker/p-released/issues?state=open&labels=bug,health-review": [],
- "repos/statewalker/p-claimed/issues?state=open&labels=bug,review-followup": [],
- "repos/statewalker/p-claimed/issues?state=open&labels=bug,health-review": [],
- "repos/statewalker/p-first-low/issues?state=open&labels=bug,review-followup": [],
- "repos/statewalker/p-first-low/issues?state=open&labels=bug,health-review": [],
- "repos/statewalker/p-unchanged/issues?state=open&labels=bug,review-followup": [],
- "repos/statewalker/p-unchanged/issues?state=open&labels=bug,health-review": [],
- "repos/statewalker/p-recent/issues?state=open&labels=bug,review-followup": [],
- "repos/statewalker/p-recent/issues?state=open&labels=bug,health-review": [],
- "repos/statewalker/p-old/issues?state=open&labels=bug,review-followup": [
+ "repos/statewalker/p-released/issues?state=open&labels=bug": [],
+ "repos/statewalker/p-claimed/issues?state=open&labels=bug": [],
+ "repos/statewalker/p-unchanged/issues?state=open&labels=bug": [],
+ "repos/statewalker/p-recent/issues?state=open&labels=bug": [],
+ "repos/statewalker/p-old/issues?state=open&labels=bug": [
   {
    "number": 7,
    "title": "Exactly four weeks",
@@ -226,19 +220,7 @@
    ]
   }
  ],
- "repos/statewalker/p-old/issues?state=open&labels=bug,health-review": [
-  {
-   "number": 7,
-   "title": "Exactly four weeks",
-   "created_at": "2026-10-17T00:00:00.000Z",
-   "labels": [
-    {
-     "name": "bug"
-    }
-   ]
-  }
- ],
- "repos/statewalker/p-first/issues?state=open&labels=bug,review-followup": [
+ "repos/statewalker/p-first/issues?state=open&labels=bug": [
   {
    "number": 3,
    "title": "Old crash",
@@ -248,7 +230,29 @@
      "name": "bug"
     }
    ]
+  },
+  {
+   "number": 4,
+   "title": "A PR",
+   "created_at": "2026-08-16T00:00:00.000Z",
+   "labels": [
+    {
+     "name": "bug"
+    }
+   ],
+   "pull_request": {}
   }
  ],
- "repos/statewalker/p-first/issues?state=open&labels=bug,health-review": []
+ "repos/statewalker/p-first-low/issues?state=open&labels=bug": [
+  {
+   "number": 9,
+   "title": "Filed by hand, no review label",
+   "created_at": "2026-10-10T00:00:00.000Z",
+   "labels": [
+    {
+     "name": "bug"
+    }
+   ]
+  }
+ ]
 }
