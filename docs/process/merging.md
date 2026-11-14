@@ -153,7 +153,8 @@ one** machine-readable line:
 - `rejected`: findings judged speculative.
 
 The counts are judged results. A pass with no findings still posts its record, with zeros. These
-lines are what the review metrics read; the human reads the tables to audit a merge.
+lines are what [the review metrics](review-metrics.md) read (a footer that tooling appends after
+the line is ignored); the human reads the tables to audit a merge.
 
 ## No human approval step
 
