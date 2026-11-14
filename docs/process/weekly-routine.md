@@ -10,8 +10,17 @@ and [What do we measure?](https://github.com/statewalker/statewalker-root/issues
 ## Schedule and control
 
 - **Scheduled task** "Weekly review health", on the human's claude.ai account: **every Monday at
-  04:57 UTC** (`57 4 * * 1`). Each firing starts a fresh cloud session in the account's default
-  environment, which follows the steps below.
+  04:57 UTC** (`57 4 * * 1`). Each firing wakes one long-lived **host session**, "Weekly review
+  health (routine host)", started with `statewalker/statewalker-root` as its source, which pulls
+  root's `main` and follows the steps below.
+- Why a host session: a session that a scheduled task starts from nothing has no repository and no
+  `add_repo` tool, so every GitHub call fails (the first run did). A session started with a source
+  repository has `add_repo` and `create_session`. If the host session is archived, first try
+  `unarchive_session` on it. Otherwise start a new session with root as its source, then **delete**
+  the old scheduled task (`delete_trigger`; `update_trigger` cannot change the target) and create a
+  new one with the same name, schedule and prompt, targeting the new session
+  (`persistent_session_id`). Never leave two "Weekly review health" tasks enabled: two runs at once
+  could both plan the week.
 - **Pause** it in claude.ai's scheduled tasks (Claude Code, scheduled tasks: disable "Weekly review
   health"), or ask a session to disable it (`update_trigger` with `enabled: false`). Enable it the
   same way. **Run it now** with "Run now" there, or `fire_trigger`.
@@ -33,10 +42,12 @@ and [What do we measure?](https://github.com/statewalker/statewalker-root/issues
 
 The routine's prompt points here; a session following it does exactly this, in this order:
 
-1. **Get root and the projects.** Attach `statewalker/statewalker-root` and every project in its
-   `repos.json` with `add_repo` and **`access: "push"`** (the tools' API calls, the tickets, the
-   comments and the pull request need it), and clone root. Work on root's default branch; there is
-   no ticket to claim. If no project besides root could be attached, post that on #36 (no marker)
+1. **Get root and the projects.** In the host session's existing root checkout (clone it only if
+   there is none): `git fetch origin main && git switch main && git merge --ff-only origin/main`
+   (if `main` has diverged, `git switch --detach origin/main`), and delete last week's `plan.md`
+   and `plan.json`. Attach `statewalker/statewalker-root` and every project in its `repos.json`
+   with `add_repo` and **`access: "push"`** (the tools' API calls, the tickets, the comments and
+   the pull request need it). There is no ticket to claim. If no project besides root could be attached, post that on #36 (no marker)
    and stop: a plan over root alone is not this routine's job.
 2. **Plan and file.** `node tools/health-dispatch.mjs --create --json --md plan.md > plan.json`.
    It files the week's record tickets and escalations, and writes the plan as JSON (stdout) and as
