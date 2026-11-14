@@ -6,7 +6,7 @@
 //   node tools/packages.mjs status [project...] [--deep]
 //       per project, in dependency order: versions not `latest` on npm, @statewalker references
 //       behind npm's latest (and whether only the lockfile or the range must move); --deep also
-//       builds and lists the packages whose contents changed since npm (needs repos/.github)
+//       builds and lists the packages whose contents changed since npm (needs repos/statewalker-ci)
 //   node tools/packages.mjs deps <project>
 //       the projects that depend on <project>, directly or not, in the order they update
 //
