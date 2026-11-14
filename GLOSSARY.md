@@ -15,13 +15,16 @@ _Avoid_: repo (fine in prose about git), monorepo (says how, not what).
 **App**: a private package that runs or deploys. **Example**: a small private runnable package
 showing one library feature. **Proto**: a throwaway prototype that may break.
 
-**Layer**: a project's position in the dependency order (L0 = depends on no other project). A
-project depends only on lower layers; changes merge and release bottom-up.
+**Layer**: a project's position in the dependency order of its published packages (L0 = depends on
+no other project). Published packages depend only on lower layers; changes merge and release
+bottom-up. Private packages may reach sideways (cellb.dev → statewalker-knowledge).
 
-**Session**: one agent conversation working one ticket, on its own branch of this repository.
+**Session**: one agent conversation working one ticket, on its own branch in its own checkout of
+this repository: its container in the cloud, its workspace's worktree locally.
 
-**Workspace**: a folder holding worktrees of several projects on one feature branch, linked into
-one pnpm workspace, so changes across projects build and test together before any release.
+**Workspace**: locally, `ws/<feature>/`: a worktree of this repository plus worktrees of the
+projects a session changes, all on one branch, linked by one `pnpm-workspace.yaml` so changes
+across projects build and test together before any release.
 
 **Cascade**: releasing a project and then updating and releasing every dependent project in layer
 order (`umbrella/tools/sw.mjs cascade`).

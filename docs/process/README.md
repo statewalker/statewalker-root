@@ -14,8 +14,8 @@ How work moves from an idea to released packages. The skills named here live in
 | Code-health survey | `/improve-codebase-architecture` on one project, every few days |
 | After a session | `/retro`: findings become `area:root` tickets |
 
-Every route ends in issues on this repository (`docs/agents/issue-tracker.md`). Specs and tickets
-carry `repo:<name>` labels naming the projects their code lands in.
+Every route ends in issues on this repository (`docs/agents/issue-tracker.md`). Specs, tickets
+and Wayfinder tickets carry `repo:<name>` labels naming the projects they concern.
 
 ## 2. Parallel work
 
@@ -25,11 +25,12 @@ Three layers, kept apart differently:
 |---|---|---|
 | Knowledge: skills, `CLAUDE.md`, glossary, ADRs | Shared, read-mostly | This repository's `main` |
 | Code: projects and their branches | Isolated per session | Cloud: each session's own container. Local: a workspace of worktrees per feature (`sessions.md`) |
-| Coordination: who does what | Shared | Issues: claim by assigning, blocking edges, Wayfinder frontier |
+| Coordination: who does what | Shared | Issues: claim (assignee + claim comment), blocking edges, Wayfinder frontier |
 
 Rules that make parallel sessions work:
 
-- **One ticket per session.** Claim it first; an assigned ticket is taken.
+- **One ticket per session.** Claim it first; a ticket with an open claim comment is taken
+  (`docs/agents/issue-tracker.md`).
 - **Blocking edges follow the layers.** A ticket changing a lower-layer API blocks the tickets
   that consume it.
 - **Worktrees and containers postpone collisions to merge time; they do not remove them.** Two
@@ -41,25 +42,35 @@ Rules that make parallel sessions work:
 ## 3. Changes across projects
 
 1. One branch name across projects: `<ticket-number>-<slug>`.
-2. Build and test the projects together before releasing: locally in a workspace (`sessions.md`);
-   in the cloud, by cloning the projects side by side under `repos/` and linking with
-   `pnpm` overrides or umbrella's `tools/workspace.mjs`.
+2. Build and test the projects together before releasing, with one `pnpm-workspace.yaml` that
+   lists every project's package globs and sets `linkWorkspacePackages: true`
+   (`sessions.md`, "Linking the projects"): locally in `ws/<feature>/`, in the cloud in `repos/`.
 3. One pull request per project, each linking the ticket; the ticket lists them.
 4. Take each pull request through the review loop (`merging.md`), then merge **lowest layer
    first**, release (below), and update the next layer's branch.
 
 ## 4. Release
 
-Only through umbrella's `tools/sw.mjs`, from a clean `main` clone, one release at a time (one
-publisher is deliberate: no version races, no npm credential in CI):
+Only through umbrella's `tools/sw.mjs`, one release at a time (one publisher is deliberate: no
+version races, no npm credential in CI). **Run locally by a human**: `release` needs `npm whoami`
+with publish rights on `@statewalker`, and npm asks for a 2FA one-time password while publishing,
+so cloud sessions cannot release. A session's job ends at merged pull requests and a ticket
+comment naming the project to cascade from.
+
+`sw.mjs` works on umbrella's own clones (`umbrella/repos/`, from umbrella's `repos.json`), not on
+this repository's `repos/`:
 
 ```sh
+git clone git@github.com:statewalker/umbrella.git && cd umbrella   # private
+node tools/repos.mjs clone          # once; later: node tools/repos.mjs pull
 node tools/sw.mjs cascade <lowest-changed-project> --dry-run
 node tools/sw.mjs cascade <lowest-changed-project>
 ```
 
 `release` publishes under the npm tag `next`, installs and imports every entry back from npm, then
-promotes to `latest`. Releases are run by a human, or by a session whose ticket says so.
+promotes to `latest`. `update`, `release` and `cascade` commit and push `main` of the projects
+they touch directly: these commits are the one exception to the pull-request rule. cellb.dev is
+not in umbrella's registry yet, so it cannot be released this way until refactoring step 1.1.
 
 ## 5. Conventions inside each project
 

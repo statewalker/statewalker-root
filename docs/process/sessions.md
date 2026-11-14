@@ -6,12 +6,13 @@ pull request here (knowledge).
 
 ## Where each artifact goes
 
-Parallel sessions each have their own copy of this repository. They only meet in issues and on
-`main`, so artifacts are placed where concurrent edits do not collide:
+Every session works on its own branch in its own checkout of this repository: its container in the
+cloud, its own worktree locally (below). Sessions only meet in issues and on `main`, so artifacts
+are placed where concurrent edits do not collide:
 
 | Artifact | Where | Why it does not collide |
 |---|---|---|
-| Tickets, Wayfinder maps, specs | Issues here | Not files. Claimed by assignment |
+| Tickets, Wayfinder maps, specs | Issues here | Not files. Claimed with assignee + claim comment |
 | Progress, handoff, decisions in flight | Comments on the ticket | Append-only |
 | Code | Pull requests in the project repositories | Never in this repository |
 | ADRs | `docs/adr/YYYY-MM-DD-<slug>.md`, one file each | New files never conflict |
@@ -30,13 +31,17 @@ Every session contributes through **its own pull request**, never by pushing to 
 - Title: `root: <ticket title>`; body links the ticket (`Part of #<n>`) and the project PRs.
 - **Merge it when the session ends**, even if the project PRs are still in review. Short-lived
   pull requests are what keep conflicts rare.
-- Before merging: the review loop in `merging.md` (separate reviewer agent, severities, fix all,
-  re-review on critical or high, CI green). Rebase onto `main`; resolve conflicts yourself.
-  Squash merge.
-- **Merges on green**: changes confined to `docs/adr/`, `docs/research/`, additions to
-  `GLOSSARY.md`, and appended index lines.
-- **Needs human review**: anything that changes how agents behave: `CLAUDE.md`, `AGENTS.md`,
-  `.claude/**`, `docs/process/**`, `docs/agents/**`, `tools/**`, `repos.json`.
+- Before merging: the review loop in `merging.md`. Rebase onto `main`; resolve conflicts
+  yourself. Squash merge.
+
+Two merge categories:
+
+- **Merges once the loop passes**: changes confined to new files in `docs/adr/` and
+  `docs/research/`, new entries in `GLOSSARY.md`, and appended index lines.
+- **Needs human review**: everything else, including edits to existing glossary entries,
+  `docs/projects.md`, `docs/refactoring/**`, `README.md`, `skills-lock.json`, `CLAUDE.md`,
+  `AGENTS.md`, `.claude/**`, `docs/process/**`, `docs/agents/**`, `tools/**`, `.github/**` and
+  `repos.json`. When unsure, it needs review.
 
 A session with nothing to contribute here opens no pull request; its trace is the ticket.
 
@@ -45,49 +50,60 @@ A session with nothing to contribute here opens no pull request; its trace is th
 ### Cloud (claude.ai/code)
 
 1. New session → select **`statewalker/statewalker-root`**, plus every project the session will
-   **push** to (public projects can be cloned read-only without selecting them; a running session
-   can attach more).
+   push to, plus the private projects it must read (umbrella, statewalker-sites). Public projects
+   can be cloned read-only without selecting them; a running session can attach more.
 2. Prompt with the ticket, for example:
    - `Work on statewalker-root#12.`
    - `/wayfinder statewalker-root#4` (work the next frontier ticket of a map)
    - `/grill-with-docs` for a new idea, then `/to-spec`.
-3. The session follows `CLAUDE.md`: claims the ticket, clones what it needs into `repos/`, works.
+3. The session follows `CLAUDE.md`: claims the ticket, clones what it needs into `repos/` and
+   works there.
 
 Each cloud session has its own container, so cloud sessions never share files: run as many in
 parallel as there are unblocked, unclaimed tickets.
 
 ### Local
 
+One clone of this repository holds the clean project clones; each session gets a **workspace**:
+its own worktree of this repository plus worktrees of the projects it changes, all on one branch.
+
+```
+statewalker-root/                 main clone of this repository: stays on main
+├── repos/<name>/                 clean project clones on main: worktree source only, never edited
+└── ws/<feature>/                 one per session (gitignored)
+    ├── statewalker-root/         worktree of this repository, branch <ticket>-<slug>: start here
+    ├── <project>/                worktree, branch <ticket>-<slug>
+    ├── <project>/
+    └── pnpm-workspace.yaml       links the projects (below)
+```
+
 ```sh
 git clone git@github.com:statewalker/statewalker-root.git && cd statewalker-root
-claude          # then: "Work on statewalker-root#12."
+F=42-sqlite-cache
+git worktree add ws/$F/statewalker-root -b $F
+git clone git@github.com:statewalker/webrun-files.git repos/webrun-files   # once per project
+git -C repos/webrun-files worktree add ../../ws/$F/webrun-files -b $F
+cd ws/$F/statewalker-root && claude --add-dir ..   # then: "Work on statewalker-root#42."
 ```
 
-Several local sessions in parallel need separate files. Per feature, use a workspace:
+**Linking the projects** so changes build and test together: in `ws/<feature>/` write a
+`pnpm-workspace.yaml` listing each project's own package globs (copy them from each project's
+`pnpm-workspace.yaml`, prefixed with the folder name, e.g. `webrun-files/packages/*`) with
+`linkWorkspacePackages: true`, then `pnpm install` there. `@statewalker/*` ranges then resolve to
+the worktrees, so unpublished versions work across projects. A `tools/ws.mjs` that does all of
+this (create, list, sync, remove) is planned (`docs/refactoring/README.md`, step 1.5).
 
-```
-statewalker-root/
-├── repos/<name>/            clean clones on main: worktree source only, never edited
-└── ws/<feature>/            one per session (gitignored)
-    ├── <project>/           worktree on branch <ticket>-<slug>
-    └── <project>/
-```
-
-```sh
-git -C repos/webrun-files worktree add ../../ws/42-sqlite-cache/webrun-files -b 42-sqlite-cache
-```
-
-Start that session inside `ws/<feature>/` and point it at this repository's `CLAUDE.md`. Worktrees
-hold only tracked files: copy `.env` files in, and give each workspace its own dev-server ports.
-A `tools/ws.mjs` that creates, lists, syncs and removes workspaces is planned
-(`docs/refactoring/README.md`, phase 1).
+Worktrees hold only tracked files: copy `.env` files in, and give each workspace its own
+dev-server ports.
 
 ## End a session
 
 1. Project PRs opened, each linking the ticket, and taken through the review loop in
    `merging.md` before merging (lowest layer first).
-2. **Handoff comment** on the ticket: what was done, links to every PR, what is left, anything
-   the next session must know. Close the ticket if it is resolved.
+2. **Handoff comment** on the ticket (not the `/handoff` skill's file): what was done, links to
+   every PR, what is left, anything the next session must know. Close the ticket if it is
+   resolved; otherwise comment `Released: <why>` and remove the assignee.
 3. New work discovered → new tickets (with blocking edges), not notes in files.
-4. This repository's PR rebased, green, and merged (or left for review if it is in the
-   review-required set).
+4. This repository's PR rebased, through the review loop, and merged (or left for review if it is
+   in the review-required set).
+5. Locally: `git worktree remove` the workspace's worktrees once their branches are merged.

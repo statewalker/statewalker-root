@@ -16,3 +16,4 @@ development session starts, human or agent. No product code lives here.
 | Plan and progress | [GitHub issues](https://github.com/statewalker/statewalker-root/issues) |
 
 Update the skills with `npx skills@latest update` and review the diff like any other change.
+CI (`.github/workflows/checks.yml`) runs `node tools/check-docs.mjs`: links, skills lock, registry.

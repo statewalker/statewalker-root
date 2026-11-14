@@ -6,18 +6,20 @@ Regenerate the numbers when they drift; the layer order is the part that matters
 
 ## Dependency layers
 
-Computed from the `dependencies` and `peerDependencies` of published packages:
+Computed from the `dependencies` and `peerDependencies` of published packages. Private packages
+can reach sideways: cellb.dev's `packages/notebooks` and `apps/sandbox` depend on
+statewalker-knowledge, so umbrella's release order puts cellb.dev after it.
 
 ```
 L0  statewalker-shared · statewalker-fsm · statewalker-db · webrun-wire
 L1  webrun-files (→db) · statewalker-search (→db)
 L2  webrun-sites · webrun-sync · httpeers             (→files, wire)
-L3  webrun-vcs (→sync) · statewalker-knowledge · cellb.dev
+L3  webrun-vcs (→sync) · statewalker-knowledge · cellb.dev (its private packages →knowledge)
 L4  statewalker-kernel (→shared, files, sites, vcs)
 L5  statewalker-ai (→kernel, fsm)
 L6  statewalker-shell-react (→ai, kernel)
 L7  sandclaw (→shell-react, search, kernel)
-──  apps: statewalker-sandbox · statewalker-shell-theia · statewalker-sites · webrun-devtools
+──  apps: statewalker-sandbox · statewalker-shell-theia · statewalker-sites · webrun-devtools (published)
 ```
 
 ## Per project
@@ -43,27 +45,27 @@ L7  sandclaw (→shell-react, search, kernel)
 | statewalker-sandbox | 0 | 25 | 18 apps and prototype ladders, 7 packages (`docs/refactoring/`) |
 | statewalker-shell-theia | 0 | 26 | `@theia-shell/*`: app, extensions, prototypes p1–p7 |
 | statewalker-sites | 0 | 5 | site, site-fsm, site-webrun, site-dots, blog |
-| webrun-devtools | 0 | 1 | the extension |
+| webrun-devtools | 1 | 0 | the extension itself is the published package `@statewalker/webrun-devtools` |
 
 ## Known problems
 
 The refactoring plan (`docs/refactoring/README.md`) turns each of these into work.
 
-1. `cellb.dev` is missing from umbrella's `repos.json` and from its combined workspace.
-2. Umbrella's combined workspace leaves out `httpeers` entirely, although it publishes 12
-   libraries, so a change spanning webrun-wire and httpeers has no linked workspace.
-3. Two packages are named `@statewalker/httpeers-conformance` (sandbox and httpeers). The
-   sandbox's `httpeers.core` is an older parallel line of the published `httpeers-core`.
-4. statewalker-sandbox's CI needs a sibling checkout of webrun-wire: not self-contained.
-5. sandclaw keeps libraries under `apps/` (`chat-mini.chat`, `chat-mini.chat-react`), and its
-   `peershare.*` apps (httpeers-based) fall outside its stated "chat + wiki" scope.
-6. Overlaps: sandbox `service-rpc` vs `webrun-rpc`; `file-mounts.core` vs
-   `webrun-files-composite`; `app-shell` is private but generic.
-7. Five conventions for examples: `apps/examples/NN-*` (webrun-vcs), top-level `examples/`
-   (cellb.dev), `apps/*-demo` (webrun-sites), `packages/x/demo` (webrun-wire), `packages/x/examples`
-   (statewalker-fsm, webrun-modules).
-8. `tools/consumer-install` is copied into three projects and has already drifted.
-9. Library docs live in two places: cellb.dev and webrun-vcs keep theirs in-repo; fsm and webrun
-   docs live in the private statewalker-sites.
-10. Umbrella's GitHub description (bare mirrors, branch per build configuration) no longer matches
-    its README.
+- **P1.** `cellb.dev` is missing from umbrella's `repos.json` and from its combined workspace.
+- **P2.** Umbrella's combined workspace leaves out `httpeers` entirely, although it publishes 12
+  libraries, so a change spanning webrun-wire and httpeers has no linked workspace.
+- **P3.** Two packages are named `@statewalker/httpeers-conformance` (sandbox and httpeers). The
+  sandbox's `httpeers.core` is an older parallel line of the published `httpeers-core`.
+- **P4.** statewalker-sandbox's CI needs a sibling checkout of webrun-wire: not self-contained.
+- **P5.** sandclaw keeps libraries under `apps/` (`chat-mini.chat`, `chat-mini.chat-react`), and its
+  `peershare.*` apps (httpeers-based) fall outside its stated "chat + wiki" scope.
+- **P6.** Overlaps: sandbox `service-rpc` vs `webrun-rpc`; `file-mounts.core` vs
+  `webrun-files-composite`; `app-shell` is private but generic.
+- **P7.** Five conventions for examples: `apps/examples/NN-*` (webrun-vcs), top-level `examples/`
+  (cellb.dev), `apps/*-demo` (webrun-sites), `packages/x/demo` (webrun-wire), `packages/x/examples`
+  (statewalker-fsm, and webrun-sites' `packages/webrun-modules/examples`).
+- **P8.** `tools/consumer-install` is copied into three projects and has already drifted.
+- **P9.** Library docs live in two places: cellb.dev and webrun-vcs keep theirs in-repo; fsm and webrun
+  docs live in the private statewalker-sites.
+- **P10.** Umbrella's GitHub description (bare mirrors, branch per build configuration) no longer matches
+  its README.
