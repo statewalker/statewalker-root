@@ -1,9 +1,10 @@
 # Issue tracker: GitHub
 
 Issues, specs and Wayfinder maps for the whole statewalker ecosystem live as GitHub issues on
-**`statewalker/statewalker-root`**, including work whose code lands in a project repository. The
-one exception: review follow-up issues go to the repository of the pull request they come from
-(`docs/process/merging.md`).
+**`statewalker/statewalker-root`**, including work whose code lands in a project repository. Two
+exceptions: review follow-up issues go to the repository of the pull request they come from
+(`docs/process/merging.md`), and a health review's findings go to the reviewed project's own
+tracker (`docs/process/health-review.md`; its record ticket stays here).
 
 **Always name the repository.** Sessions run inside project clones (`repos/<name>`,
 `ws/<feature>/<name>`), where `gh` infers the *project* from `git remote`:
@@ -145,9 +146,13 @@ caused it leads to it.
   or decision concerns.
 - `review-followup` (with `bug`) for high findings the merge gate filed instead of fixing (issues
   from the earlier review loop may carry `enhancement`). These
-  issues are the one kind filed **in the repository of the pull request** rather than here
+  issues are filed **in the repository of the pull request** rather than here
   (`docs/process/merging.md`); create the labels there with the same REST call, naming that
   repository.
+- `health-review`: here, on a health review's record ticket; in a project, on that review's
+  findings, with `bug` or `enhancement` (`docs/process/health-review.md`). Open issues labelled
+  `bug` with `review-followup` or `health-review` are the project's **deferred bugs**.
+- `ci-baseline`: in a project, one issue per missing CI baseline measure (`docs/process/prevention.md`).
 
 The triage, Wayfinder and `area:root` labels exist. Before applying a label the repository lacks
 (a new `repo:<name>`), create it:
