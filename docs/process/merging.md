@@ -40,12 +40,15 @@ or block the merge.
    if trivial, otherwise dropped.
 3. **Act on the real findings:**
    - critical: fix now;
-   - high: fix now if cheap, otherwise open one follow-up issue per finding;
-   - medium and low: fix now if cheap, otherwise collect them into one follow-up issue for the
-     round.
+   - high, medium and low: fix now if cheap, otherwise mark them **deferred** in the round's
+     record. Deferred findings are filed once, in step 5, not during the loop: later rounds would
+     find them again and the loop may still stop.
 
    Commit the fixes to the pull request's branch and post the round's record (below).
 4. **Decide.**
+   - If a real critical finding could not be fixed (it needs a decision or work beyond this pull
+     request), stop now: comment `Waiting on human: <the finding>` on the ticket, add
+     `ready-for-human` (not on Wayfinder tickets), and leave the pull request open.
    - If this round fixed any critical or high finding in the pull request, the fixes need
      verifying: go back to step 1 with a new reviewer, who reviews the whole change again.
    - Otherwise the change is **clean**: go to step 5.
@@ -57,8 +60,8 @@ or block the merge.
 5. **Merge when checks are green.** Every check on the latest commit passes (all of them, not
    only those a ruleset marks required), the branch is up to date with its base (rebase locally,
    or `update_pull_request_branch` in the cloud; either is fine with squash merge), no critical
-   finding is open, and every other open finding is filed as a follow-up issue. Then **merge
-   automatically** (squash), without waiting for a human. Where a repository has no CI yet,
+   finding is open, and every deferred finding from all rounds is filed as a follow-up issue
+   (below). Then **merge automatically** (squash), without waiting for a human. Where a repository has no CI yet,
    "green" means the repository's own check commands (its README) pass locally, and the record
    says so.
 
@@ -71,15 +74,24 @@ cloud session it must be selected or attached). Label them `review-followup` and
 creating the labels in that repository if missing (`docs/agents/issue-tracker.md`, "Labels in
 use"), and reference the root ticket in full (`statewalker/statewalker-root#<n>`):
 
+Filed in step 5, just before merging, from the deferred findings of **all** rounds, with the
+same finding reported by several rounds counted once:
+
 - **One per deferred high finding**: also labelled `bug`; title `Review: <the defect>`; body:
-  the finding, its evidence (file and line at the merged commit), the proposed fix, and links to
-  the pull request and the round's record.
-- **One per round for the deferred medium and low findings** that the judge found real (not
-  speculative, not cosmetic): also labelled `enhancement`; title
+  the finding, its evidence (file and line at the pull request's head commit), the proposed fix,
+  and links to the pull request and the rounds' records.
+- **One for all deferred medium and low findings** of the pull request that the judge found real
+  (not speculative, not cosmetic): also labelled `enhancement`; title
   `Review improvements: <pull request title>`; body: one checklist item per finding with its
   evidence and proposed fix.
 
-The round's record lists every follow-up issue it opened.
+**No duplicates.** Before filing, search the repository's open issues for each defect
+(`docs/agents/issue-tracker.md`). When it is already filed, do not open another: update the
+existing issue only if the new finding changes its scope or description, and link the existing
+issue instead.
+
+The last round's record and the ticket's handoff comment list every follow-up issue, new or
+existing.
 
 ## Reviewer brief
 
@@ -89,7 +101,9 @@ Pass this to the reviewer, with the placeholders filled:
 > comment on GitHub.
 >
 > - **Change**: `git -C <checkout> diff origin/<base>...HEAD` (three dots: against the merge base,
->   so a moved base branch does not distort the diff; name any vendored paths to skip).
+>   so a moved base branch does not distort the diff; name any vendored paths to skip). If git
+>   answers "no merge base" (a shallow clone), run `git -C <checkout> fetch --deepen=200 origin`
+>   and retry.
 > - **Spec**: ticket `statewalker-root#<n>` (read it and its comments), plus what the pull request
 >   says it does.
 > - **Axes**: apply both axes of `/code-review` yourself, without spawning sub-agents:
@@ -112,7 +126,7 @@ Post each round as one pull request comment, one row per finding:
 | # | the finding's id in this round |
 | Proposed / judged | the reviewer's severity, the judge's severity |
 | Verdict | real, speculative or cosmetic, with the reason |
-| Outcome | fixed (commit), deferred (issue link), rejected or dropped (reason) |
+| Outcome | fixed (commit), deferred (filed in step 5; the last record links the issue), rejected or dropped (reason) |
 
 followed by the round's decision: another round, clean, or stopped. This is the record a human
 reads to audit the merge.

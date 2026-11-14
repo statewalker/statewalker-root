@@ -97,8 +97,9 @@ Archived, do not change: `statewalker-content`, `statewalker-ai-legacy`. Private
 
 GitHub issues on `statewalker/statewalker-root`, including Wayfinder maps. Always name the
 repository explicitly (`-R statewalker/statewalker-root`, or `owner`/`repo` in MCP tools): sessions
-run inside project clones, where `gh` would otherwise pick the project. See
-`docs/agents/issue-tracker.md`.
+run inside project clones, where `gh` would otherwise pick the project. Pull-request operations and review follow-up issues name the pull request's own repository
+instead. Before creating any issue, check it is not already filed (update the existing one only if
+the new finding changes its scope). See `docs/agents/issue-tracker.md`.
 
 ### Triage labels
 
@@ -145,4 +146,5 @@ type the command instead.
 - **A handoff is a comment on the ticket**, not the `/handoff` skill's file: that file lands in
   `$TMPDIR`, which a cloud container loses.
 - **Reviews follow `docs/process/merging.md`**, which overrides `/code-review`'s "do not rerank"
-  and its sub-agent fan-out.
+  and its sub-agent fan-out, and the review steps of `/implement` and `/implement-spec` ("fix all
+  issues", "mark ready for review"): they run the review loop and merge as it says.

@@ -6,10 +6,23 @@ one exception: review follow-up issues go to the repository of the pull request 
 (`docs/process/merging.md`).
 
 **Always name the repository.** Sessions run inside project clones (`repos/<name>`,
-`ws/<feature>/<name>`), where `gh` infers the *project* from `git remote`. Every `gh issue` / `gh pr`
-command below carries `-R statewalker/statewalker-root`; every `gh api` path names it literally;
-every MCP call passes `owner: statewalker`, `repo: statewalker-root`. File issues only here, never
-into a project repository and never into `mattpocock/skills`.
+`ws/<feature>/<name>`), where `gh` infers the *project* from `git remote`:
+
+- **Issue operations** (tickets, maps, specs): every `gh issue` command carries
+  `-R statewalker/statewalker-root`, every `gh api` path names it literally, every MCP call passes
+  `owner: statewalker`, `repo: statewalker-root`.
+- **Pull-request operations** (open, read checks, comment the review record, update, merge) and
+  **review follow-up issues** name **the pull request's own repository**: `-R statewalker/<project>`,
+  or `repo: <project>` in MCP calls. A pull-request number means nothing in another repository.
+
+File issues nowhere else, and never into `mattpocock/skills`.
+
+**Before creating any issue, check that it is not already filed.** Search the target repository's
+open issues for the same defect or question (`gh api 'search/issues?q=repo:statewalker/<repo>+is:issue+is:open+<keywords>'`,
+or `list_issues` with the label, such as `review-followup`, and read the titles). If it exists, do
+not create a duplicate: update the existing issue only when the new finding changes its scope or
+description (edit the body, or comment what is new), and link it wherever the new one would have
+been linked.
 
 ## Which tool works where
 
@@ -114,6 +127,14 @@ Used by `/wayfinder`. The **map** is a single issue with **child** issues as tic
 - **Claim**: see **Claiming a ticket**.
 - **Resolve**: comment the answer, close the ticket, append a context pointer (gist + link) to the
   map's Decisions so far.
+
+## Review follow-ups in project repositories
+
+Follow-up issues filed in project repositories (`docs/process/merging.md`) are part of the plan
+too. When triaging, also sweep them: for each project in `repos.json`,
+`gh api 'repos/statewalker/<repo>/issues?state=open&labels=review-followup'`. Every follow-up issue
+is also linked from the round record and from the ticket's handoff comment, so the ticket that
+caused it leads to it.
 
 ## Labels in use
 

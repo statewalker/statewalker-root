@@ -108,6 +108,7 @@ dev-server ports.
 1. Project PRs opened, each referencing `statewalker/statewalker-root#<n>`, and taken through the review loop in
    `merging.md` before merging (lowest layer first).
 2. **Handoff comment** on the ticket (not the `/handoff` skill's file): what was done, links to
+   every follow-up issue the review loop filed or reused, links to
    every PR, what is left, anything the next session must know. Close the ticket if it is
    resolved; otherwise comment `Released: <why>` and remove the assignee, or
    `Waiting on human: <what>` when the next step is the human's.
