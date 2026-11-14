@@ -18,6 +18,7 @@ import fs from "node:fs";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
 import { fixtureSource, liveSource } from "./lib/github.mjs";
+import { isoWeek } from "./lib/week.mjs";
 
 const ORG = "statewalker";
 const SELF = "statewalker-root";
@@ -210,6 +211,8 @@ function markdown(r) {
     lines.push("", "**Calibration candidates** (this week's downgrades and overrides):");
     for (const c of r.calibration) lines.push(`- ${c.pr}: ${c.downgraded} downgraded${c.override ? ", override" : ""}`);
   }
+  // The weekly routine posts this report on #36; the marker tells a rerun the week's metrics are in.
+  lines.push("", `<!-- review-metrics: week=${isoWeek(new Date(r.now))} -->`);
   return lines.join("\n");
 }
 

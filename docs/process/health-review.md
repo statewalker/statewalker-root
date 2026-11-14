@@ -123,5 +123,5 @@ dispatcher read to find where to start:
 A run that cannot finish comments `Released: <why>` with what it has done so far, and leaves the
 ticket open, unassigned, for the dispatcher to resume.
 
-The dispatcher adds one line per week to the pinned [**Review health**](https://github.com/statewalker/statewalker-root/issues/36) issue, linking that week's
+The weekly routine ([weekly-routine.md](weekly-routine.md)) adds one comment per week to the pinned [**Review health**](https://github.com/statewalker/statewalker-root/issues/36) issue, linking that week's
 record tickets.
