@@ -26,6 +26,10 @@ A finding is critical only if it falls into one of these seven classes:
 | f. Main purpose | does not deliver the ticket's **main** purpose although it says it does (partially met acceptance criteria are high) |
 | g. Destructive instructions | changes agent instructions (`CLAUDE.md`, skills, process docs) so that agents would do something destructive or irreversible |
 
+Until CI publishing is rolled out and umbrella retires
+([Retire umbrella](https://github.com/statewalker/statewalker-root/issues/14)), a human running
+umbrella's `tools/sw.mjs` locally, as `CLAUDE.md` describes, is not a bypass of the release path.
+
 Not critical, whatever the reviewer proposes: bugs in normal or edge paths, missing tests,
 performance regressions, wrong docs. These are high or lower.
 

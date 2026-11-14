@@ -41,7 +41,8 @@ every severity, plus a survey of the project's architecture. It files tickets in
 tracker; it never blocks a merge or a release.
 
 **Critical finding**: a review finding whose merge would cause concrete harm right away that a
-later follow-up cannot safely repair, backed by the file and line and a specific failure scenario.
+later follow-up cannot safely repair, backed by the file and line and a specific failure scenario or a
+reproduction.
 The one kind of finding that blocks a merge (`docs/process/review-rubric.md`).
 _Avoid_: blocker, showstopper.
 
