@@ -5,8 +5,12 @@ this repository alike. The gate is short and blocks only **critical findings**
 ([the review rubric](review-rubric.md)); bugs that a follow-up can repair are fixed when cheap or
 filed, and improvements are left to the health review. The session that opened the pull request
 drives the gate **automatically, without waiting for the human**, and merges as soon as its
-conditions hold. There are no exemptions: docs-only pull requests, dependency updates and the
-"version packages" pull requests that publish (`README.md` §4) pass it too. Decided in
+conditions hold. There is **one named exception**: the lockfile-only pull requests that follow a
+publish merge through a mechanical gate, without a reviewer pass ("Lockfile-only pull requests",
+below; the human's decision, recorded on
+[#15](https://github.com/statewalker/statewalker-root/issues/15)). Otherwise there are no
+exemptions: docs-only pull requests, other dependency updates and the "version packages" pull
+requests that publish (`README.md` §4) pass it too. Decided in
 [two-tier-review](../adr/2026-11-14-two-tier-review.md).
 
 ## Roles
@@ -93,6 +97,40 @@ existing issue only if the new finding changes its scope or description, and lin
 issue instead.
 
 The pass's record and the ticket's handoff comment list every follow-up issue, new or existing.
+
+## Lockfile-only pull requests
+
+After a publish, each dependent opens a pull request that only moves its lockfile to the new
+versions within its ranges ([#15](https://github.com/statewalker/statewalker-root/issues/15);
+statewalker-ci's README, "Dependents update themselves after a publish"). No session drives it:
+it has no code for a reviewer to read, and its CI is the test that matters (does the dependent
+work with the new versions?). The gate recognises it by all of:
+
+- opened by `statewalker-release[bot]` (the release App) from the branch
+  `deps/statewalker-lockfile` of the repository itself;
+- labelled `deps:lockfile`;
+- changing `pnpm-lock.yaml` and nothing else.
+
+For such a pull request the gate is mechanical, run by the `lockfile` job of the project's
+`ci.yml` (statewalker-ci's `merge-lockfile.yml`): it re-checks the three conditions on the head
+commit, waits until every other check on that commit passes, posts the record (what it verified,
+ending with a `<!-- lockfile-gate: sha=<sha> checks=<n> -->` line, which the review metrics count
+apart) and squash-merges. Steps 2 to 6 do not apply.
+
+**When it does not merge**, the pull request stays open for a session:
+
+- a check failed: the dependent breaks with a compatible release (a bug in the dependent, or a
+  release that was not compatible after all). The `lockfile` job still runs after a failed `ci`
+  job and comments which checks failed;
+- the other checks were still running after the timeout (60 minutes), or a condition above does
+  not hold: it comments why.
+
+A session takes it like any bug: claim or open a root ticket, and fix it in **a new pull request
+from its session branch**, carrying the lockfile change and the fix, through the full gate since it
+now carries code. Never push to `deps/statewalker-lockfile`: `statewalker-update.yml` force-pushes
+it on the next dispatch or daily run, and the fix would be lost. Close the bot's pull request once
+the session's merges. A pull request labelled `deps:lockfile` that changes anything else is not
+lockfile-only, whoever opened it.
 
 ## Reviewer brief
 

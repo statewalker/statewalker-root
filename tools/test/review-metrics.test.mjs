@@ -169,3 +169,26 @@ test("live --create files only the thresholds not already open, with area:root a
   assert.match(r.stdout, /deferred bugs growing in webrun-files: .*Filed: #901\./);
   assert.match(r.stdout, /critical findings rising in webrun-files: .*Already filed: #40\./);
 });
+
+test("a lockfile-only pull request merged by merge-lockfile.yml has its own record, not a missing one", async () => {
+  const { gateRecords, compute } = await import(TOOL);
+  const SHA = "a".repeat(40);
+  const lockfileRecord = { body: `Merge gate, lockfile-only pull request: verified mechanically.\n\n<!-- lockfile-gate: sha=${SHA} checks=3 -->` };
+  const fullRecord = { body: "<!-- gate: pass=1 critical=0 downgraded=0 high=0 rejected=0 -->" };
+  assert.deepEqual(gateRecords([lockfileRecord], SHA), { records: [], malformed: 0, lockfile: true });
+  assert.equal(gateRecords([fullRecord], SHA).lockfile, false);
+  // Changed after the mechanical record (another head merged): not a lockfile merge.
+  assert.equal(gateRecords([lockfileRecord], "b".repeat(40)).lockfile, false);
+  // A full gate record wins: counted once, as a record.
+  assert.equal(gateRecords([lockfileRecord, fullRecord], SHA).lockfile, false);
+
+  const now = new Date(NOW);
+  const pr = (number, comments, head = SHA) => ({ repo: "cellb.dev", number, title: "t", created: new Date(now - 7200000), merged: new Date(now - 3600000), ...gateRecords(comments, head) });
+  const { signals: s } = compute(
+    { prs: [pr(1, [lockfileRecord]), pr(2, []), pr(3, [lockfileRecord], "c".repeat(40))], deferred: { "cellb.dev": [] }, escalations: 0, rootIssues: [] },
+    now,
+  );
+  assert.deepEqual(s.withoutRecord, ["cellb.dev#2", "cellb.dev#3"]);
+  assert.equal(s.lockfileMerges, 1);
+  assert.equal(s.withRecord, 0);
+});
