@@ -47,6 +47,23 @@ function parseArgs(argv) {
 
 // ---- reading ----
 
+/**
+ * Whether a record has a table row whose Outcome is "overridden" (merging.md, "Record of a pass":
+ * columns #, Proposed / judged, Verdict, Outcome). The Outcome is everything after the third cell,
+ * so a pipe in the quoted human message does not hide it; the word in prose or in the Verdict
+ * cell is not an override.
+ */
+export function hasOverrideRow(body) {
+  for (const line of (body ?? "").split(/\r?\n/)) {
+    if (!/^\s*\|/.test(line)) continue;
+    const cells = line.trim().replace(/^\|/, "").replace(/\|$/, "").split(/(?<!\\)\|/);
+    if (cells.length < 4) continue;
+    const outcome = cells.slice(3).join("|").replace(/[*_`]/g, "").trim();
+    if (/^overridden\b/i.test(outcome)) return true;
+  }
+  return false;
+}
+
 /** The gate records of one pull request's comments: { records, malformed }. */
 export function gateRecords(comments) {
   const records = [];
@@ -58,8 +75,7 @@ export function gateRecords(comments) {
     const m = gateLines.length ? RECORD.exec(gateLines[gateLines.length - 1]) : null;
     if (m) {
       const [pass, critical, downgraded, high, rejected] = m.slice(1).map(Number);
-      // An override is a row whose Outcome (last) cell starts with "overridden"; the word in prose is not one.
-      const override = /^\|.*\|\s*overridden\b[^|]*\|\s*$/im.test(c.body);
+      const override = hasOverrideRow(c.body);
       records.push({ pass, critical, downgraded, high, rejected, override });
     } else if (/<!--\s*gate:/.test(c.body ?? "")) malformed++;
   }

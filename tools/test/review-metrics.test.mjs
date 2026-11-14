@@ -104,6 +104,26 @@ test("the report ends with the week's metrics marker", () => {
   assert.match(run("empty", "statewalker-fsm").stdout, /<!-- review-metrics: week=2026-W46 -->\n$/);
 });
 
+test("an override is read from the Outcome cell only", async () => {
+  const { hasOverrideRow } = await import(TOOL);
+  const row = (outcome, verdict = "real") => `| # | Proposed / judged | Verdict | Outcome |\n|---|---|---|---|\n| 1 | critical / critical | ${verdict} | ${outcome} |`;
+  for (const yes of [
+    row("overridden (the human's message)"),
+    row("Overridden: merge anyway"),
+    row('overridden (the human: "a | b")'),
+    row("overridden (a \\| b)"),
+    row("**overridden** (human)"),
+    "  | 1 | critical / critical | real | overridden (human)",
+    row("overridden").replace(/\n/g, "\r\n"),
+  ]) assert.equal(hasOverrideRow(yes), true, yes);
+  for (const no of [
+    row("fixed (abc)", 'an override is a record saying "overridden"'),
+    row("not overridden: fixed"),
+    `${row("fixed")}\n\nNot overridden; merged after the fix.`,
+    "Earlier pass | overridden |",
+  ]) assert.equal(hasOverrideRow(no), false, no);
+});
+
 test("a request without a recorded response fails instead of reaching the network", () => {
   const r = run("empty", "webrun-files");
   assert.equal(r.status, 1);
