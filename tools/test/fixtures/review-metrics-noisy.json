@@ -1,0 +1,58 @@
+{
+ "repos/statewalker/httpeers/pulls?state=closed&sort=updated&direction=desc": [
+  {
+   "number": 1,
+   "title": "PR 1",
+   "created_at": "2026-11-12T23:00:00.000Z",
+   "updated_at": "2026-11-13T00:00:00.000Z",
+   "merged_at": "2026-11-13T00:00:00.000Z"
+  },
+  {
+   "number": 2,
+   "title": "PR 2",
+   "created_at": "2026-11-11T21:00:00.000Z",
+   "updated_at": "2026-11-12T00:00:00.000Z",
+   "merged_at": "2026-11-12T00:00:00.000Z"
+  },
+  {
+   "number": 3,
+   "title": "PR 3",
+   "created_at": "2026-11-10T19:00:00.000Z",
+   "updated_at": "2026-11-11T00:00:00.000Z",
+   "merged_at": "2026-11-11T00:00:00.000Z"
+  }
+ ],
+ "repos/statewalker/httpeers/issues/1/comments": [
+  {
+   "body": "## Merge gate: pass 1\n\n| # | Proposed / judged | Verdict | Outcome |\n|---|---|---|---|\n\n\n<!-- gate: pass=1 critical=1 downgraded=0 high=0 rejected=3 -->"
+  },
+  {
+   "body": "## Merge gate: pass 2\n\n| # | Proposed / judged | Verdict | Outcome |\n|---|---|---|---|\n\n\n<!-- gate: pass=2 critical=0 downgraded=0 high=0 rejected=1 -->"
+  }
+ ],
+ "repos/statewalker/httpeers/issues/2/comments": [
+  {
+   "body": "## Merge gate: pass 1\n\n| # | Proposed / judged | Verdict | Outcome |\n|---|---|---|---|\n\n\n<!-- gate: pass=1 critical=1 downgraded=0 high=1 rejected=2 -->"
+  },
+  {
+   "body": "## Merge gate: pass 2\n\n| # | Proposed / judged | Verdict | Outcome |\n|---|---|---|---|\n\n\n<!-- gate: pass=2 critical=1 downgraded=0 high=0 rejected=0 -->"
+  },
+  {
+   "body": "## Merge gate: pass 3\n\n| # | Proposed / judged | Verdict | Outcome |\n|---|---|---|---|\n\n\n<!-- gate: pass=3 critical=0 downgraded=0 high=0 rejected=1 -->"
+  }
+ ],
+ "repos/statewalker/httpeers/issues/3/comments": [
+  {
+   "body": "## Merge gate: pass 1\n\n| # | Proposed / judged | Verdict | Outcome |\n|---|---|---|---|\n\n\n<!-- gate: pass=1 critical=0 downgraded=0 high=1 rejected=0 -->"
+  }
+ ],
+ "repos/statewalker/httpeers/issues?state=all&labels=bug,review-followup": [],
+ "repos/statewalker/httpeers/issues?state=all&labels=bug,health-review": [],
+ "repos/statewalker/statewalker-root/issues?state=open&labels=bug": [],
+ "repos/statewalker/statewalker-root/issues?state=open&labels=area:root": [
+  {
+   "number": 60,
+   "title": "Review metrics: speculative share above 30%"
+  }
+ ]
+}
