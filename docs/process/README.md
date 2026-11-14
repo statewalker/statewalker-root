@@ -80,7 +80,7 @@ Rules that make parallel sessions work:
 ## 4. Release
 
 **Only through CI**: npm trusted publishing over OIDC, from the standard `publish` job of each
-project's `ci.yml` (in the `npm` environment, which admits only `main`, with provenance). One shape
+project's `ci.yml` (in the `npm` environment, only from `main`, with provenance). One shape
 everywhere, the **version pull request**: changesets accumulate on `main`; CI opens a "version
 packages" pull request that applies them (versions, `CHANGELOG.md`); merging it publishes. That pull
 request goes through the merge gate like any other, so a session can release without a human release
