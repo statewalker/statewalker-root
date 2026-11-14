@@ -115,12 +115,20 @@ commit, waits until every other check on that commit passes, posts the record (w
 ending with a `<!-- lockfile-gate: sha=<sha> checks=<n> -->` line, which the review metrics count
 apart) and squash-merges. Steps 2 to 6 do not apply.
 
-**When it does not merge**, it comments why and leaves the pull request open: a check failed
-(the dependent breaks with a compatible release, a bug in the dependent or a release that was not
-compatible after all), or a condition does not hold. A session takes it like any bug: claim or
-open a root ticket, push the fix to the pull request's branch or a new pull request, and pass
-the full gate, since the pull request now carries code. A pull request labelled `deps:lockfile`
-that changes anything else is not lockfile-only, whoever opened it.
+**When it does not merge**, the pull request stays open for a session:
+
+- a check failed: the dependent breaks with a compatible release (a bug in the dependent, or a
+  release that was not compatible after all). The `lockfile` job still runs after a failed `ci`
+  job and comments which checks failed;
+- the other checks were still running after the timeout (60 minutes), or a condition above does
+  not hold: it comments why.
+
+A session takes it like any bug: claim or open a root ticket, and fix it in **a new pull request
+from its session branch**, carrying the lockfile change and the fix, through the full gate since it
+now carries code. Never push to `deps/statewalker-lockfile`: `statewalker-update.yml` force-pushes
+it on the next dispatch or daily run, and the fix would be lost. Close the bot's pull request once
+the session's merges. A pull request labelled `deps:lockfile` that changes anything else is not
+lockfile-only, whoever opened it.
 
 ## Reviewer brief
 
