@@ -42,5 +42,5 @@ over HTTPS; private ones fail unless attached.
 These tools came from the archived `statewalker/umbrella` (statewalker-root#14). `workspace.mjs`
 became `ws.mjs` (per-feature, on a branch, instead of one detached workspace); `sw.mjs` kept only
 its read-only commands, as `packages.mjs`; `release`, `cascade`, `update`, `unpublished-on-main.mjs`
-(covered by `packages.mjs status`) and `merge-when-green.sh` (replaced by the review loop,
+(covered by `packages.mjs status`) and `merge-when-green.sh` (replaced by the merge gate,
 `docs/process/merging.md`) were dropped; `adopt.mjs` no longer strips publishing jobs.

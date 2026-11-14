@@ -2,6 +2,8 @@
 
 **Status**: accepted, 2026-11-14. The release clause of decision 5 and the last consequence are
 superseded by [ci-publishing-and-umbrella-retired](2026-11-14-ci-publishing-and-umbrella-retired.md).
+Decision 3's merge clause (the review loop) is amended by
+[two-tier-review](2026-11-14-two-tier-review.md): pull requests pass the merge gate instead.
 
 ## Context
 

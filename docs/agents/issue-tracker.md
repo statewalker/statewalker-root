@@ -83,7 +83,7 @@ words:
 |---|---|---|
 | `Claimed by <session URL or branch>` | the session taking it | taken |
 | `Released: <why>` | a session stopping without finishing | free |
-| `Waiting on human: <what is needed>` | a session that needs the human (a decision, a package's first publish, approving a publish, the review loop stopped on a critical finding) | **not available** to sessions |
+| `Waiting on human: <what is needed>` | a session that needs the human (a decision, a package's first publish, approving a publish, the merge gate stopped on a critical finding) | **not available** to sessions |
 | `Resumed: <what changed>` | **the human only**, once the wait is over | free |
 
 1. Read the ticket's comments. The latest status comment decides: available only if there is
@@ -133,7 +133,7 @@ Used by `/wayfinder`. The **map** is a single issue with **child** issues as tic
 Follow-up issues filed in project repositories (`docs/process/merging.md`) are part of the plan
 too. When triaging, also sweep them: for each project in `repos.json`,
 `gh api 'repos/statewalker/<repo>/issues?state=open&labels=review-followup'`. Every follow-up issue
-is also linked from the round record and from the ticket's handoff comment, so the ticket that
+is also linked from the gate's pass record and from the ticket's handoff comment, so the ticket that
 caused it leads to it.
 
 ## Labels in use
@@ -143,7 +143,8 @@ caused it leads to it.
   `wayfinder:task`.
 - `area:root` for work on this repository itself; `repo:<name>` for each project a ticket's code
   or decision concerns.
-- `review-followup` (with `bug` or `enhancement`) for findings deferred by the review loop. These
+- `review-followup` (with `bug`) for high findings the merge gate filed instead of fixing (issues
+  from the earlier review loop may carry `enhancement`). These
   issues are the one kind filed **in the repository of the pull request** rather than here
   (`docs/process/merging.md`); create the labels there with the same REST call, naming that
   repository.

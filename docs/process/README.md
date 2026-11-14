@@ -40,7 +40,7 @@ Rules that make parallel sessions work:
   tickets, or order them with a blocking edge.
 - **Large refactors and renames go first,** before parallel work branches off them.
 - **The session that wrote a change merges it** and resolves its conflicts: it knows the intent.
-  Merging is automatic once the review loop's conditions hold (`merging.md`).
+  Merging is automatic once the merge gate's conditions hold (`merging.md`).
 
 ## 3. Changes across projects
 
@@ -56,9 +56,9 @@ Rules that make parallel sessions work:
 4. **Land bottom-up, with a publish between layers.** Each project resolves `@statewalker/*` from
    npm through its catalog, so an upper project can only go green against a published lower one:
    1. Take the lowest project's pull request, with a changeset (`pnpm changeset`) for each package
-      it changes, through the review loop (`merging.md`) and merge it.
+      it changes, through the merge gate (`merging.md`) and merge it.
    2. CI opens or updates that project's "version packages" pull request (§4). Take it through the
-      review loop and merge it: CI publishes. In a project that still publishes on every merge
+      merge gate and merge it: CI publishes. In a project that still publishes on every merge
       (§4, "Transition"), step 1's merge already published: skip this step. If the `publish` run
       waits for approval of the `npm` environment (§4), comment
       `Waiting on human: approve the publish of <project>` on the ticket and stop there.
@@ -66,7 +66,7 @@ Rules that make parallel sessions work:
       `node tools/packages.mjs status <project>` shows no `unpublished` line: without the pull,
       the clone still holds the old versions and reads "up to date"), raise the upper
       project's catalog range where the new version falls outside it, get its checks green, take
-      it through the review loop and merge it.
+      it through the merge gate and merge it.
    4. Repeat per layer. No human release step sits between layers, except approving the publish
       where a project's `npm` environment requires it.
 
@@ -82,14 +82,14 @@ Rules that make parallel sessions work:
 project's `ci.yml` (gated by the `npm` environment, with provenance). One shape everywhere, the
 **version pull request**: changesets accumulate on `main`; CI opens a "version packages" pull
 request that applies them (versions, `CHANGELOG.md`); merging it publishes. That pull request goes
-through the review loop like any other, so a session can release without a human release step
+through the merge gate like any other, so a session can release without a human release step
 ([decision](https://github.com/statewalker/statewalker-root/issues/10)). Where a project's `npm`
 environment requires reviewers (webrun-files and httpeers do: their `publish` job "waits for a
 maintainer's approval"), a human approves the run in GitHub Actions; the session waits for that
 (§3).
 
 - **Never publish by hand**, from any machine, and never add a publish step outside the standard
-  `publish` job: the shared CI fails such a pull request, and the review loop grades it a
+  `publish` job: the shared CI fails such a pull request, and the merge gate grades it a
   release-path bypass (critical). **One exception: a package's first version.** Trusted publishing
   needs a package that already exists on npm, so the `publish` job skips a new package with a
   warning. A human publishes its first version once, with their 2FA, and adds the trusted
