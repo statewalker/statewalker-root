@@ -99,6 +99,10 @@ test("empty week: no signals, no thresholds, no crash", () => {
   assert.match(md, /No threshold fires\./);
 });
 
+test("the report ends with the week's metrics marker", () => {
+  assert.match(run("empty", "statewalker-fsm").stdout, /<!-- review-metrics: week=2026-W46 -->\n$/);
+});
+
 test("a request without a recorded response fails instead of reaching the network", () => {
   const r = run("empty", "webrun-files");
   assert.equal(r.status, 1);

@@ -15,26 +15,33 @@ and [What do we measure?](https://github.com/statewalker/statewalker-root/issues
 - **Pause** it in claude.ai's scheduled tasks (Claude Code, scheduled tasks: disable "Weekly review
   health"), or ask a session to disable it (`update_trigger` with `enabled: false`). Enable it the
   same way. **Run it now** with "Run now" there, or `fire_trigger`.
-- Runs are **idempotent within a week**: the plan comment on #36 ends with
-  `<!-- review-health: week=<ISO week> -->`, and the dispatcher plans nothing once this week's
-  marker is there. A second run in the same week therefore creates no tickets, starts no sessions
-  and posts nothing (it stops at step 2). A run that fails before posting the plan leaves its new
-  record tickets open and unclaimed: the next run resumes them instead of opening others, and the
-  escalations are duplicate-checked.
-- The routine reaches only the repositories its session can attach. A project it cannot read is
-  listed as skipped in the plan and in the metrics, so attaching the projects (or allowing them
-  for the environment) widens what it covers.
+- Runs are **idempotent within a week**, through two markers on #36:
+  - the plan comment ends with `<!-- review-health: week=<ISO week> -->`; once it is there, the
+    dispatcher plans nothing (`alreadyPlanned`), so a rerun creates no tickets and starts no
+    sessions;
+  - the metrics comment ends with `<!-- review-metrics: week=<ISO week> -->`; once it is there, a
+    rerun skips the metrics and the rubric pull request.
+
+  A rerun therefore redoes only what failed. A run that fails before posting the plan leaves its
+  new record tickets open and unclaimed: the next run resumes them instead of opening others, and
+  escalations and threshold tickets are duplicate-checked.
+- The tools call the GitHub API for every project, which needs the repository attached **with push
+  access** (read access serves only git). A project the session cannot attach is listed as skipped
+  in the plan and the metrics; if every project but root is skipped, the run has failed (step 1).
 
 ## Steps
 
 The routine's prompt points here; a session following it does exactly this, in this order:
 
-1. **Get root.** Attach `statewalker/statewalker-root` (and, where the session can, every project in
-   `repos.json`, read access) and clone root. Work on the default branch; no ticket to claim.
+1. **Get root and the projects.** Attach `statewalker/statewalker-root` and every project in its
+   `repos.json` with `add_repo` and **`access: "push"`** (the tools' API calls, the tickets, the
+   comments and the pull request need it), and clone root. Work on root's default branch; there is
+   no ticket to claim. If no project besides root could be attached, post that on #36 (no marker)
+   and stop: a plan over root alone is not this routine's job.
 2. **Plan and file.** `node tools/health-dispatch.mjs --create --json --md plan.md > plan.json`.
    It files the week's record tickets and escalations, and writes the plan as JSON (stdout) and as
-   Markdown (`plan.md`, ending with the week marker). If `alreadyPlanned` is true, stop: this week
-   already ran.
+   Markdown (`plan.md`, ending with the week marker). If `alreadyPlanned` is true, this week's plan
+   is already posted: go to step 5.
 3. **Start the sessions.** For every `review` entry with `action: "resume"` and `start: true`,
    and every entry with `action: "create"` (its new ticket number is `created`), create one fresh
    cloud session (`create_session`, source `https://github.com/statewalker/statewalker-root`, title
@@ -43,8 +50,11 @@ The routine's prompt points here; a session following it does exactly this, in t
 4. **Post the plan** as one comment on #36: `plan.md` with a "Sessions" list (project, ticket,
    session link) inserted above its last line, the week marker, which must stay last. This
    comment is the week's index line and its guard.
-5. **Post the metrics.** `node tools/review-metrics.mjs --create`: it files root `area:root`
-   tickets for firing thresholds (duplicate-checked). Post its output as a second comment on #36.
+5. **Post the metrics.** If a comment on #36 already holds this week's metrics marker
+   (`gh api 'repos/statewalker/statewalker-root/issues/36/comments?per_page=100' --paginate --jq '.[].body' | grep -F '<!-- review-metrics: week=<ISO week> -->'`),
+   skip to step 7. Otherwise `node tools/review-metrics.mjs --create`: it files root `area:root`
+   tickets for firing thresholds (duplicate-checked). Post its output, unchanged (it ends with the
+   metrics marker), as a second comment on #36.
 6. **Propose rubric examples.** If the metrics output lists calibration candidates, read each
    pull request's gate record and open **one** pull request here that adds, for each real case, a
    calibration example to `docs/process/review-rubric.md` (critical or not critical, one line, with
@@ -53,5 +63,7 @@ The routine's prompt points here; a session following it does exactly this, in t
 7. **End** with a short summary of what was filed, started and posted, as the session's last
    message.
 
-If a step fails, post what happened as a comment on #36 (without the week marker, so the next run
-retries) and stop.
+If a step fails, post what happened as a comment on #36, without any marker, and stop. Rerun the
+routine ("Run now"): the markers already posted skip what succeeded. A failure in step 6 after the
+metrics are posted is not retried by a rerun: open the pull request by hand from the metrics
+comment's calibration candidates.
