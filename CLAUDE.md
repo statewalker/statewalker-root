@@ -14,7 +14,9 @@ below. Code changes are committed in the project's own repository, never here.
    `docs/process/sessions.md` for how this session works and contributes to this repository.
 3. Get the projects the ticket touches, from `repos.json`:
    - **cloud**: work in the checkouts of the projects selected for the session (the harness clones
-     them beside this repository, on the session branch); clone unselected public projects into
+     them beside this repository; before the first commit in each, check `git branch
+     --show-current` and, if it is not the session branch, `git checkout -b <session-branch>`);
+     clone unselected public projects into
      `repos/<name>` (gitignored) for reading only, since pushes and API calls need the project
      selected or attached;
    - **local**: work in worktrees under `ws/<feature>/`; `repos/` holds clean clones that are
@@ -34,7 +36,7 @@ project's docs say (umbrella's still name `statewalker/umbrella`), and the overr
 All under `github.com/statewalker/<name>`. Layers are computed from published `@statewalker/*`
 dependencies; a project's published packages depend only on lower layers, so changes land and
 release bottom-up. Private packages may reach sideways: cellb.dev's depend on
-statewalker-knowledge and webrun-vcs, so cellb.dev comes after them. Inventory, apps and known problems:
+statewalker-knowledge and webrun-vcs, so cellb.dev must come after them. Inventory, apps and known problems:
 `docs/projects.md`.
 
 | Layer | Project | What it holds |
@@ -76,7 +78,8 @@ Archived, do not change: `statewalker-content`, `statewalker-ai-legacy`. Private
 - **Lower layers first.** A change spanning layers merges and releases bottom-up, with a human
   release between layers (`docs/process/README.md` §3).
 - **Code goes to the project's repository** as a pull request, one per repository, linked from
-  the ticket. Knowledge goes here, as a pull request (`docs/process/sessions.md`).
+  the ticket; project pull requests reference it in full, `statewalker/statewalker-root#<n>` (a
+  bare `#<n>` there points at the project's own issues). Knowledge goes here, as a pull request (`docs/process/sessions.md`).
 - **Before merging any pull request**, run the review loop in `docs/process/merging.md`: review
   by a separate agent with findings graded critical / high / medium / low, fix them all, review
   again while critical or high remain, merge only when checks are green. The only exception is
@@ -125,8 +128,14 @@ type the command instead.
   not on a throwaway `research/*` branch. The charting session may resolve its own research
   tickets (through subagents), the one exception to one ticket per session.
 - **Wayfinder tickets never take triage labels.** Where this repository's docs say to label a
-  ticket `ready-for-human`, a Wayfinder ticket instead gets a comment addressed to the human and
-  is released (`Released: needs human`, assignee removed).
+  ticket `ready-for-human`, a Wayfinder ticket gets only the `Waiting on human: …` status comment
+  (`docs/agents/issue-tracker.md`), which keeps it off the frontier until the human comments
+  `Resumed`.
+- **`/implement-spec` claims the spec and all its tickets**: the session comments a claim on the
+  spec issue and on every child ticket it will build, the second exception to one ticket per
+  session. Tickets do not close through pull requests: the session closes each one with a comment
+  once its project pull request has merged (no closing keywords; they would not reach issues in
+  this repository from a project repository anyway).
 - **Triage's `.out-of-scope/<concept>.md` files** live at this repository's root
   (`.out-of-scope/`) and need human review to merge.
 - **A handoff is a comment on the ticket**, not the `/handoff` skill's file: that file lands in

@@ -61,15 +61,29 @@ repositories selected for the session or attached to it; others answer 403.
 ## Claiming a ticket
 
 Every session acts as the same GitHub account, so an assignee alone cannot tell sessions apart.
-A claim is two writes, the session's first:
+A ticket's availability is read from its **status comments**, each starting with one of these
+words:
 
-1. Read the ticket's comments. If the latest `Claimed by` comment has no later `Released` or
-   handoff comment, the ticket is taken: pick another.
-2. Assign the ticket (`--add-assignee @me`, or `assignees` in `issue_write`) **and** comment
-   `Claimed by <session URL or branch name>`.
+| Status comment | Written by | Ticket is |
+|---|---|---|
+| `Claimed by <session URL or branch>` | the session taking it | taken |
+| `Released: <why>` | a session stopping without finishing | free |
+| `Waiting on human: <what is needed>` | a session that needs the human (a release, a decision, an approval, the review loop's stop rule) | **not available** to sessions |
+| `Resumed: <what changed>` | **the human only**, once the wait is over | free |
 
-A session that stops without finishing comments `Released: <why>` and removes the assignee.
-Tickets assigned to a human without a claim comment are theirs, not available.
+1. Read the ticket's comments. The latest status comment decides: available only if there is
+   none, or it is `Released` or `Resumed`; a ticket labelled `ready-for-human` is not available
+   either. Otherwise pick another.
+2. Claim with two writes, the session's first: assign the ticket and comment
+   `Claimed by <session URL or branch name>`. With `gh`: `--add-assignee @me`. With
+   `mcp__github__issue_write`: `assignees` needs a real login (get it with `mcp__github__get_me`;
+   `@me` is not accepted), and on `update`, `labels` replaces the whole set, so pass the full list.
+
+A session that stops without finishing comments `Released: <why>` and removes the assignee; one
+that needs the human comments `Waiting on human: …` (and, on non-Wayfinder tickets, adds
+`ready-for-human`). The human hands a ticket back by commenting `Resumed: …` and, where present,
+swapping `ready-for-human` for `ready-for-agent`. Tickets assigned to a human without a claim
+comment are theirs, not available.
 
 ## Pull requests as a triage surface
 
@@ -93,8 +107,8 @@ Used by `/wayfinder`. The **map** is a single issue with **child** issues as tic
 - **Child ticket**: a sub-issue of the map, labelled `wayfinder:<type>` (`research`, `prototype`,
   `grilling`, `task`), optionally `repo:<name>` (the override in `CLAUDE.md`).
 - **Blocking**: see **Blocking** above.
-- **Frontier**: the map's open sub-issues with no open blocker and no claim; first in map order
-  wins.
+- **Frontier**: the map's open sub-issues with no open blocker that are available (see
+  **Claiming a ticket**: not claimed, not waiting on the human); first in map order wins.
 - **Claim**: see **Claiming a ticket**.
 - **Resolve**: comment the answer, close the ticket, append a context pointer (gist + link) to the
   map's Decisions so far.

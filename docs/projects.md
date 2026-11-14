@@ -8,8 +8,8 @@ Regenerate the numbers when they drift; the layer order is the part that matters
 
 Computed from the `dependencies` and `peerDependencies` of published packages. Private packages
 can reach sideways: cellb.dev's `packages/notebooks` and `apps/sandbox` depend on
-statewalker-knowledge, and `apps/sandbox` also on webrun-vcs, so umbrella's release order puts
-cellb.dev after both.
+statewalker-knowledge, and `apps/sandbox` also on webrun-vcs, so cellb.dev must be released after
+both (once it joins umbrella's registry, refactoring step 1.1).
 
 ```
 L0  statewalker-shared · statewalker-fsm · statewalker-db · webrun-wire

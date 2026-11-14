@@ -16,14 +16,15 @@ the commits umbrella's `sw.mjs` pushes to `main` during `update`, `release` and 
    go back to step 1 with a new reviewer, who reviews the whole change again, not just the fixes.
    If it reported only medium and low findings, go to step 4 once they are fixed.
 4. **Merge when checks are green.** Every check on the latest commit passes (all of them, not
-   only those a ruleset marks required), the branch is rebased on the current base, and any
+   only those a ruleset marks required), the branch is up to date with its base (rebase locally,
+   or `update_pull_request_branch` in the cloud; either is fine with squash merge), and any
    human approval the path requires (below) is given. Squash merge. Where a repository has no CI
    yet, "green" means the repository's own check commands (its README) pass locally, and the
    round's record says so.
 
 **Stop after three rounds.** If the third review still reports critical or high findings, stop:
-comment on the ticket with the open findings, label it `ready-for-human` (a Wayfinder ticket gets
-the alternative in `CLAUDE.md` instead), and leave the pull request open.
+comment `Waiting on human: review loop stopped after three rounds` on the ticket with the open
+findings, add `ready-for-human` (not on Wayfinder tickets), and leave the pull request open.
 
 ## Reviewer brief
 
@@ -32,7 +33,8 @@ Pass this to the reviewer, with the placeholders filled:
 > You are an independent reviewer; you did not write this change. Do not modify files, push or
 > comment on GitHub.
 >
-> - **Change**: `git -C <checkout> diff <base-sha> HEAD` (name any vendored paths to skip).
+> - **Change**: `git -C <checkout> diff origin/<base>...HEAD` (three dots: against the merge base,
+>   so a moved base branch does not distort the diff; name any vendored paths to skip).
 > - **Spec**: ticket `statewalker-root#<n>` (read it and its comments), plus what the pull request
 >   says it does.
 > - **Axes**: apply both axes of `/code-review` yourself, without spawning sub-agents:

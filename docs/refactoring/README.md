@@ -32,13 +32,13 @@ Problems referenced as P1–P10 are listed in `docs/projects.md`.
 
 | Step | Project | Change | Fixes |
 |---|---|---|---|
-| 1.1 | umbrella | Make umbrella's `repos.json` follow this repository's: add `cellb.dev` (also to the workspace's library list) and `statewalker-root` (or exempt it in `repos.mjs check`, which otherwise fails) | P1 |
+| 1.1 | umbrella | Bring umbrella's `repos.json` to the same set of names as this repository's, in umbrella's own format (SSH URLs, umbrella itself omitted): add `cellb.dev` (also to the workspace's library list) and `statewalker-root` (or exempt it in `repos.mjs check`, which otherwise fails) | P1 |
 | 1.2 | umbrella | Workspace selects library globs, not repositories, so `httpeers/packages/*`, `sandclaw/packages/*`, `cellb.dev/packages/cellb` join it | P2 |
 | 1.3 | .github, then statewalker-db, webrun-wire, webrun-sites | Move `tools/consumer-install` into shared scripts (or replace with umbrella's `npmverify.sh`); then one ticket per project removes its copy | P8 |
 | 1.4 | umbrella | Update the GitHub description to match the README | P10 |
 | 1.4b | umbrella | Point its `CLAUDE.md` and `docs/agents/` at statewalker-root as the issue tracker (or remove them), so agents in umbrella get one answer | — |
 | 1.5 | root | `tools/ws.mjs`: workspace new / list / sync / rm, built on umbrella's `workspace.mjs` merge logic | — |
-| 1.6 | root | Extend this repository's CI (`tools/check-docs.mjs`): `repos.json` equals the organization, skills lint | — |
+| 1.6 | root | Extend this repository's CI (`tools/check-docs.mjs`): `repos.json` equals the organization (needs a token that can list the org's private repositories, since the default `GITHUB_TOKEN` and cloud sessions cannot; exempt statewalker-root and the archived ones), skills lint | — |
 | 1.7 | every project | An agent pointer back to this repository: a short `CLAUDE.md` (or a section in the existing one) saying sessions start from statewalker-root, the tracker is there, and the review loop applies | — |
 
 ## Phase 2 — dissolve statewalker-sandbox (one ticket per row; blocked by 0.2 and 0.4)

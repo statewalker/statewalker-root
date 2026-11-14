@@ -10,7 +10,7 @@ follows it (`CLAUDE.md`, "Skills only a human can start").
 | The work is… | Route |
 |---|---|
 | Too big or foggy for one session, or spans several projects | `/wayfinder` → map issue here; one decision ticket per session until the way is clear, then a spec |
-| A clear feature | `/grill-with-docs` → `/to-spec` → `/to-tickets` → `/implement` (one ticket) or `/implement-spec` (whole spec, parallel subagents) |
+| A clear feature | `/grill-with-docs` → `/to-spec` → `/to-tickets` → `/implement` (one ticket) or `/implement-spec` (whole spec, parallel subagents; claims every ticket, `CLAUDE.md` overrides) |
 | A bug or regression | `/diagnosing-bugs`, with `/tdd` for the regression test |
 | A design question | `/prototype` (throwaway) or a `wayfinder:prototype` ticket |
 | Code-health survey | `/improve-codebase-architecture` on one project, every few days |
@@ -45,24 +45,29 @@ Rules that make parallel sessions work:
 ## 3. Changes across projects
 
 1. **Branches**: locally, one branch name across this repository and every project:
-   `<ticket-number>-<slug>`. In the cloud, the harness names the session branch and uses it in
-   every repository selected for the session; use it as given.
+   `<ticket-number>-<slug>`. In the cloud, use the session branch the harness names, in every
+   repository: check each project checkout with `git branch --show-current` and create the branch
+   there if the harness left it on `main`.
 2. **Build and test together** before anything is released, in one pnpm workspace over all the
    projects (`sessions.md`, "Linking the projects"): locally in `ws/<feature>/`, in the cloud over
    the session's checkouts.
-3. **One pull request per project**, each linking the ticket; the ticket lists them.
+3. **One pull request per project**, each referencing the ticket in full
+   (`statewalker/statewalker-root#<n>`); the ticket lists them.
 4. **Land bottom-up, with a release between layers.** Each project resolves `@statewalker/*` from
    npm through its catalog, so an upper project can only go green against a released lower one:
    1. Take the lowest project's pull request through the review loop (`merging.md`) and merge it.
    2. Comment on the ticket asking the human to run `node tools/sw.mjs release <lower-project>`
       (release, **not** cascade: a cascade would release the dependents from `main`, without the
-      open pull requests), and mark the ticket for the human (`ready-for-human`, or the Wayfinder
-      alternative in `CLAUDE.md`). Stop there.
-   3. After the release, a session raises the upper project's catalog range to the new version,
-      gets its checks green, takes it through the review loop and merges it.
-   4. Repeat per layer. After the topmost changed project merges, the human runs
-      `node tools/sw.mjs cascade <topmost-changed-project>` to release it and catch up the
-      projects above.
+      open pull requests), comment `Waiting on human: release <lower-project>` and add
+      `ready-for-human` (Wayfinder tickets: the comment only). Stop there.
+   3. The human releases, then comments `Resumed: <project> <version> released` and swaps
+      `ready-for-human` for `ready-for-agent`.
+   4. A session claims the ticket again, raises the upper project's catalog range to the new
+      version, gets its checks green, takes it through the review loop and merges it.
+   5. Repeat per layer. After the last pull request merges, the human runs
+      `node tools/sw.mjs cascade <lowest-changed-project>`: it publishes only what is still
+      unreleased, then updates and releases **every** dependent in order, including dependents
+      that the change did not touch.
 
 ## 4. Release
 

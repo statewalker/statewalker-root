@@ -29,7 +29,8 @@ issues are for, and it is what would make every pull request conflict.
 Every session contributes through **its own pull request**, never by pushing to `main`:
 
 - Branch: the session branch (cloud, named by the harness) or `<ticket-number>-<slug>` (local).
-- Title: `root: <ticket title>`; body links the ticket (`Part of #<n>`) and the project PRs.
+- Title: `root: <ticket title>`; body links the ticket (`Part of #<n>`, bare is fine here) and the
+  project PRs.
 - **Merge it when the session ends** if it is in the first category below, even if the project
   PRs are still in review. Short-lived pull requests are what keep conflicts rare.
 - Before merging: the review loop in `merging.md`. Rebase onto `main`; resolve conflicts
@@ -63,8 +64,8 @@ A session with nothing to contribute here opens no pull request; its trace is th
    - `/wayfinder statewalker-root#4` (work the next frontier ticket of a map)
    - `/grill-with-docs` for a new idea, then `/to-spec`.
 3. The session follows `CLAUDE.md`: claims the ticket, works in the harness's checkouts of the
-   selected projects (on the session branch), and clones unselected public projects into
-   `repos/` only to read them.
+   selected projects (switching each to the session branch if the harness left it on `main`),
+   and clones unselected public projects into `repos/` only to read them.
 
 Each cloud session has its own container, so cloud sessions never share files: run as many in
 parallel as there are unblocked, unclaimed tickets.
@@ -113,11 +114,12 @@ dev-server ports.
 
 ## End a session
 
-1. Project PRs opened, each linking the ticket, and taken through the review loop in
+1. Project PRs opened, each referencing `statewalker/statewalker-root#<n>`, and taken through the review loop in
    `merging.md` before merging (lowest layer first).
 2. **Handoff comment** on the ticket (not the `/handoff` skill's file): what was done, links to
    every PR, what is left, anything the next session must know. Close the ticket if it is
-   resolved; otherwise comment `Released: <why>` and remove the assignee.
+   resolved; otherwise comment `Released: <why>` and remove the assignee, or
+   `Waiting on human: <what>` when the next step is the human's.
 3. New work discovered → new tickets (with blocking edges), not notes in files.
 4. This repository's PR rebased, through the review loop, and merged (or left for review if it is
    in the review-required set).

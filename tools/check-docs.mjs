@@ -27,16 +27,22 @@ function markdownFiles(dir) {
 for (const file of markdownFiles(ROOT)) {
   const text = fs
     .readFileSync(file, "utf8")
-    .replace(/^(```|~~~)[\s\S]*?^\1/gm, "") // fenced blocks
+    .replace(/^[ \t]*(```|~~~)[\s\S]*?^[ \t]*\1/gm, "") // fenced blocks, indented too
     .replace(/`[^`\n]*`/g, ""); // inline code
   const targets = [
-    ...[...text.matchAll(/\]\((\S+?)(?:\s+"[^"]*")?\)/g)].map((m) => m[1]), // [a](t) and [a](t "title")
+    ...[...text.matchAll(/\]\((?:<([^>]+)>|(\S+?))(?:\s+"[^"]*")?\)/g)].map((m) => m[1] ?? m[2]), // [a](t), [a](<t>), [a](t "title")
     ...[...text.matchAll(/^\s*\[[^\]]+\]:\s*(\S+)/gm)].map((m) => m[1]), // [a]: t
   ];
   for (const raw of targets) {
     const target = raw.replace(/^<|>$/g, "");
     if (/^[a-z][a-z0-9+.-]*:/i.test(target) || target.startsWith("#")) continue;
-    const rel = decodeURIComponent(target.split("#")[0]);
+    let rel;
+    try {
+      rel = decodeURIComponent(target.split("#")[0]);
+    } catch {
+      problems.push(`${path.relative(ROOT, file)}: malformed link ${target}`);
+      continue;
+    }
     const resolved = rel.startsWith("/") ? path.join(ROOT, rel) : path.resolve(path.dirname(file), rel);
     if (!fs.existsSync(resolved)) problems.push(`${path.relative(ROOT, file)}: broken link ${target}`);
   }
