@@ -14,10 +14,10 @@
 // Each firing threshold is a root ticket to create; dry run unless --create, and never when an
 // open area:root issue already has the same title.
 // GitHub is read with `gh api` (REST); --fixtures reads recorded responses instead (tests).
-import { execFileSync } from "node:child_process";
 import fs from "node:fs";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
+import { fixtureSource, liveSource } from "./lib/github.mjs";
 
 const ORG = "statewalker";
 const SELF = "statewalker-root";
@@ -42,48 +42,6 @@ function parseArgs(argv) {
   if (Number.isNaN(a.now.getTime())) throw new Error("--now is not a date");
   if (a.create && a.fixtures) throw new Error("--create cannot be used with --fixtures");
   return a;
-}
-
-// ---- GitHub access: live through gh, or recorded fixtures ----
-
-function liveSource() {
-  const gh = (args) => {
-    try {
-      return JSON.parse(execFileSync("gh", ["api", ...args], { encoding: "utf8", maxBuffer: 1 << 28, stdio: ["ignore", "pipe", "pipe"] }));
-    } catch (e) {
-      const err = new Error(`gh api ${args.join(" ")}: ${(e.stderr || e.message).toString().trim().split("\n").pop()}`);
-      err.unreadable = true; // the repository is skipped, the run goes on
-      throw err;
-    }
-  };
-  return {
-    // Every page of a list endpoint; stop(item) ends paging early once a page holds an item it accepts.
-    list(p, stop = () => false) {
-      const out = [];
-      for (let page = 1; ; page++) {
-        const items = gh([`${p}${p.includes("?") ? "&" : "?"}per_page=100&page=${page}`]);
-        out.push(...items);
-        if (items.length < 100 || items.some(stop)) return out;
-      }
-    },
-    create(p, fields) {
-      const f = Object.entries(fields).flatMap(([k, v]) => (Array.isArray(v) ? v.flatMap((x) => ["-f", `${k}[]=${x}`]) : ["-f", `${k}=${v}`]));
-      return gh(["--method", "POST", p, ...f]);
-    },
-  };
-}
-
-function fixtureSource(file) {
-  const data = JSON.parse(fs.readFileSync(file, "utf8"));
-  return {
-    list(p) {
-      if (!(p in data)) throw new Error(`no fixture for ${p}`);
-      return data[p];
-    },
-    create() {
-      throw new Error("fixtures are read-only");
-    },
-  };
 }
 
 // ---- reading ----

@@ -17,6 +17,7 @@ serves. Nothing here publishes: releases happen only in CI (`docs/process/README
 | `ci-local.sh <dir>` | The shared CI steps (`statewalker/.github`), run locally; prints the first failing step |
 | `npmverify.sh <registry> <dir> <pkgdir>…` | Install the given packages from npm into an empty folder and import every exported entry |
 | `review-metrics.mjs [--repos a,b] [--json] [--create]` | The five review signals and four thresholds over the last four weeks; files the threshold tickets with `--create` (`docs/process/review-metrics.md`) |
+| `health-dispatch.mjs [--repos a,b] [--json] [--create]` | The week's health-review plan: unfinished runs to resume, record tickets to create (five at most), deferred bugs to escalate (`docs/process/health-review.md`) |
 | `check-docs.mjs` | This repository's own CI: Markdown links, skills lock, `repos.json` format |
 
 They work on the clones in `repos/` (gitignored; `SW_REPOS` overrides). Those clones are for reading

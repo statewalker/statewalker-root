@@ -24,6 +24,33 @@ when it was given one ("Work on statewalker-root#N"):
   unfinished is released, and the next week's dispatcher resumes the same ticket instead of
   opening another.
 
+## The dispatcher's plan
+
+`tools/health-dispatch.mjs` decides the week's runs from the record tickets, each project's
+latest commit on `main` and the open deferred bugs:
+
+```sh
+node tools/health-dispatch.mjs            # dry run: prints the plan (--json for the routine)
+node tools/health-dispatch.mjs --create   # files the record tickets and escalations
+```
+
+1. **Unfinished runs first**: every open record ticket, oldest first, counts against the cap.
+   It is started again only if it is available (no claim, `Released` or `Resumed`); a claimed or
+   waiting one just takes its slot.
+2. **Then changed projects**: the projects without an open record ticket whose `main` moved since
+   their last recorded commit (the `<!-- health-review: … -->` line of their latest closed record
+   ticket; a closed record without that line is ignored). The least recently reviewed come first,
+   never reviewed before all; ties go to the lower layer (from `CLAUDE.md`'s project table; apps,
+   infra and this repository last), then by name. One new record ticket each, never a second open
+   one for a project.
+3. **The cap: five runs a week.** The rest wait for next week; unchanged projects are skipped.
+4. **Escalations**: every open deferred bug 28 days old or older becomes a root ticket labelled
+   `bug`, `ready-for-agent` and `repo:<project>` that links it (with acceptance criteria), unless an
+   open root `bug` issue already links it.
+
+Repositories `gh` cannot read (in a cloud session: unattached ones) are skipped and listed. Tests:
+`tools/test/health-dispatch.test.mjs`, on recorded responses.
+
 ## Inputs
 
 1. **The change since the base commit.** Note the project's `main` head when the run starts: it
@@ -96,5 +123,5 @@ dispatcher read to find where to start:
 A run that cannot finish comments `Released: <why>` with what it has done so far, and leaves the
 ticket open, unassigned, for the dispatcher to resume.
 
-The dispatcher adds one line per week to the pinned **Review health** issue, linking that week's
+The dispatcher adds one line per week to the pinned [**Review health**](https://github.com/statewalker/statewalker-root/issues/36) issue, linking that week's
 record tickets.

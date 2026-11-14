@@ -16,7 +16,7 @@ node tools/review-metrics.mjs --create        # also file the tickets of firing 
 
 It reads GitHub with `gh api` (REST), so it reaches only the repositories `gh` can see (in a
 cloud session: the attached ones); the others are skipped and listed in the report. Without `--create` it is a dry run: it prints the report,
-which is the weekly comment on the pinned **Review health** issue, and the tickets it would file.
+which is the weekly comment on the pinned [**Review health**](https://github.com/statewalker/statewalker-root/issues/36) issue, and the tickets it would file.
 `--now <date>` moves the window's end. The weekly dispatcher routine runs it.
 
 ## Signals
