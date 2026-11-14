@@ -19,6 +19,5 @@
   "statewalker-shell-theia": "https://github.com/statewalker/statewalker-shell-theia.git",
   "statewalker-sites": "https://github.com/statewalker/statewalker-sites.git",
   "webrun-devtools": "https://github.com/statewalker/webrun-devtools.git",
-  "umbrella": "https://github.com/statewalker/umbrella.git",
   ".github": "https://github.com/statewalker/.github.git"
 }

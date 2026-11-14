@@ -5,7 +5,7 @@ Ecosystem-wide terms. Project-local terms live in each project's own glossary
 
 **Root project**: this repository, `statewalker-root`. Holds the plan, the knowledge and the
 skills; no product code. Every session starts here.
-_Avoid_: umbrella (that is the release-tooling repository), home repo (the pattern's name).
+_Avoid_: umbrella (the archived repository whose tools moved here), home repo (the pattern's name).
 
 **Project**: one repository under `github.com/statewalker` listed in `repos.json`, usually a pnpm
 monorepo of several packages.
@@ -24,7 +24,8 @@ this repository: its container in the cloud, its workspace's worktree locally.
 
 **Workspace**: locally, `ws/<feature>/`: a worktree of this repository plus worktrees of the
 projects a session changes, all on one branch, linked by one `pnpm-workspace.yaml` so changes
-across projects build and test together before any release.
+across projects build and test together before any release (`tools/ws.mjs`).
 
-**Cascade**: releasing a project and then updating and releasing every dependent project in layer
-order (`umbrella/tools/sw.mjs cascade`).
+**Version pull request**: the "version packages" pull request CI opens from a project's pending
+changesets; merging it publishes the versions it applies. The only release path.
+_Avoid_: cascade (umbrella's retired local release of a project and all its dependents).

@@ -9,7 +9,7 @@ Regenerate the numbers when they drift; the layer order is the part that matters
 Computed from the `dependencies` and `peerDependencies` of published packages. Private packages
 can reach sideways: cellb.dev's `packages/notebooks` and `apps/sandbox` depend on
 statewalker-knowledge, and `apps/sandbox` also on webrun-vcs, so cellb.dev must be released after
-both (once it joins umbrella's registry, refactoring step 1.1).
+both.
 
 ```
 L0  statewalker-shared · statewalker-fsm · statewalker-db · webrun-wire
@@ -52,9 +52,10 @@ L7  sandclaw (→shell-react, search, kernel)
 
 The refactoring plan (`docs/refactoring/README.md`) turns each of these into work.
 
-- **P1.** `cellb.dev` is missing from umbrella's `repos.json` and from its combined workspace.
-- **P2.** Umbrella's combined workspace leaves out `httpeers` entirely, although it publishes 12
-  libraries, so a change spanning webrun-wire and httpeers has no linked workspace.
+- **P1.** Resolved: `cellb.dev` was missing from umbrella's registry and workspace; umbrella is archived
+  and this repository's `repos.json` and `tools/ws.mjs` include it.
+- **P2.** Resolved: umbrella's combined workspace left out `httpeers`; `tools/ws.mjs new --libraries`
+  links every project's `packages/*`.
 - **P3.** Two packages are named `@statewalker/httpeers-conformance` (sandbox and httpeers). The
   sandbox's `httpeers.core` is an older parallel line of the published `httpeers-core`.
 - **P4.** statewalker-sandbox's CI needs a sibling checkout of webrun-wire: not self-contained.
@@ -68,5 +69,4 @@ The refactoring plan (`docs/refactoring/README.md`) turns each of these into wor
 - **P8.** `tools/consumer-install` is copied into three projects and has already drifted.
 - **P9.** Library docs live in two places: cellb.dev and webrun-vcs keep theirs in-repo; fsm and webrun
   docs live in the private statewalker-sites.
-- **P10.** Umbrella's GitHub description (bare mirrors, branch per build configuration) no longer matches
-  its README.
+- **P10.** Resolved: umbrella's GitHub description no longer matched its README; umbrella is archived.

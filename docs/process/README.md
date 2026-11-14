@@ -1,6 +1,6 @@
 # Development process
 
-How work moves from an idea to released packages. The skills named here live in
+How work moves from an idea to published packages. The skills named here live in
 `.claude/skills/`; `/ask-matt` routes when unsure which one fits. Most of them are started by the
 human typing the command; a session started with only a ticket reads the skill's `SKILL.md` and
 follows it (`CLAUDE.md`, "Skills only a human can start").
@@ -49,48 +49,43 @@ Rules that make parallel sessions work:
    repository: check each project checkout with `git branch --show-current` and create the branch
    there if the harness left it on `main`.
 2. **Build and test together** before anything is released, in one pnpm workspace over all the
-   projects (`sessions.md`, "Linking the projects"): locally in `ws/<feature>/`, in the cloud over
-   the session's checkouts.
+   projects (`sessions.md`, "Linking the projects"): locally in `ws/<feature>/`
+   (`node tools/ws.mjs new <feature> <project…>`), in the cloud over the session's checkouts.
 3. **One pull request per project**, each referencing the ticket in full
    (`statewalker/statewalker-root#<n>`); the ticket lists them.
-4. **Land bottom-up, with a release between layers.** Each project resolves `@statewalker/*` from
-   npm through its catalog, so an upper project can only go green against a released lower one:
-   1. Take the lowest project's pull request through the review loop (`merging.md`) and merge it.
-   2. Comment on the ticket asking the human to run `node tools/sw.mjs release <lower-project>`
-      (release, **not** cascade: a cascade would release the dependents from `main`, without the
-      open pull requests), comment `Waiting on human: release <lower-project>` and add
-      `ready-for-human` (Wayfinder tickets: the comment only). Stop there.
-   3. The human releases, then comments `Resumed: <project> <version> released` and swaps
-      `ready-for-human` for `ready-for-agent`.
-   4. A session claims the ticket again, raises the upper project's catalog range to the new
-      version, gets its checks green, takes it through the review loop and merges it.
-   5. Repeat per layer. After the last pull request merges, the human runs
-      `node tools/sw.mjs cascade <lowest-changed-project>`: it publishes only what is still
-      unreleased, then updates and releases **every** dependent in order, including dependents
-      that the change did not touch.
+4. **Land bottom-up, with a publish between layers.** Each project resolves `@statewalker/*` from
+   npm through its catalog, so an upper project can only go green against a published lower one:
+   1. Take the lowest project's pull request, with a changeset (`pnpm changeset`) for each package
+      it changes, through the review loop (`merging.md`) and merge it.
+   2. CI opens or updates that project's "version packages" pull request (§4). Take it through the
+      review loop and merge it: CI publishes.
+   3. Once npm serves the new versions (`node tools/packages.mjs status <project>`), raise the upper
+      project's catalog range where the new version falls outside it, get its checks green, take
+      it through the review loop and merge it.
+   4. Repeat per layer. No human release step sits between layers.
+
+   Dependents the change did not touch are updated automatically after a publish
+   ([#15](https://github.com/statewalker/statewalker-root/issues/15)): a compatible version only
+   moves their lockfile. Until that lands, `node tools/packages.mjs deps <project>` lists them and
+   `status` shows which references are behind. A project whose `ci.yml` has no `publish` job yet
+   cannot release: block the ticket on that project's CI-publishing ticket (open one if missing).
 
 ## 4. Release
 
-Only through umbrella's `tools/sw.mjs`, one release at a time (one publisher is deliberate: no
-version races, no npm credential in CI). **Run locally by a human**: `release` needs `npm whoami`
-with publish rights on `@statewalker`, and npm asks for a 2FA one-time password while publishing,
-so cloud sessions cannot release. A session's job ends at merged pull requests and a ticket
-comment naming what to release next (§3).
+**Only through CI**: npm trusted publishing over OIDC, from the standard `publish` job of each
+project's `ci.yml` (gated by the `npm` environment, with provenance). One shape everywhere, the
+**version pull request**: changesets accumulate on `main`; CI opens a "version packages" pull
+request that applies them (versions, `CHANGELOG.md`); merging it publishes. That pull request goes
+through the review loop like any other, so a session can release without the human
+([decision](https://github.com/statewalker/statewalker-root/issues/10)).
 
-`sw.mjs` works on umbrella's own clones (`umbrella/repos/`, from umbrella's `repos.json`), not on
-this repository's `repos/`:
-
-```sh
-git clone git@github.com:statewalker/umbrella.git && cd umbrella   # private
-node tools/repos.mjs clone          # once; later: node tools/repos.mjs pull
-node tools/sw.mjs release <project> --dry-run    # one project
-node tools/sw.mjs cascade <project> --dry-run    # a project and every dependent, in order
-```
-
-`release` publishes under the npm tag `next`, installs and imports every entry back from npm, then
-promotes to `latest`. `update`, `release` and `cascade` commit and push `main` of the projects
-they touch directly: these commits are the one exception to the pull-request rule. cellb.dev is
-not in umbrella's registry yet, so it cannot be released this way until refactoring step 1.1.
+- **Never publish by hand**, from any machine, and never add a publish step outside the standard
+  `publish` job: the shared CI fails such a pull request, and the review loop grades it a
+  release-path bypass (critical).
+- To check what a project has not published, or which references are behind npm:
+  `node tools/packages.mjs status [project…]` over the clones in `repos/`
+  (`node tools/repos.mjs clone`, later `pull`).
+- To check published packages install and import from npm: `tools/npmverify.sh` (`tools/README.md`).
 
 ## 5. Conventions inside each project
 

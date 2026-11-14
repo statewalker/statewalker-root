@@ -28,8 +28,8 @@ below. Code changes are committed in the project's own repository, never here.
 
 This file and `docs/` win over a project's own agent docs and over the vendored skills where they
 disagree. In particular: **the issue tracker is always `statewalker/statewalker-root`**, whatever a
-project's docs say (umbrella's still name `statewalker/umbrella`), with one exception: review
-follow-up issues go to the repository of the pull request they come from (`docs/process/merging.md`).
+project's docs say, with one exception: review follow-up issues go to the repository of the pull
+request they come from (`docs/process/merging.md`).
 The overrides listed under **Agent skills** below apply.
 
 ## Projects
@@ -62,22 +62,27 @@ statewalker-knowledge and webrun-vcs, so cellb.dev must come after them. Invento
 | app | statewalker-shell-theia | Browser-only Eclipse Theia shell over a FilesApi |
 | app | statewalker-sites | Private: documentation sites and blog (Cloudflare Workers) |
 | app | webrun-devtools | Chrome extension for browser automation; publishes `@statewalker/webrun-devtools` |
-| infra | umbrella | Private: release tooling (`tools/sw.mjs`), its own registry, combined workspace |
 | infra | .github | Shared CI workflows and release-planning scripts |
 
-Archived, do not change: `statewalker-content`, `statewalker-ai-legacy`. Private projects
-(umbrella, statewalker-sites) must be selected for a cloud session even to read them.
+Archived, do not change: `statewalker-content`, `statewalker-ai-legacy`, `umbrella` (its
+repository-management tools now live in this repository's `tools/`). The private project
+(statewalker-sites) must be selected for a cloud session even to read it.
 
-`repos.json` here is the source of truth for which projects exist; umbrella's registry follows it
-(`docs/refactoring/README.md`, step 1.1).
+`repos.json` here is the source of truth for which projects exist. `tools/` manages them from one
+machine, plain Node with no dependencies (`tools/README.md`): `repos.mjs` (clone, pull, status,
+check against the organization), `ws.mjs` (per-feature workspaces), `packages.mjs` (what is
+unpublished, what is behind npm, dependency order).
 
 ## Rules
 
-- **Releases only through umbrella's `tools/sw.mjs`** (`release` / `cascade`), run locally by a
-  human logged in to npm (`docs/process/README.md` §4). Never `npm publish` or `pnpm publish` by
-  hand, and never from a cloud session.
-- **Lower layers first.** A change spanning layers merges and releases bottom-up, with a human
-  release between layers (`docs/process/README.md` §3).
+- **Releases only through CI** (npm trusted publishing from each project's `ci.yml`): changesets
+  open a "version packages" pull request, and merging it, through the review loop like any other,
+  publishes (`docs/process/README.md` §4). Never `npm publish` or `pnpm publish` by hand, from any
+  machine: a publish outside the standard `publish` job is a release-path bypass, a critical
+  finding.
+- **Lower layers first.** A change spanning layers merges and releases bottom-up: the lower
+  project's version pull request merges and publishes before the upper project moves to the new
+  version (`docs/process/README.md` §3).
 - **Code goes to the project's repository** as a pull request, one per repository, linked from
   the ticket; project pull requests reference it in full, `statewalker/statewalker-root#<n>` (a
   bare `#<n>` there points at the project's own issues). Knowledge goes here, as a pull request (`docs/process/sessions.md`).
@@ -86,8 +91,8 @@ Archived, do not change: `statewalker-content`, `statewalker-ai-legacy`. Private
   be integrated as is; high = bug; medium and low = improvements); you judge each one real,
   speculative or cosmetic; fix critical always, the rest when cheap, otherwise open follow-up
   issues in the pull request's own repository; then **merge automatically** once no critical
-  finding is open, every other open finding is filed, and checks are green. The only exception is
-  the commits `sw.mjs` pushes to `main` during `update`, `release` and `cascade`.
+  finding is open, every other open finding is filed, and checks are green. No exceptions: the
+  version pull requests that publish go through the same loop.
 - **Do not create files that track state.** Tickets, maps, specs, progress and handoffs are
   GitHub issues and issue comments, not files.
 
