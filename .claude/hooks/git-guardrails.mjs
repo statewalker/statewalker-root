@@ -11,6 +11,8 @@
 // Best effort: it reads the command text, so it cannot see through scripts or aliases.
 import { execFileSync } from "node:child_process";
 import fs from "node:fs";
+import os from "node:os";
+import path from "node:path";
 
 const PROTECTED = new Set(["main", "master"]);
 
@@ -82,7 +84,7 @@ function gitInvocation(words) {
 
 function currentBranch(dir) {
   try {
-    return execFileSync("git", [...(dir ? ["-C", dir] : []), "branch", "--show-current"], {
+    return execFileSync("git", ["-C", dir, "branch", "--show-current"], {
       encoding: "utf8",
       stdio: ["ignore", "pipe", "ignore"],
     }).trim();
@@ -91,14 +93,24 @@ function currentBranch(dir) {
   }
 }
 
+// The checked-out branch is main, or cannot be told (detached, not a repository): assume main.
+const onProtected = (branch) => !branch || PROTECTED.has(branch);
+
 const refName = (ref) => ref.replace(/^\+/, "").replace(/^refs\/heads\//, "");
 
 // The reason a command is blocked, or null.
 export function check(command, branchOf = currentBranch) {
+  let cwd = process.cwd(); // follows `cd` earlier in the same command line
   for (const words of simpleCommands(command)) {
+    if (words[0] === "cd") {
+      const to = words[1] && words[1] !== "-" ? words[1].replace(/^~(?=$|\/)/, os.homedir()) : os.homedir();
+      cwd = path.resolve(cwd, to);
+      continue;
+    }
     const git = gitInvocation(words);
     if (!git) continue;
-    const { dir, sub, args } = git;
+    const { sub, args } = git;
+    const dir = git.dir ? path.resolve(cwd, git.dir) : cwd;
     if (sub === "reset" && args.includes("--hard")) return "git reset --hard discards work irreversibly";
     if (sub === "branch" && args.some((a) => ["-d", "-D", "--delete"].includes(a) || /^-[a-zA-Z]*[dD]/.test(a) && !a.startsWith("--")))
       return "deleting a branch";
@@ -121,8 +133,8 @@ export function check(command, branchOf = currentBranch) {
     const targets = refspecs.map((r) => refName(r.includes(":") ? r.slice(r.indexOf(":") + 1) : r));
     const pushesMain =
       targets.length > 0
-        ? targets.some((t) => PROTECTED.has(t) || (t === "HEAD" && PROTECTED.has(branchOf(dir))))
-        : opts.includes("--all") || opts.includes("--branches") || PROTECTED.has(branchOf(dir));
+        ? targets.some((t) => PROTECTED.has(t) || (t === "HEAD" && onProtected(branchOf(dir))))
+        : opts.includes("--all") || opts.includes("--branches") || onProtected(branchOf(dir));
     if (pushesMain) return "force-pushing main";
   }
   return null;
