@@ -1,0 +1,7 @@
+# Project clones and per-feature workspaces: derived from repos.json, never tracked.
+repos/
+ws/
+
+node_modules/
+.env
+.env.*
