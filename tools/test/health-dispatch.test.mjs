@@ -58,8 +58,16 @@ test("a first run has no base; a later run starts from the last finished record,
 test("escalation at exactly four weeks and not before; an already escalated bug is a duplicate", () => {
   assert.deepEqual(planOf().escalate.map((e) => [e.repo, e.issue, e.ageDays, e.duplicateOf]), [
     ["p-first", 3, 60, 200],
-    ["p-old", 7, 28, null], // 27.9 days old #8 is not escalated; #7 under two labels counts once
+    ["p-old", 7, 28, null], // 27.9 days old #8 is not escalated; #7 under two labels counts once; root #201 links #70, not #7
   ]);
+});
+
+test("more unfinished runs than the cap: the five oldest are resumed, the rest wait", () => {
+  const r = run(["--now", NOW, "--repos", "q1,q2,q3,q4,q5,q6", "--layers", FX("health-dispatch-layers.json"), "--fixtures", FX("health-dispatch-cap.json"), "--json"]);
+  assert.equal(r.status, 0, r.stderr);
+  const p = JSON.parse(r.stdout);
+  assert.deepEqual(p.review.map((x) => x.repo), ["q1", "q2", "q3", "q4", "q5"]);
+  assert.deepEqual(p.waiting, ["q6"]);
 });
 
 test("the Markdown plan", () => {

@@ -104,6 +104,7 @@ export function plan({ projects, skipped, rootBugs }, layers, now) {
   //    (no claim, or released, or resumed by the human) are started again.
   for (const p of projects) for (const r of p.openRecords.slice(0, 1)) review.push({ repo: p.repo, action: "resume", record: r.number, status: r.status, start: [null, "Released", "Resumed"].includes(r.status), created: r.created });
   review.sort((a, b) => a.created - b.created);
+  const waiting = review.splice(CAP).map((r) => r.repo); // more unfinished runs than the cap: oldest first
   // 2. Changed projects without an open record: least recently reviewed (never first), lower layer on ties.
   const unchanged = [];
   const candidates = [];
@@ -113,7 +114,6 @@ export function plan({ projects, skipped, rootBugs }, layers, now) {
     else candidates.push(p);
   }
   candidates.sort((a, b) => (a.last?.at ?? -Infinity) - (b.last?.at ?? -Infinity) || layer(a.repo) - layer(b.repo) || a.repo.localeCompare(b.repo));
-  const waiting = [];
   for (const p of candidates) {
     const entry = { repo: p.repo, action: "create", title: `Health review: ${p.repo}`, base: p.last?.commit ?? null, lastRecord: p.last?.number ?? null, head: p.head };
     if (review.length < CAP) review.push(entry);
@@ -125,7 +125,8 @@ export function plan({ projects, skipped, rootBugs }, layers, now) {
     for (const b of p.bugs) {
       if (now - new Date(b.created_at) < ESCALATE_AFTER_DAYS * DAY) continue;
       const url = `https://github.com/${ORG}/${p.repo}/issues/${b.number}`;
-      const existing = rootBugs.find((i) => (i.body ?? "").includes(url));
+      const linked = new RegExp(`${url.replace(/[.*+?^${}()|[\]\\]/g, "\\$&")}(?!\\d)`); // #7 is not #70
+      const existing = rootBugs.find((i) => linked.test(i.body ?? ""));
       escalate.push({ repo: p.repo, issue: b.number, title: b.title, url, ageDays: Math.floor((now - new Date(b.created_at)) / DAY), duplicateOf: existing?.number ?? null });
     }
   }

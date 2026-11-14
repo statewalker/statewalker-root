@@ -39,6 +39,7 @@ const data = {
   [`${R}/issues/92/comments`]: [done("p-recent", sha("c"))],
   [`${R}/issues?state=open&labels=bug`]: [
     { number: 200, title: "Deferred bug: p-first#3 Old crash", body: "Links https://github.com/statewalker/p-first/issues/3 here." },
+    { number: 201, title: "Deferred bug: p-old#70 Other", body: "Links https://github.com/statewalker/p-old/issues/70." }, // not a link to #7
   ],
   ...head("p-released", "1"), ...head("p-claimed", "2"), ...head("p-first", "3"), ...head("p-first-low", "4"),
   ...head("p-unchanged", "a"), ...head("p-old", "5"), ...head("p-recent", "6"),
@@ -57,3 +58,10 @@ fs.writeFileSync(`${OUT}/health-dispatch-claude-md.json`, JSON.stringify({
   ...head("statewalker-sandbox", "7"), ...head("webrun-files", "8"), ...head("statewalker-shared", "9"),
   ...noBugs("statewalker-sandbox"), ...noBugs("webrun-files"), ...noBugs("statewalker-shared"),
 }, null, 1) + "\n");
+
+// More unfinished runs than the cap: six open record tickets, no comments.
+const six = ["q1", "q2", "q3", "q4", "q5", "q6"];
+fs.writeFileSync(`${OUT}/health-dispatch-cap.json`, JSON.stringify(Object.assign(
+  { [`${R}/issues?state=all&labels=health-review`]: six.map((q, i) => record(300 + i, q, "open", 10 - i)), [`${R}/issues?state=open&labels=bug`]: [] },
+  ...six.map((q, i) => ({ [`${R}/issues/${300 + i}/comments`]: [], ...head(q, "d"), ...noBugs(q) })),
+), null, 1) + "\n");
