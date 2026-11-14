@@ -58,7 +58,9 @@ export function gateRecords(comments) {
     const m = gateLines.length ? RECORD.exec(gateLines[gateLines.length - 1]) : null;
     if (m) {
       const [pass, critical, downgraded, high, rejected] = m.slice(1).map(Number);
-      records.push({ pass, critical, downgraded, high, rejected, override: /\boverridden\b/i.test(c.body) });
+      // An override is a row whose Outcome (last) cell starts with "overridden"; the word in prose is not one.
+      const override = /^\|.*\|\s*overridden\b[^|]*\|\s*$/im.test(c.body);
+      records.push({ pass, critical, downgraded, high, rejected, override });
     } else if (/<!--\s*gate:/.test(c.body ?? "")) malformed++;
   }
   return { records, malformed };
@@ -120,7 +122,7 @@ export function compute({ prs, deferred, skipped = [], escalations, rootIssues }
   const recorded = prs.filter((p) => p.records.length);
   const total = (p, k) => sum(p.records, (r) => r[k]);
   const passes = recorded.map((p) => Math.max(...p.records.map((r) => r.pass)));
-  // An override: a record says "overridden" (merging.md, "Record of a pass"). A critical count alone
+  // An override: a record row's Outcome is "overridden" (merging.md, "Record of a pass"). A critical count alone
   // does not tell, since it counts real critical findings whether fixed or not.
   const overridden = (p) => p.records.some((r) => r.override);
   const critical = sum(recorded, (p) => total(p, "critical"));
@@ -204,7 +206,7 @@ function markdown(r) {
   if (s.skippedRepos.length)
     lines.push(`Not readable, skipped: ${s.skippedRepos.map((x) => x.repo).join(", ")}.`, "");
   if (s.withoutRecord.length || s.malformedRecords)
-    lines.push(`Missing gate records: ${s.withoutRecord.join(", ") || "none"}; malformed record lines: ${s.malformedRecords}.`, "");
+    lines.push(`Missing gate records: ${s.withoutRecord.length}${s.withoutRecord.length ? ` (${s.withoutRecord.slice(0, 10).join(", ")}${s.withoutRecord.length > 10 ? ", …" : ""})` : ""}; malformed record lines: ${s.malformedRecords}.`, "");
   lines.push(r.thresholds.length ? "**Thresholds firing:**" : "No threshold fires.");
   for (const t of r.thresholds) lines.push(`- ${t.title}: ${t.value}. ${t.duplicateOf ? `Already filed: #${t.duplicateOf}.` : t.created ? `Filed: #${t.created}.` : "To file."}`);
   if (r.calibration.length) {

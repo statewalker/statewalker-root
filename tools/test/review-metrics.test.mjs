@@ -68,6 +68,7 @@ test("busy: duplicate check against open area:root issues", () => {
   assert.deepEqual(rep.thresholds.map((t) => t.duplicateOf), [40, null]);
   const md = run("busy", "webrun-files,statewalker-db").stdout;
   assert.match(md, /critical findings rising in webrun-files: .*Already filed: #40\./);
+  assert.match(md, /Missing gate records: 2 \(webrun-files#14, webrun-files#15\)/);
   assert.match(md, /deferred bugs growing in webrun-files: .*To file\./);
 });
 

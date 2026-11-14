@@ -34,7 +34,7 @@ write("busy", {
     pr(9, null, 0), // closed without merging
     pr(8, 40, 1),   // merged before the window
   ],
-  [comments("webrun-files", 10)]: [rec(1, 1, 0, 0, 0, "| 1 | critical / critical | real | fixed (abc123) |"), chat, rec(2, 0, 0, 0, 0)],
+  [comments("webrun-files", 10)]: [rec(1, 1, 0, 0, 0, "| 1 | critical / critical | real: an override is a record saying \"overridden\" | fixed (abc123) |"), chat, rec(2, 0, 0, 0, 0)], // the word in prose is not an override
   [comments("webrun-files", 11)]: [rec(1, 0, 1, 1, 2, "| 1 | critical / high | real; no failure scenario | fixed |")],
   [comments("webrun-files", 13)]: [rec(1, 1, 0, 0, 0, "| 1 | critical / critical | real | overridden (the human's message) |")],
   [comments("webrun-files", 14)]: [chat],
