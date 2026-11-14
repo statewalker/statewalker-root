@@ -28,6 +28,8 @@ export const ROOT = mainCheckout();
 export const REPOS_DIR = path.resolve(process.env.SW_REPOS ?? path.join(ROOT, "repos"));
 export const WS_DIR = path.join(ROOT, "ws");
 export const ORG = "statewalker";
+/** This repository: it manages the others and is not in its own registry. */
+export const SELF = "statewalker-root";
 
 /** { name: url } from repos.json, in file order. */
 export function registry() {
@@ -47,6 +49,26 @@ export const packageRepos = () => clonedRepos().filter((n) => fs.existsSync(path
 /** git in a directory; returns trimmed stdout, throws with stderr on failure. */
 export const git = (cwd, ...args) =>
   execFileSync("git", args, { cwd, encoding: "utf8", stdio: ["ignore", "pipe", "pipe"] }).trim();
+
+/** Branch, uncommitted file count and ahead/behind its upstream, of a checkout, as one line. */
+export function checkoutState(dir) {
+  const tryGit = (...args) => {
+    try {
+      return git(dir, ...args);
+    } catch {
+      return null;
+    }
+  };
+  const branch = tryGit("branch", "--show-current") || "(detached)";
+  const dirty = (tryGit("status", "--porcelain") ?? "").split("\n").filter(Boolean).length;
+  const counts = tryGit("rev-list", "--left-right", "--count", "HEAD...@{upstream}");
+  let c = " (no upstream)";
+  if (counts) {
+    const [a, b] = counts.split(/\s+/);
+    c = `${a !== "0" ? ` ahead ${a}` : ""}${b !== "0" ? ` behind ${b}` : ""}`;
+  }
+  return { branch, dirty, text: `${branch}${dirty ? `, ${dirty} uncommitted` : ""}${c}` };
+}
 
 /**
  * The catalogs of a pnpm-workspace.yaml: { "": {default catalog}, <name>: {...} }.

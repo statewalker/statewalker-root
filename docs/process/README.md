@@ -62,7 +62,9 @@ Rules that make parallel sessions work:
       (§4, "Transition"), step 1's merge already published: skip this step. If the `publish` run
       waits for approval of the `npm` environment (§4), comment
       `Waiting on human: approve the publish of <project>` on the ticket and stop there.
-   3. Once npm serves the new versions (`node tools/packages.mjs status <project>`), raise the upper
+   3. Once npm serves the new versions (`node tools/repos.mjs pull`, then
+      `node tools/packages.mjs status <project>` shows no `unpublished` line: without the pull,
+      the clone still holds the old versions and reads "up to date"), raise the upper
       project's catalog range where the new version falls outside it, get its checks green, take
       it through the review loop and merge it.
    4. Repeat per layer. No human release step sits between layers, except approving the publish

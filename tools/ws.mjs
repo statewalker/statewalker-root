@@ -26,9 +26,19 @@
 import { execFileSync } from "node:child_process";
 import fs from "node:fs";
 import path from "node:path";
-import { clonedRepos, git, packageGlobs, readCatalogs, registry, repoDir, ROOT, WS_DIR } from "./lib/registry.mjs";
+import {
+  checkoutState,
+  clonedRepos,
+  git,
+  packageGlobs,
+  readCatalogs,
+  registry,
+  repoDir,
+  ROOT,
+  SELF,
+  WS_DIR,
+} from "./lib/registry.mjs";
 
-const SELF = "statewalker-root";
 const argv = process.argv.slice(2);
 const flags = new Set(argv.filter((a) => a.startsWith("--")));
 const [command, feature, ...projects] = argv.filter((a) => !a.startsWith("--"));
@@ -147,17 +157,7 @@ const order = (name) => {
 const metaFile = (f) => path.join(wsOf(f), ".ws.json");
 const readMeta = (f) => (fs.existsSync(metaFile(f)) ? JSON.parse(fs.readFileSync(metaFile(f), "utf8")) : {});
 
-function status(dir) {
-  const branch = tryGit(dir, "branch", "--show-current") || "(detached)";
-  const dirty = (tryGit(dir, "status", "--porcelain") ?? "").split("\n").filter(Boolean).length;
-  const counts = tryGit(dir, "rev-list", "--left-right", "--count", "HEAD...@{upstream}");
-  let c = " (not pushed)";
-  if (counts) {
-    const [a, b] = counts.split(/\s+/);
-    c = `${a !== "0" ? ` ahead ${a}` : ""}${b !== "0" ? ` behind ${b}` : ""}`;
-  }
-  return { branch, dirty, text: `${branch}${dirty ? `, ${dirty} uncommitted` : ""}${c}` };
-}
+const status = checkoutState;
 
 if (command === "new") {
   if (!feature || !/^[\w.-]+$/.test(feature)) fail(usage);
@@ -169,9 +169,12 @@ if (command === "new") {
   const wanted = [...projects];
   const meta = readMeta(feature);
   if (flags.has("--libraries")) {
+    // Only projects new to the workspace are linked libraries-only; members keep their globs.
+    const members = new Set(membersOf(feature));
     const libs = libraryProjects();
     wanted.push(...libs);
-    meta.librariesOnly = [...new Set([...(meta.librariesOnly ?? []), ...libs.filter((l) => !projects.includes(l))])];
+    const fresh = libs.filter((l) => !projects.includes(l) && !members.has(l));
+    meta.librariesOnly = [...new Set([...(meta.librariesOnly ?? []), ...fresh])];
   }
   for (const name of [...new Set(wanted)]) {
     if (name === SELF) continue;

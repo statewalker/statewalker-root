@@ -11,25 +11,10 @@
 //                                 projects missing from it, archived, renamed or deleted ones in it
 import { execFileSync } from "node:child_process";
 import fs from "node:fs";
-import { clonedRepos, git, ORG, REPOS_DIR, registry, repoDir } from "./lib/registry.mjs";
+import { checkoutState, clonedRepos, git, ORG, REPOS_DIR, registry, repoDir, SELF } from "./lib/registry.mjs";
 
 const command = process.argv[2] ?? "status";
-// This repository manages the others; it is not in its own registry.
-const SELF = "statewalker-root";
-
-function state(name) {
-  const dir = repoDir(name);
-  const branch = git(dir, "branch", "--show-current") || "(detached)";
-  const dirty = git(dir, "status", "--porcelain").split("\n").filter(Boolean).length;
-  let counts = "";
-  try {
-    const [ahead, behind] = git(dir, "rev-list", "--left-right", "--count", "HEAD...@{upstream}").split(/\s+/);
-    counts = `${ahead !== "0" ? ` ahead ${ahead}` : ""}${behind !== "0" ? ` behind ${behind}` : ""}`;
-  } catch {
-    counts = " (no upstream)";
-  }
-  return `${branch}${dirty ? `, ${dirty} uncommitted` : ""}${counts}`;
-}
+const state = (name) => checkoutState(repoDir(name)).text;
 
 const firstLine = (e) => String(e.stderr || e.message || e).trim().split("\n").pop();
 

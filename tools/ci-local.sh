@@ -1,6 +1,9 @@
 #!/bin/bash
 # ci-local.sh REPO_DIR : run the steps of statewalker/.github's ci.yml locally; prints the first failing step.
-D=$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)
+# The main checkout of statewalker-root (also when run from a worktree of it): repos/ lives there.
+H=$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)
+C=$(git -C "$H" rev-parse --path-format=absolute --git-common-dir 2>/dev/null)
+if [ "$(basename "$C")" = ".git" ]; then D=$(dirname "$C"); else D=$H; fi
 S=${SW_CI_SCRIPTS:-${SW_REPOS:-$D/repos}/.github/scripts}
 cd "$1" || exit 2
 step() { local name=$1; shift; if ! "$@" >/tmp/ci-local-$$.log 2>&1; then echo "FAIL $name"; tail -40 /tmp/ci-local-$$.log; rm -f /tmp/ci-local-$$.log; exit 1; fi; echo "ok   $name"; }
