@@ -24,6 +24,7 @@ through it too.
 | **medium** | improvement | Works, but costs later: an unhandled edge case, unclear naming, duplication, missing docs, a minor inaccuracy | Fixed when cheap; otherwise collected into **one follow-up issue** |
 | **low** | improvement | Polish: wording, style, small simplifications | Fixed when cheap; otherwise into the same follow-up issue, or dropped if cosmetic |
 
+What counts as critical, and the evidence it needs, is defined in [the review rubric](review-rubric.md).
 Critical and high are **bugs**; medium and low are **improvements**. When in doubt, the reviewer
 proposes the higher severity and the judge decides.
 
