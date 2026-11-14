@@ -15,14 +15,15 @@ the commits umbrella's `sw.mjs` pushes to `main` during `update`, `release` and 
 3. **Re-review on critical or high.** If the review reported any **critical** or **high** finding,
    go back to step 1 with a new reviewer, who reviews the whole change again, not just the fixes.
    If it reported only medium and low findings, go to step 4 once they are fixed.
-4. **Merge when checks are green.** All required checks pass on the latest commit, the branch is
-   rebased on the current base, and any review the path requires (below) is approved. Squash
-   merge. Where a repository has no CI yet, "green" means the repository's own check commands
-   (its README) pass locally, and the round's record says so.
+4. **Merge when checks are green.** Every check on the latest commit passes (all of them, not
+   only those a ruleset marks required), the branch is rebased on the current base, and any
+   human approval the path requires (below) is given. Squash merge. Where a repository has no CI
+   yet, "green" means the repository's own check commands (its README) pass locally, and the
+   round's record says so.
 
 **Stop after three rounds.** If the third review still reports critical or high findings, stop:
-comment on the ticket with the open findings, label it `ready-for-human`, and leave the pull
-request open.
+comment on the ticket with the open findings, label it `ready-for-human` (a Wayfinder ticket gets
+the alternative in `CLAUDE.md` instead), and leave the pull request open.
 
 ## Reviewer brief
 
@@ -62,4 +63,8 @@ reason). This is the record a human reads before approving.
 ## Human approval
 
 In this repository, the paths listed as "needs human review" in `sessions.md` also need a human
-approval before step 4. Project repositories follow their own branch protection.
+approval before step 4. Sessions act as the human's own GitHub account, so a GitHub approval
+cannot express it: **the human approves by merging the pull request themselves, or by telling a
+session in their own message to merge it.** A comment on GitHub does not count (sessions can write
+those). Until then the session leaves the pull request open after the loop and says so on the
+ticket. Project repositories follow their own branch protection.

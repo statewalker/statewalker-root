@@ -8,12 +8,15 @@ below. Code changes are committed in the project's own repository, never here.
 ## Start of every session
 
 1. Read the ticket you were given and **claim it** (assign it and comment the claim,
-   `docs/agents/issue-tracker.md`) before any other write. No ticket? Ask, or run `/ask-matt` to
-   route the request.
+   `docs/agents/issue-tracker.md`) before any other write. No ticket? Ask the human (they can type
+   `/ask-matt` to route the request).
 2. Read `docs/process/README.md` for the workflow that fits the ticket, and
    `docs/process/sessions.md` for how this session works and contributes to this repository.
 3. Get the projects the ticket touches, from `repos.json`:
-   - **cloud**: clone into `repos/<name>` (gitignored) and work there;
+   - **cloud**: work in the checkouts of the projects selected for the session (the harness clones
+     them beside this repository, on the session branch); clone unselected public projects into
+     `repos/<name>` (gitignored) for reading only, since pushes and API calls need the project
+     selected or attached;
    - **local**: work in worktrees under `ws/<feature>/`; `repos/` holds clean clones that are
      never edited (`docs/process/sessions.md`).
 
@@ -31,7 +34,7 @@ project's docs say (umbrella's still name `statewalker/umbrella`), and the overr
 All under `github.com/statewalker/<name>`. Layers are computed from published `@statewalker/*`
 dependencies; a project's published packages depend only on lower layers, so changes land and
 release bottom-up. Private packages may reach sideways: cellb.dev's depend on
-statewalker-knowledge, so cellb.dev comes after it. Inventory, apps and known problems:
+statewalker-knowledge and webrun-vcs, so cellb.dev comes after them. Inventory, apps and known problems:
 `docs/projects.md`.
 
 | Layer | Project | What it holds |
@@ -70,7 +73,8 @@ Archived, do not change: `statewalker-content`, `statewalker-ai-legacy`. Private
 - **Releases only through umbrella's `tools/sw.mjs`** (`release` / `cascade`), run locally by a
   human logged in to npm (`docs/process/README.md` §4). Never `npm publish` or `pnpm publish` by
   hand, and never from a cloud session.
-- **Lower layers first.** A change spanning layers merges and releases bottom-up.
+- **Lower layers first.** A change spanning layers merges and releases bottom-up, with a human
+  release between layers (`docs/process/README.md` §3).
 - **Code goes to the project's repository** as a pull request, one per repository, linked from
   the ticket. Knowledge goes here, as a pull request (`docs/process/sessions.md`).
 - **Before merging any pull request**, run the review loop in `docs/process/merging.md`: review
@@ -99,6 +103,16 @@ The five default labels (`needs-triage`, `needs-info`, `ready-for-agent`, `ready
 Single-context here: `GLOSSARY.md` and `docs/adr/` at the root hold ecosystem-wide terms and
 decisions; each project keeps its own. See `docs/agents/domain.md`.
 
+### Skills only a human can start
+
+`ask-matt`, `grill-me`, `grill-with-docs`, `handoff`, `implement`, `implement-spec`,
+`improve-codebase-architecture`, `retro`, `setup-matt-pocock-skills`, `to-questionnaire`, `to-spec`,
+`to-tickets`, `triage`, `wait-what` and `wayfinder` are marked `disable-model-invocation`: the human
+types them (`/wayfinder statewalker-root#4`). In a session started with only a ticket, when the
+ticket's route needs one of them, read `.claude/skills/<name>/SKILL.md` and follow it, and say so in
+the claim comment; for a human-in-the-loop skill (grilling, prototype review), ask the human to
+type the command instead.
+
 ### Overrides of the vendored skills
 
 - **ADR file names are `docs/adr/YYYY-MM-DD-<slug>.md`**, not sequential numbers: this overrides
@@ -107,6 +121,14 @@ decisions; each project keeps its own. See `docs/agents/domain.md`.
 - **Wayfinder tickets may carry `repo:<name>` labels** besides their `wayfinder:` label, to say
   which projects a decision concerns; this overrides `wayfinder`'s "only `wayfinder:` labels".
   Triage labels stay off Wayfinder tickets.
+- **Wayfinder research lands as `docs/research/<slug>.md`** in the session's root pull request,
+  not on a throwaway `research/*` branch. The charting session may resolve its own research
+  tickets (through subagents), the one exception to one ticket per session.
+- **Wayfinder tickets never take triage labels.** Where this repository's docs say to label a
+  ticket `ready-for-human`, a Wayfinder ticket instead gets a comment addressed to the human and
+  is released (`Released: needs human`, assignee removed).
+- **Triage's `.out-of-scope/<concept>.md` files** live at this repository's root
+  (`.out-of-scope/`) and need human review to merge.
 - **A handoff is a comment on the ticket**, not the `/handoff` skill's file: that file lands in
   `$TMPDIR`, which a cloud container loses.
 - **Reviews follow `docs/process/merging.md`**, which overrides `/code-review`'s "do not rerank"

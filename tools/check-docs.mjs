@@ -25,10 +25,19 @@ function markdownFiles(dir) {
 }
 
 for (const file of markdownFiles(ROOT)) {
-  const text = fs.readFileSync(file, "utf8").replace(/```[\s\S]*?```/g, "");
-  for (const [, target] of text.matchAll(/\]\(([^)\s]+)\)/g)) {
-    if (/^[a-z]+:/i.test(target) || target.startsWith("#")) continue;
-    const resolved = path.resolve(path.dirname(file), decodeURIComponent(target.split("#")[0]));
+  const text = fs
+    .readFileSync(file, "utf8")
+    .replace(/^(```|~~~)[\s\S]*?^\1/gm, "") // fenced blocks
+    .replace(/`[^`\n]*`/g, ""); // inline code
+  const targets = [
+    ...[...text.matchAll(/\]\((\S+?)(?:\s+"[^"]*")?\)/g)].map((m) => m[1]), // [a](t) and [a](t "title")
+    ...[...text.matchAll(/^\s*\[[^\]]+\]:\s*(\S+)/gm)].map((m) => m[1]), // [a]: t
+  ];
+  for (const raw of targets) {
+    const target = raw.replace(/^<|>$/g, "");
+    if (/^[a-z][a-z0-9+.-]*:/i.test(target) || target.startsWith("#")) continue;
+    const rel = decodeURIComponent(target.split("#")[0]);
+    const resolved = rel.startsWith("/") ? path.join(ROOT, rel) : path.resolve(path.dirname(file), rel);
     if (!fs.existsSync(resolved)) problems.push(`${path.relative(ROOT, file)}: broken link ${target}`);
   }
 }

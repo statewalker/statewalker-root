@@ -8,13 +8,14 @@ Regenerate the numbers when they drift; the layer order is the part that matters
 
 Computed from the `dependencies` and `peerDependencies` of published packages. Private packages
 can reach sideways: cellb.dev's `packages/notebooks` and `apps/sandbox` depend on
-statewalker-knowledge, so umbrella's release order puts cellb.dev after it.
+statewalker-knowledge, and `apps/sandbox` also on webrun-vcs, so umbrella's release order puts
+cellb.dev after both.
 
 ```
 L0  statewalker-shared · statewalker-fsm · statewalker-db · webrun-wire
 L1  webrun-files (→db) · statewalker-search (→db)
 L2  webrun-sites · webrun-sync · httpeers             (→files, wire)
-L3  webrun-vcs (→sync) · statewalker-knowledge · cellb.dev (its private packages →knowledge)
+L3  webrun-vcs (→sync) · statewalker-knowledge · cellb.dev (its private packages →knowledge, vcs)
 L4  statewalker-kernel (→shared, files, sites, vcs)
 L5  statewalker-ai (→kernel, fsm)
 L6  statewalker-shell-react (→ai, kernel)
@@ -43,7 +44,7 @@ L7  sandclaw (→shell-react, search, kernel)
 | statewalker-shell-react | 15 | 0 | |
 | sandclaw | 4 | 10 | apps: chat-mini, peershare, wiki-viewer, ui-protos; `app-shell`; chat libraries under `apps/` |
 | statewalker-sandbox | 0 | 25 | 18 apps and prototype ladders, 7 packages (`docs/refactoring/`) |
-| statewalker-shell-theia | 0 | 26 | `@theia-shell/*`: app, extensions, prototypes p1–p7 |
+| statewalker-shell-theia | 0 | 28 | `@theia-shell/*`: app, extensions, prototypes p1, p3–p7; plus two unscoped VS Code plugin fixtures under p6 |
 | statewalker-sites | 0 | 5 | site, site-fsm, site-webrun, site-dots, blog |
 | webrun-devtools | 1 | 0 | the extension itself is the published package `@statewalker/webrun-devtools` |
 

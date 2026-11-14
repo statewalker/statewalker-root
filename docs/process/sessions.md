@@ -17,6 +17,7 @@ are placed where concurrent edits do not collide:
 | Code | Pull requests in the project repositories | Never in this repository |
 | ADRs | `docs/adr/YYYY-MM-DD-<slug>.md`, one file each | New files never conflict |
 | Research | `docs/research/<slug>.md`, one file each | New files never conflict |
+| Out-of-scope records (`/triage`) | `.out-of-scope/<concept>.md`, one file each | New files never conflict |
 | Glossary, `CLAUDE.md`, process docs, skills, tools | Edited in this repository's PR | Shared files: keep the edit small, rebase just before merging |
 | Indexes (`docs/adr/README.md`) | One line per entry, appended | Rebase resolves appends trivially |
 
@@ -27,10 +28,10 @@ issues are for, and it is what would make every pull request conflict.
 
 Every session contributes through **its own pull request**, never by pushing to `main`:
 
-- Branch: the session branch (cloud) or `<ticket-number>-<slug>` (local).
+- Branch: the session branch (cloud, named by the harness) or `<ticket-number>-<slug>` (local).
 - Title: `root: <ticket title>`; body links the ticket (`Part of #<n>`) and the project PRs.
-- **Merge it when the session ends**, even if the project PRs are still in review. Short-lived
-  pull requests are what keep conflicts rare.
+- **Merge it when the session ends** if it is in the first category below, even if the project
+  PRs are still in review. Short-lived pull requests are what keep conflicts rare.
 - Before merging: the review loop in `merging.md`. Rebase onto `main`; resolve conflicts
   yourself. Squash merge.
 
@@ -41,7 +42,10 @@ Two merge categories:
 - **Needs human review**: everything else, including edits to existing glossary entries,
   `docs/projects.md`, `docs/refactoring/**`, `README.md`, `skills-lock.json`, `CLAUDE.md`,
   `AGENTS.md`, `.claude/**`, `docs/process/**`, `docs/agents/**`, `tools/**`, `.github/**` and
-  `repos.json`. When unsure, it needs review.
+  `repos.json`, and `.out-of-scope/`. When unsure, it needs review. Sessions act as the human's
+  own GitHub account, so GitHub approvals cannot express this: the session takes the pull request
+  through the review loop, leaves it open, and **the human approves by merging it, or by telling a
+  session in their own message to merge it** (`merging.md`).
 
 A session with nothing to contribute here opens no pull request; its trace is the ticket.
 
@@ -50,14 +54,17 @@ A session with nothing to contribute here opens no pull request; its trace is th
 ### Cloud (claude.ai/code)
 
 1. New session → select **`statewalker/statewalker-root`**, plus every project the session will
-   push to, plus the private projects it must read (umbrella, statewalker-sites). Public projects
-   can be cloned read-only without selecting them; a running session can attach more.
+   change or open pull requests in, plus the private projects it must read (umbrella,
+   statewalker-sites). Unselected public projects can be cloned with git for reading, but API
+   and pull-request calls on them are refused until the project is attached; a running session
+   can attach more.
 2. Prompt with the ticket, for example:
    - `Work on statewalker-root#12.`
    - `/wayfinder statewalker-root#4` (work the next frontier ticket of a map)
    - `/grill-with-docs` for a new idea, then `/to-spec`.
-3. The session follows `CLAUDE.md`: claims the ticket, clones what it needs into `repos/` and
-   works there.
+3. The session follows `CLAUDE.md`: claims the ticket, works in the harness's checkouts of the
+   selected projects (on the session branch), and clones unselected public projects into
+   `repos/` only to read them.
 
 Each cloud session has its own container, so cloud sessions never share files: run as many in
 parallel as there are unblocked, unclaimed tickets.
@@ -86,12 +93,20 @@ git -C repos/webrun-files worktree add ../../ws/$F/webrun-files -b $F
 cd ws/$F/statewalker-root && claude --add-dir ..   # then: "Work on statewalker-root#42."
 ```
 
-**Linking the projects** so changes build and test together: in `ws/<feature>/` write a
-`pnpm-workspace.yaml` listing each project's own package globs (copy them from each project's
-`pnpm-workspace.yaml`, prefixed with the folder name, e.g. `webrun-files/packages/*`) with
-`linkWorkspacePackages: true`, then `pnpm install` there. `@statewalker/*` ranges then resolve to
-the worktrees, so unpublished versions work across projects. A `tools/ws.mjs` that does all of
-this (create, list, sync, remove) is planned (`docs/refactoring/README.md`, step 1.5).
+**Linking the projects** so changes build and test together, in the folder that holds the project
+checkouts (`ws/<feature>/` locally): write a `pnpm-workspace.yaml` with
+
+- `packages:` each project's own package globs, prefixed with its folder name (copy them from the
+  project's `pnpm-workspace.yaml`, e.g. `webrun-files/packages/*`);
+- `catalog:` and `catalogs:` merged from every project's `pnpm-workspace.yaml` (projects declare
+  dependencies as `catalog:`, so install fails without them); where two projects give different
+  ranges, take the one with the highest minimum version;
+- `linkWorkspacePackages: true`;
+
+then `pnpm install` there. A `@statewalker/*` dependency resolves to the checkout only when the
+checkout's version satisfies the range: after bumping a lower project's version, widen the upper
+project's range too. umbrella's `tools/workspace.mjs` implements this merge for its own clones;
+`tools/ws.mjs` (`docs/refactoring/README.md`, step 1.5) will do it here.
 
 Worktrees hold only tracked files: copy `.env` files in, and give each workspace its own
 dev-server ports.

@@ -1,7 +1,9 @@
 # Development process
 
 How work moves from an idea to released packages. The skills named here live in
-`.claude/skills/`; `/ask-matt` routes when unsure which one fits.
+`.claude/skills/`; `/ask-matt` routes when unsure which one fits. Most of them are started by the
+human typing the command; a session started with only a ticket reads the skill's `SKILL.md` and
+follows it (`CLAUDE.md`, "Skills only a human can start").
 
 ## 1. Pick the route by size
 
@@ -38,16 +40,29 @@ Rules that make parallel sessions work:
   tickets, or order them with a blocking edge.
 - **Large refactors and renames go first,** before parallel work branches off them.
 - **The session that wrote a change merges it** and resolves its conflicts: it knows the intent.
+  Pull requests that need human review are merged by the human (`merging.md`).
 
 ## 3. Changes across projects
 
-1. One branch name across projects: `<ticket-number>-<slug>`.
-2. Build and test the projects together before releasing, with one `pnpm-workspace.yaml` that
-   lists every project's package globs and sets `linkWorkspacePackages: true`
-   (`sessions.md`, "Linking the projects"): locally in `ws/<feature>/`, in the cloud in `repos/`.
-3. One pull request per project, each linking the ticket; the ticket lists them.
-4. Take each pull request through the review loop (`merging.md`), then merge **lowest layer
-   first**, release (below), and update the next layer's branch.
+1. **Branches**: locally, one branch name across this repository and every project:
+   `<ticket-number>-<slug>`. In the cloud, the harness names the session branch and uses it in
+   every repository selected for the session; use it as given.
+2. **Build and test together** before anything is released, in one pnpm workspace over all the
+   projects (`sessions.md`, "Linking the projects"): locally in `ws/<feature>/`, in the cloud over
+   the session's checkouts.
+3. **One pull request per project**, each linking the ticket; the ticket lists them.
+4. **Land bottom-up, with a release between layers.** Each project resolves `@statewalker/*` from
+   npm through its catalog, so an upper project can only go green against a released lower one:
+   1. Take the lowest project's pull request through the review loop (`merging.md`) and merge it.
+   2. Comment on the ticket asking the human to run `node tools/sw.mjs release <lower-project>`
+      (release, **not** cascade: a cascade would release the dependents from `main`, without the
+      open pull requests), and mark the ticket for the human (`ready-for-human`, or the Wayfinder
+      alternative in `CLAUDE.md`). Stop there.
+   3. After the release, a session raises the upper project's catalog range to the new version,
+      gets its checks green, takes it through the review loop and merges it.
+   4. Repeat per layer. After the topmost changed project merges, the human runs
+      `node tools/sw.mjs cascade <topmost-changed-project>` to release it and catch up the
+      projects above.
 
 ## 4. Release
 
@@ -55,7 +70,7 @@ Only through umbrella's `tools/sw.mjs`, one release at a time (one publisher is 
 version races, no npm credential in CI). **Run locally by a human**: `release` needs `npm whoami`
 with publish rights on `@statewalker`, and npm asks for a 2FA one-time password while publishing,
 so cloud sessions cannot release. A session's job ends at merged pull requests and a ticket
-comment naming the project to cascade from.
+comment naming what to release next (§3).
 
 `sw.mjs` works on umbrella's own clones (`umbrella/repos/`, from umbrella's `repos.json`), not on
 this repository's `repos/`:
@@ -63,8 +78,8 @@ this repository's `repos/`:
 ```sh
 git clone git@github.com:statewalker/umbrella.git && cd umbrella   # private
 node tools/repos.mjs clone          # once; later: node tools/repos.mjs pull
-node tools/sw.mjs cascade <lowest-changed-project> --dry-run
-node tools/sw.mjs cascade <lowest-changed-project>
+node tools/sw.mjs release <project> --dry-run    # one project
+node tools/sw.mjs cascade <project> --dry-run    # a project and every dependent, in order
 ```
 
 `release` publishes under the npm tag `next`, installs and imports every entry back from npm, then

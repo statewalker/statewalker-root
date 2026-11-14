@@ -1,9 +1,17 @@
 # Refactoring plan
 
-The step-by-step reorganization of the managed projects. This file is the readable overview; the
-**work is to be tracked as a Wayfinder map issue** ("Reorganize the statewalker projects"), created
-by the first session that works this plan (`/wayfinder`), with one ticket per step below. When a ticket resolves a decision differently from this plan, the
-ticket wins: record the decision in an ADR and update this file in the same pull request.
+The step-by-step reorganization of the managed projects. This file is the readable overview. The
+work is to be tracked in issues, created by the first session that works this plan:
+
+- **Phase 0** is a Wayfinder map ("Reorganize the statewalker projects", `/wayfinder`): its five
+  decisions are `wayfinder:grilling` tickets, worked with the human. Wayfinder plans; it does not
+  execute.
+- **Phases 1–5** are implementation tickets (`/to-tickets` from this file, labelled
+  `ready-for-agent` and `repo:<name>`), one per row below, with blocking edges where a row says
+  "blocked by". Phases 2–5 are ticketed once the decisions they depend on are made.
+
+When a ticket resolves a decision differently from this plan, the ticket wins: record the decision
+in an ADR and update this file in the same pull request.
 
 Problems referenced as P1–P10 are listed in `docs/projects.md`.
 
@@ -104,7 +112,7 @@ If decided in-repo: `statewalker-sites/packages/site-fsm` → `statewalker-fsm/s
 | sandclaw | 1.7; 2 (receives fm-protos); 3 (all) |
 | statewalker-sandbox | 2 (dissolved; archived or labs) |
 | statewalker-shell-theia | 1.7; no other change (already app + protos) |
-| statewalker-sites | 5 (if decided) |
+| statewalker-sites | 1.7; 5 (if decided) |
 | webrun-devtools | 1.7; no other change |
 | umbrella | 1.1, 1.2, 1.4, 1.4b |
 | .github | 1.3 |

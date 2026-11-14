@@ -17,7 +17,7 @@ showing one library feature. **Proto**: a throwaway prototype that may break.
 
 **Layer**: a project's position in the dependency order of its published packages (L0 = depends on
 no other project). Published packages depend only on lower layers; changes merge and release
-bottom-up. Private packages may reach sideways (cellb.dev → statewalker-knowledge).
+bottom-up. Private packages may reach sideways (cellb.dev → statewalker-knowledge, webrun-vcs).
 
 **Session**: one agent conversation working one ticket, on its own branch in its own checkout of
 this repository: its container in the cloud, its workspace's worktree locally.

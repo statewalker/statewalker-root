@@ -16,8 +16,9 @@ into a project repository and never into `mattpocock/skills`.
 | Local | `gh issue …`, `gh pr …`, `gh api …` | — |
 | Cloud (Claude Code on the web) | `gh api` (REST), the GitHub MCP tools | `gh issue …` / `gh pr …` (they use GraphQL, which cloud sessions block) |
 
-In cloud sessions use the MCP tools for issue reads and writes (load them with ToolSearch,
-`+github issue`), and `gh api` (REST) for what they lack, such as blocking edges:
+In cloud sessions use the MCP tools (load them with ToolSearch, `+github issue`, `+github pull`),
+and `gh api` (REST) for what they lack, such as blocking edges and labels. Both only reach
+repositories selected for the session or attached to it; others answer 403.
 
 | Operation | MCP tool |
 |---|---|
@@ -26,6 +27,11 @@ In cloud sessions use the MCP tools for issue reads and writes (load them with T
 | List issues | `mcp__github__list_issues` |
 | Comment | `mcp__github__add_issue_comment` |
 | Add / remove a sub-issue | `mcp__github__sub_issue_write` |
+| Open a pull request | `mcp__github__create_pull_request` |
+| Read a pull request, its diff, check runs, reviews | `mcp__github__pull_request_read` (`get`, `get_diff`, `get_check_runs`, …) |
+| Comment on a pull request (the review record) | `mcp__github__add_issue_comment` with the PR number |
+| Update a branch from its base | `mcp__github__update_pull_request_branch` |
+| Squash-merge | `mcp__github__merge_pull_request` (`merge_method: squash`) |
 
 ## Conventions (local `gh`; REST equivalents work everywhere)
 
@@ -34,8 +40,9 @@ In cloud sessions use the MCP tools for issue reads and writes (load them with T
 - **Read**: `gh issue view <n> -R statewalker/statewalker-root --json number,title,body,labels,comments`.
 - **List**: `gh issue list -R statewalker/statewalker-root --state open --json number,title,labels`
   with `--label` / `--state` filters.
-- **Sub-issue**: `gh issue create -R statewalker/statewalker-root --parent <parent> ...`, or
-  `gh api --method POST repos/statewalker/statewalker-root/issues/<parent>/sub_issues -F sub_issue_id=<child-db-id>`.
+- **Sub-issue**: `gh api --method POST repos/statewalker/statewalker-root/issues/<parent>/sub_issues -F sub_issue_id=<child-db-id>`
+  (works with every `gh` version), or `gh issue create -R statewalker/statewalker-root --parent <parent> ...`
+  (`gh` 2.94+).
   Without sub-issues, put `Part of #<parent>` at the top of the child body.
 - **Blocking**: GitHub's native issue dependencies, the canonical, UI-visible representation:
   `gh api --method POST repos/statewalker/statewalker-root/issues/<child>/dependencies/blocked_by -F issue_id=<blocker-db-id>`,
@@ -100,4 +107,7 @@ Used by `/wayfinder`. The **map** is a single issue with **child** issues as tic
 - `area:root` for work on this repository itself; `repo:<name>` for each project a ticket's code
   or decision concerns.
 
-A label the repository lacks is created on first use.
+The triage, Wayfinder and `area:root` labels exist. Before applying a label the repository lacks
+(a new `repo:<name>`), create it:
+`gh api --method POST repos/statewalker/statewalker-root/labels -f name=repo:<name> -f color=ededed`
+(a 422 "already_exists" answer is fine). `--add-label` fails on a missing label.
