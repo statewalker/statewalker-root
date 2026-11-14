@@ -5,10 +5,12 @@ this repository alike. The gate is short and blocks only **critical findings**
 ([the review rubric](review-rubric.md)); bugs that a follow-up can repair are fixed when cheap or
 filed, and improvements are left to the health review. The session that opened the pull request
 drives the gate **automatically, without waiting for the human**, and merges as soon as its
-conditions hold. There are no exemptions: docs-only pull requests, dependency updates and the
-"version packages" pull requests that publish (`README.md` §4) pass it too; the lockfile-only
-pull requests that follow a publish pass it in its mechanical form ("Lockfile-only pull
-requests", below). Decided in
+conditions hold. There is **one named exception**: the lockfile-only pull requests that follow a
+publish merge through a mechanical gate, without a reviewer pass ("Lockfile-only pull requests",
+below; the human's decision, recorded on
+[#15](https://github.com/statewalker/statewalker-root/issues/15)). Otherwise there are no
+exemptions: docs-only pull requests, other dependency updates and the "version packages" pull
+requests that publish (`README.md` §4) pass it too. Decided in
 [two-tier-review](../adr/2026-11-14-two-tier-review.md).
 
 ## Roles
