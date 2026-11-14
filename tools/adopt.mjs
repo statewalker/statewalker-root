@@ -1,7 +1,7 @@
 #!/usr/bin/env node
 // adopt.mjs REPO_DIR : bring a repository to the current conventions. Idempotent; prints what changed.
 //
-//   .github/workflows/ci.yml   the shared CI (statewalker/.github), created when missing. Publishing
+//   .github/workflows/ci.yml   the shared CI (statewalker/statewalker-ci), created when missing. Publishing
 //                              jobs are left alone: CI publishing is the release path
 //                              (docs/process/README.md §4); a `release.yml` outside ci.yml is reported
 //   renovate.json              removed (Dependabot replaces it)
@@ -55,7 +55,7 @@ on:
 
 jobs:
   ci:
-    uses: statewalker/.github/.github/workflows/ci.yml@main
+    uses: statewalker/statewalker-ci/.github/workflows/ci.yml@main
 `,
   );
 }

@@ -5,7 +5,7 @@
 //   repos.json  { "<name>": "<git url>" }: every managed project (the source of truth)
 //   REPOS_DIR   the clones, one folder per project: <ROOT>/repos (SW_REPOS overrides)
 //   WS_DIR      the per-feature workspaces: <ROOT>/ws (docs/process/sessions.md)
-//   CI_SCRIPTS  the shared CI scripts, from the clone of statewalker/.github (SW_CI_SCRIPTS overrides)
+//   CI_SCRIPTS  the shared CI scripts, from the clone of statewalker/statewalker-ci (SW_CI_SCRIPTS overrides)
 import { execFileSync } from "node:child_process";
 import fs from "node:fs";
 import path from "node:path";
@@ -38,7 +38,7 @@ export function registry() {
 
 export const repoDir = (name) => path.join(REPOS_DIR, name);
 
-export const CI_SCRIPTS = path.resolve(process.env.SW_CI_SCRIPTS ?? path.join(repoDir(".github"), "scripts"));
+export const CI_SCRIPTS = path.resolve(process.env.SW_CI_SCRIPTS ?? path.join(repoDir("statewalker-ci"), "scripts"));
 
 /** Registry projects that are cloned. */
 export const clonedRepos = () => Object.keys(registry()).filter((n) => fs.existsSync(path.join(repoDir(n), ".git")));
@@ -73,7 +73,7 @@ export function checkoutState(dir) {
 /**
  * The catalogs of a pnpm-workspace.yaml: { "": {default catalog}, <name>: {...} }.
  * A small reader for the flat maps pnpm uses (`catalog:` and `catalogs: <name>:`), not general YAML.
- * (Same reader as statewalker/.github's scripts/lib/workspace.mjs.)
+ * (Same reader as statewalker/statewalker-ci's scripts/lib/workspace.mjs.)
  */
 export function readCatalogs(dir) {
   const file = path.join(dir, "pnpm-workspace.yaml");

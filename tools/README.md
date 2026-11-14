@@ -14,7 +14,7 @@ serves. Nothing here publishes: releases happen only in CI (`docs/process/README
 | `fix-repo-metadata.mjs <dir> <repo>` | Point every manifest's `repository` / `homepage` / `bugs` at the repository it lives in |
 | `rename-package.mjs <repo> OLD=NEW…` | Rename `@statewalker` packages inside one project, references included |
 | `rename-dirs.mjs <dir> <parent> OLD=NEW…` | Move package folders and rewrite the paths that point at them |
-| `ci-local.sh <dir>` | The shared CI steps (`statewalker/.github`), run locally; prints the first failing step |
+| `ci-local.sh <dir>` | The shared CI steps (`statewalker/statewalker-ci`), run locally; prints the first failing step |
 | `npmverify.sh <registry> <dir> <pkgdir>…` | Install the given packages from npm into an empty folder and import every exported entry |
 | `review-metrics.mjs [--repos a,b] [--json] [--create]` | The five review signals and four thresholds over the last four weeks; files the threshold tickets with `--create` (`docs/process/review-metrics.md`) |
 | `health-dispatch.mjs [--repos a,b] [--json] [--md <file>] [--create]` | The week's health-review plan: unfinished runs to resume, record tickets to create (five at most), deferred bugs to escalate (`docs/process/health-review.md`) |
@@ -22,7 +22,7 @@ serves. Nothing here publishes: releases happen only in CI (`docs/process/README
 
 They work on the clones in `repos/` (gitignored; `SW_REPOS` overrides). Those clones are for reading
 and as worktree sources: never edit them, work in a workspace. `packages.mjs status --deep` and
-`ci-local.sh` also need `repos/.github` (`SW_CI_SCRIPTS` overrides its `scripts/` folder).
+`ci-local.sh` also need `repos/statewalker-ci` (`SW_CI_SCRIPTS` overrides its `scripts/` folder).
 
 ```sh
 node tools/repos.mjs clone          # once; later: node tools/repos.mjs pull
