@@ -10,8 +10,14 @@ and [What do we measure?](https://github.com/statewalker/statewalker-root/issues
 ## Schedule and control
 
 - **Scheduled task** "Weekly review health", on the human's claude.ai account: **every Monday at
-  04:57 UTC** (`57 4 * * 1`). Each firing starts a fresh cloud session in the account's default
-  environment, which follows the steps below.
+  04:57 UTC** (`57 4 * * 1`). Each firing wakes one long-lived **host session**, "Weekly review
+  health (routine host)", started with `statewalker/statewalker-root` as its source, which pulls
+  root's `main` and follows the steps below.
+- Why a host session: a session that a scheduled task starts from nothing has no repository and no
+  `add_repo` tool, so every GitHub call fails (the first run did). A session started with a source
+  repository has `add_repo` and `create_session`. If the host session is ever archived, start a new
+  one with root as its source, and point the scheduled task at it (recreate the task with that
+  session as its target).
 - **Pause** it in claude.ai's scheduled tasks (Claude Code, scheduled tasks: disable "Weekly review
   health"), or ask a session to disable it (`update_trigger` with `enabled: false`). Enable it the
   same way. **Run it now** with "Run now" there, or `fire_trigger`.
