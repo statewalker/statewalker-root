@@ -83,7 +83,7 @@ words:
 |---|---|---|
 | `Claimed by <session URL or branch>` | the session taking it | taken |
 | `Released: <why>` | a session stopping without finishing | free |
-| `Waiting on human: <what is needed>` | a session that needs the human (a release, a decision, the review loop stopped on a critical finding) | **not available** to sessions |
+| `Waiting on human: <what is needed>` | a session that needs the human (a decision, a package's first publish, approving a publish, the review loop stopped on a critical finding) | **not available** to sessions |
 | `Resumed: <what changed>` | **the human only**, once the wait is over | free |
 
 1. Read the ticket's comments. The latest status comment decides: available only if there is

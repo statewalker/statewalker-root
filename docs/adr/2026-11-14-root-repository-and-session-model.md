@@ -1,6 +1,7 @@
 # Root repository and session model
 
-**Status**: accepted, 2026-11-14
+**Status**: accepted, 2026-11-14. The release clause of decision 5 and the last consequence are
+superseded by [ci-publishing-and-umbrella-retired](2026-11-14-ci-publishing-and-umbrella-retired.md).
 
 ## Context
 

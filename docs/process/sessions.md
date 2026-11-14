@@ -46,8 +46,8 @@ A session with nothing to contribute here opens no pull request; its trace is th
 ### Cloud (claude.ai/code)
 
 1. New session → select **`statewalker/statewalker-root`**, plus every project the session will
-   change or open pull requests in, plus the private projects it must read (umbrella,
-   statewalker-sites). Unselected public projects can be cloned with git for reading, but API
+   change or open pull requests in, plus the private project if it must read it
+   (statewalker-sites). Unselected public projects can be cloned with git for reading, but API
    and pull-request calls on them are refused until the project is attached; a running session
    can attach more.
 2. Prompt with the ticket, for example:
@@ -78,15 +78,23 @@ statewalker-root/                 main clone of this repository: stays on main
 
 ```sh
 git clone git@github.com:statewalker/statewalker-root.git && cd statewalker-root
-F=42-sqlite-cache
-git worktree add ws/$F/statewalker-root -b $F
-git clone git@github.com:statewalker/webrun-files.git repos/webrun-files   # once per project
-git -C repos/webrun-files worktree add ../../ws/$F/webrun-files -b $F
-cd ws/$F/statewalker-root && claude --add-dir ..   # then: "Work on statewalker-root#42."
+node tools/repos.mjs clone                         # once: every project into repos/; later: pull
+node tools/ws.mjs new 42-sqlite-cache webrun-files webrun-sites
+cd ws/42-sqlite-cache && pnpm install
+cd statewalker-root && claude --add-dir ..         # then: "Work on statewalker-root#42."
 ```
 
+`tools/ws.mjs` (`tools/README.md`) creates the worktrees on the branch (the existing one, local or
+remote, else a new one from `origin/main`) and writes the workspace's `pnpm-workspace.yaml`
+(below). `new` again adds projects to a workspace; `list` shows every workspace's branches and
+state; `sync` rewrites the `pnpm-workspace.yaml` after a project changed its globs or catalogs;
+`rm` removes the worktrees once nothing is left uncommitted or unpushed. The tools find `repos/`
+and `ws/` in the main checkout, so they work the same when run from the workspace's
+`statewalker-root/` worktree.
+
 **Linking the projects** so changes build and test together, in the folder that holds the project
-checkouts (`ws/<feature>/` locally): write a `pnpm-workspace.yaml` with
+checkouts (`ws/<feature>/` locally, where `tools/ws.mjs` writes it; by hand in the cloud), a
+`pnpm-workspace.yaml` with
 
 - `packages:` each project's own package globs, prefixed with its folder name (copy them from the
   project's `pnpm-workspace.yaml`, e.g. `webrun-files/packages/*`);
@@ -97,8 +105,7 @@ checkouts (`ws/<feature>/` locally): write a `pnpm-workspace.yaml` with
 
 then `pnpm install` there. A `@statewalker/*` dependency resolves to the checkout only when the
 checkout's version satisfies the range: after bumping a lower project's version, widen the upper
-project's range too. umbrella's `tools/workspace.mjs` implements this merge for its own clones;
-`tools/ws.mjs` (`docs/refactoring/README.md`, step 1.5) will do it here.
+project's range too. Otherwise pnpm installs the published version without saying so.
 
 Worktrees hold only tracked files: copy `.env` files in, and give each workspace its own
 dev-server ports.
@@ -115,4 +122,4 @@ dev-server ports.
 3. New work discovered → new tickets (with blocking edges), not notes in files.
 4. This repository's PR rebased, through the review loop, and merged automatically (or left open
    with `Waiting on human` if the loop stopped on a critical finding).
-5. Locally: `git worktree remove` the workspace's worktrees once their branches are merged.
+5. Locally: `node tools/ws.mjs rm <feature>` once the workspace's branches are merged.

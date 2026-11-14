@@ -3,8 +3,8 @@
 Every pull request goes through this loop before it merges, in the project repositories and in
 this repository alike. The session that opened the pull request drives it **automatically, without
 waiting for the human between rounds**, until the change is clean or the round limit is reached.
-The only exception is the commits umbrella's `sw.mjs` pushes to `main` during `update`, `release`
-and `cascade`.
+There are no exceptions: the "version packages" pull requests that publish (`README.md` §4) go
+through it too.
 
 ## Roles
 
