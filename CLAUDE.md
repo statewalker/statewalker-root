@@ -90,8 +90,9 @@ unpublished, what is behind npm, dependency order).
   project's version pull request merges and publishes before the upper project moves to the new
   version (`docs/process/README.md` §3).
 - **Code goes to the project's repository** as a pull request, one per repository, linked from
-  the ticket; project pull requests reference it in full, `statewalker/statewalker-root#<n>` (a
-  bare `#<n>` there points at the project's own issues). Knowledge goes here, as a pull request (`docs/process/sessions.md`).
+  the ticket; project pull requests reference a root ticket in full,
+  `statewalker/statewalker-root#<n>` (a bare `#<n>` there points at the project's own issues), and
+  a ticket in the same project as `#<n>`. Knowledge goes here, as a pull request (`docs/process/sessions.md`).
 - **Before merging any pull request**, pass the merge gate in `docs/process/merging.md`,
   automatically: once CI is green, one separate reviewer agent reports only critical findings
   (the classes and evidence bar of `docs/process/review-rubric.md`) and high findings in the

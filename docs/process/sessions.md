@@ -113,7 +113,8 @@ dev-server ports.
 
 ## End a session
 
-1. Project PRs opened, each referencing `statewalker/statewalker-root#<n>`, and taken through the merge gate in
+1. Project PRs opened, each referencing the ticket (`#<n>` for a ticket in the same project,
+   `statewalker/statewalker-root#<n>` for one in root), and taken through the merge gate in
    `merging.md` before merging (lowest layer first).
 2. **Handoff comment** on the ticket (not the `/handoff` skill's file): what was done, links to
    every follow-up issue the merge gate filed or reused, links to
