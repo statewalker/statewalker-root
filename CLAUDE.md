@@ -80,9 +80,11 @@ Archived, do not change: `statewalker-content`, `statewalker-ai-legacy`. Private
 - **Code goes to the project's repository** as a pull request, one per repository, linked from
   the ticket; project pull requests reference it in full, `statewalker/statewalker-root#<n>` (a
   bare `#<n>` there points at the project's own issues). Knowledge goes here, as a pull request (`docs/process/sessions.md`).
-- **Before merging any pull request**, run the review loop in `docs/process/merging.md`: review
-  by a separate agent with findings graded critical / high / medium / low, fix them all, review
-  again while critical or high remain, merge only when checks are green. The only exception is
+- **Before merging any pull request**, run the review loop in `docs/process/merging.md`,
+  automatically, up to three rounds: a separate reviewer agent grades findings (critical = cannot
+  be integrated as is; high = bug; medium and low = improvements); you judge each one real,
+  speculative or cosmetic; fix critical always, the rest when cheap, otherwise open follow-up
+  issues; merge only when checks are green and no critical finding is open. The only exception is
   the commits `sw.mjs` pushes to `main` during `update`, `release` and `cascade`.
 - **Do not create files that track state.** Tickets, maps, specs, progress and handoffs are
   GitHub issues and issue comments, not files.
