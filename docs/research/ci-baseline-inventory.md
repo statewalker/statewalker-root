@@ -39,7 +39,7 @@ Browser/e2e scripts not listed in a cell exist but are not run.
 |---|---|---|---|---|---|---|---|---|---|---|
 | statewalker-shared | `ci.yml:10` → S | Y `package.json:27` | Y `:25` | Y `:23` (src+tests, e.g. `packages/shared-ids/tsconfig.json`) | Y `:21` | Y `:22` | – | Y | N | – |
 | statewalker-fsm | `ci.yml:10` → S | Y `:27` | Y `:25` | **N**: no package defines `typecheck`, so `:23` runs nothing; the build is `tsdown` | Y `:21` (also runs tests, `packages/fsm/package.json:44`) | Y `:22` | – | Y | N | – |
-| statewalker-db | `ci.yml:10` → S | Y `:29` | Y `:27` | Y `:25` | Y `:21` | Y `:22` | **N**: `test:browser`, `test:do` (`package.json:23-24`) | Y | **Y** `tools/consumer-install/package.json:17` (via root test; `tools/*` in workspace) | – |
+| statewalker-db | `ci.yml:10` → S | Y `:29` | Y `:27` | Y `:25` | Y `:21` | P `:22`: `db-api`, `db-sqlite` have no tests | **N**: `test:browser`, `test:do` (`package.json:23-24`) | Y | **Y** `tools/consumer-install/package.json:17` (via root test; `tools/*` in workspace) | – |
 | webrun-wire | `ci.yml:15` → S, + `node22` `:20-45`, `browser` `:51-80` | Y `:29` | Y `:26` | P: 9 packages have no `typecheck`, their build runs `tsc --emitDeclarationOnly`; tests typechecked in `ci.yml:45` | Y `:21` | Y `:22`, also on Node 22 `ci.yml:40` | P: http-browser, streams-webrtc (`ci.yml:74,80`); not livekit, peerjs, http-events | Y | **Y** `tools/consumer-install/package.json:16` | – |
 | webrun-files | `ci.yml:10` → S | Y `:27` | Y `:24` | P: none of 10 packages has `typecheck`; build runs `tsc --emitDeclarationOnly` | Y `:21` | Y `:22` | **N**: `webrun-files-http` `test:e2e`, `webrun-files-s3` `test:integration` | Y | N | – |
 | statewalker-search | `ci.yml:10` → S | Y `:27` | Y `:25` | Y `:23` | Y `:21` | P: `packages/*` only (`:22`) | – | Y | N | – |
@@ -72,8 +72,10 @@ Line numbers without a file name are in that project's root `package.json`.
    errors in `src`. It is not verified here whether fsm's `tsdown` declaration build fails on type
    errors.
 2. **Tests are not typechecked** in most projects. Many tsconfigs include only `src`
-   (statewalker-kernel, webrun-sync), and vitest does not typecheck. webrun-wire adds
-   `typecheck:tests` for this reason (`webrun-wire/.github/workflows/ci.yml:42-45`).
+   (statewalker-kernel, webrun-sync), and vitest does not typecheck. Exceptions: webrun-wire adds
+   `typecheck:tests` for this reason (`webrun-wire/.github/workflows/ci.yml:42-45`), and projects
+   whose tsconfig includes tests typecheck them with `tsc --noEmit`, such as statewalker-shared
+   (`packages/shared-ids/tsconfig.json:26`).
 3. **Browser and e2e suites are mostly outside CI.** The shared CI runs no browser
    (`httpeers/.github/workflows/ci.yml:13-14`), and no caller passes the `setup` input (`S:24-27`).
    Not run: statewalker-db (`test:browser`, `test:do`), statewalker-knowledge (`test:browser`),
@@ -104,9 +106,10 @@ Line numbers without a file name are in that project's root `package.json`.
 9. **No CI for the release tooling.** umbrella has no workflows and no tests. `.github`'s scripts,
    which every project's CI depends on, are consumed at `@main` (`S:32-35`) with no check of their
    own.
-10. **Two release paths.** cellb.dev, httpeers, statewalker-kernel, statewalker-knowledge,
-    webrun-files, webrun-sites and webrun-wire define `version`/`pack`/`publish` jobs. Their `publish`
-    job runs `npm publish --provenance` behind the `npm` environment
+10. **Two release paths.** Seven projects publish from CI, in two shapes: cellb.dev, httpeers,
+    webrun-files and webrun-wire run version PR → `pack` → `publish`; statewalker-kernel,
+    statewalker-knowledge and webrun-sites run `release` → `publish` on every merge to `main`, with
+    no version PR (kernel `ci.yml:12`, knowledge `ci.yml:12`). The `publish` job runs `npm publish --provenance` behind the `npm` environment
     (`httpeers/.github/workflows/ci.yml:176-243`; `environment: npm` at
     `statewalker-kernel/.github/workflows/ci.yml:138`, where every merge to `main` releases, `:12`).
     This contradicts `umbrella/README.md:91-94` and `.github/README.md` ("CI never publishes"). From
@@ -117,7 +120,7 @@ Line numbers without a file name are in that project's root `package.json`.
 | Class | Caught? | Evidence |
 |---|---|---|
 | Build break | **Yes**, for libraries; **partial** for apps | `S:74` on every PR; cellb `ci.yml:50,80-82`; sandbox `ci.yml:51`. Apps without a `build` script and deploy-only sites are not built on PRs (gap 5); umbrella has no CI. |
-| Typecheck break | **Partial** | `S:77` covers `src` where a `typecheck` script exists. It is missing in fsm, shell-theia and statewalker-sites; build-time `tsc` covers webrun-files/wire/sites. Tests are not typechecked except in webrun-wire (gaps 1–2). |
+| Typecheck break | **Partial** | `S:77` covers `src` where a `typecheck` script exists. It is missing in fsm, shell-theia and statewalker-sites; build-time `tsc` covers webrun-files/wire/sites. Tests are typechecked only in webrun-wire (dedicated job) and projects whose tsconfig includes tests, such as statewalker-shared (gaps 1–2). |
 | Failing tests | **Partial** | Node unit tests run everywhere except webrun-devtools (`S:84`). Browser/e2e suites are mostly not run (gap 3). The sandbox excludes some suites (gap 6). |
 | Published-API break against npm | **No** (packaging defects: partial) | No API or type diff against npm anywhere (gap 7). Shape defects are caught before merge: missing export targets, undeclared dist imports, `workspace:` leaks (`S:87-93`), plus consumer install in 4 projects. `release-changesets.mjs` notices a changed `exports` map only to compute a patch bump. `sw.mjs` installs from npm and imports every entry (`umbrella/tools/npmverify.sh`, `sw.mjs:365-377`), but after publishing under `next`, not before review. |
 | Leaked secret | **No** | No gitleaks, trufflehog or secret-scanning step in any workflow or lockfile. GitHub push protection may be on at the organization, but that is not visible in repository files. |

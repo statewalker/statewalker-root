@@ -12,9 +12,10 @@ some review from per-PR to periodic?
 
 ## Short answer
 
-- **Block on bugs only.** Every vendor reviewed ships a severity scale where only the top tier
-  means "fix before merge"; nits are labelled non-blocking, and Codex's GitHub reviewer does not
-  post below P1 at all.
+- **Block on bugs only.** Claude Code Review and Codex reserve "fix before merge" (Claude's
+  Important) or posting at all (Codex: P0 and P1 only) for bug-level findings; nits are labelled
+  non-blocking. The other tools label severity (Copilot's High/Medium/Low) without defining a
+  merge gate.
 - **Re-review the delta, not the whole change.** Claude Code Review's automatic re-reviews focus
   on what changed since the last review and hold back nits and findings on unchanged code; it
   skips re-review entirely when no blocking finding is open and the diff is unchanged.
@@ -129,9 +130,12 @@ some review from per-PR to periodic?
 
 ### Moving review from per-PR to periodic
 
-- Google: some analyses "need results across the whole codebase" (security reviews, cleanup
-  planning) and are shown in code browsing rather than review; existing issues in working code
-  are "usually not worth fixing" at review time (https://abseil.io/resources/swe-book/html/ch20.html).
+- Google: "developers actually do want the ability to view analysis results over the entire
+  codebase during code browsing" (examples: security teams, planning a cleanup), separately from
+  review; and "existing issues in otherwise working code are typically only worth highlighting
+  (and fixing) if they are particularly important (security issues, significant bug fixes, etc.)"
+  (https://abseil.io/resources/swe-book/html/ch20.html). The exception matters: particularly
+  important pre-existing issues still deserve attention outside the periodic pass.
 - GitHub Code Quality splits the two: rules-based scans "identify existing quality debt across
   your codebase" on the default branch, AI analysis covers "recently changed files", and rulesets
   can block PRs below a threshold (https://docs.github.com/en/code-security/concepts/about-code-quality).
@@ -145,8 +149,8 @@ some review from per-PR to periodic?
 
 All of this section is **(inference)**, measured against `docs/process/merging.md`.
 
-1. **Merge gate (per PR).** Keep blocking on critical only. The sources support it: no vendor
-   blocks on anything below "bug that should be fixed before merging". Consider whether *high*
+1. **Merge gate (per PR).** Keep blocking on critical only. The sources support it: the two tools
+   that define a gate (Claude Code Review, Codex) draw it at bug level, and none blocks on nits. Consider whether *high*
    should block too, since Claude's Important and Codex's P1 both sit at "bug".
 2. **Scope later rounds to the fix.** `merging.md` step 4 sends a new reviewer over "the whole
    change again". Every source that addresses it scopes re-review to the delta and treats a full
