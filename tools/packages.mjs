@@ -179,6 +179,8 @@ async function behind(repo) {
 }
 
 async function status() {
+  const missing = targets.filter((t) => !repos().includes(t));
+  if (missing.length) fail(`not cloned in repos/: ${missing.join(", ")} (node tools/repos.mjs clone)`);
   const { order } = dependencyOrder();
   const list = targets.length ? order.filter((r) => targets.includes(r)) : order;
   for (const repo of list) {

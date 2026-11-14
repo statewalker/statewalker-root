@@ -1,6 +1,7 @@
 // Where things are, for every tool in this folder. Plain Node, no dependencies.
 //
-//   ROOT        this repository
+//   ROOT        the main checkout of this repository, also when a tool runs from a worktree of it
+//               (ws/<feature>/statewalker-root): repos/ and ws/ live in the main checkout only
 //   repos.json  { "<name>": "<git url>" }: every managed project (the source of truth)
 //   REPOS_DIR   the clones, one folder per project: <ROOT>/repos (SW_REPOS overrides)
 //   WS_DIR      the per-feature workspaces: <ROOT>/ws (docs/process/sessions.md)
@@ -10,7 +11,20 @@ import fs from "node:fs";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
 
-export const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "../..");
+const HERE = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "../..");
+function mainCheckout() {
+  try {
+    const common = execFileSync("git", ["rev-parse", "--path-format=absolute", "--git-common-dir"], {
+      cwd: HERE,
+      encoding: "utf8",
+      stdio: ["ignore", "pipe", "ignore"],
+    }).trim();
+    return path.basename(common) === ".git" ? path.dirname(common) : HERE;
+  } catch {
+    return HERE; // not a git checkout (a copy of the tools): use where they are
+  }
+}
+export const ROOT = mainCheckout();
 export const REPOS_DIR = path.resolve(process.env.SW_REPOS ?? path.join(ROOT, "repos"));
 export const WS_DIR = path.join(ROOT, "ws");
 export const ORG = "statewalker";

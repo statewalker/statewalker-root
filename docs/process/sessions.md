@@ -88,7 +88,9 @@ cd statewalker-root && claude --add-dir ..         # then: "Work on statewalker-
 remote, else a new one from `origin/main`) and writes the workspace's `pnpm-workspace.yaml`
 (below). `new` again adds projects to a workspace; `list` shows every workspace's branches and
 state; `sync` rewrites the `pnpm-workspace.yaml` after a project changed its globs or catalogs;
-`rm` removes the worktrees once nothing is left uncommitted or unpushed.
+`rm` removes the worktrees once nothing is left uncommitted or unpushed. The tools find `repos/`
+and `ws/` in the main checkout, so they work the same when run from the workspace's
+`statewalker-root/` worktree.
 
 **Linking the projects** so changes build and test together, in the folder that holds the project
 checkouts (`ws/<feature>/` locally, where `tools/ws.mjs` writes it; by hand in the cloud), a

@@ -16,7 +16,9 @@ agent docs, so a session got two answers to "which projects exist" and "where do
 1. **Publishing happens only in CI**, by npm trusted publishing from the standard `publish` job of
    each project's `ci.yml`. One shape everywhere: changesets open a "version packages" pull
    request, and merging it publishes. That pull request goes through the merge gate
-   (`docs/process/merging.md`) like any other, so a session can release without the human.
+   (`docs/process/merging.md`) like any other, so a session can release without a human release
+   step; only a project whose `npm` environment requires reviewers waits for a human to approve
+   the publish run.
 2. Publishing by hand, or a publish step outside the standard job, is a release-path bypass: the
    shared CI fails it and the review loop grades it critical. The one exception is a package's
    first version, which a human publishes once, since trusted publishing needs an existing package.

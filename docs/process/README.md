@@ -59,11 +59,14 @@ Rules that make parallel sessions work:
       it changes, through the review loop (`merging.md`) and merge it.
    2. CI opens or updates that project's "version packages" pull request (§4). Take it through the
       review loop and merge it: CI publishes. In a project that still publishes on every merge
-      (§4, "Transition"), step 1's merge already published: skip this step.
+      (§4, "Transition"), step 1's merge already published: skip this step. If the `publish` run
+      waits for approval of the `npm` environment (§4), comment
+      `Waiting on human: approve the publish of <project>` on the ticket and stop there.
    3. Once npm serves the new versions (`node tools/packages.mjs status <project>`), raise the upper
       project's catalog range where the new version falls outside it, get its checks green, take
       it through the review loop and merge it.
-   4. Repeat per layer. No human release step sits between layers.
+   4. Repeat per layer. No human release step sits between layers, except approving the publish
+      where a project's `npm` environment requires it.
 
    Dependents the change did not touch are updated automatically after a publish
    ([#15](https://github.com/statewalker/statewalker-root/issues/15)): a compatible version only
@@ -77,8 +80,11 @@ Rules that make parallel sessions work:
 project's `ci.yml` (gated by the `npm` environment, with provenance). One shape everywhere, the
 **version pull request**: changesets accumulate on `main`; CI opens a "version packages" pull
 request that applies them (versions, `CHANGELOG.md`); merging it publishes. That pull request goes
-through the review loop like any other, so a session can release without the human
-([decision](https://github.com/statewalker/statewalker-root/issues/10)).
+through the review loop like any other, so a session can release without a human release step
+([decision](https://github.com/statewalker/statewalker-root/issues/10)). Where a project's `npm`
+environment requires reviewers (webrun-files and httpeers do: their `publish` job "waits for a
+maintainer's approval"), a human approves the run in GitHub Actions; the session waits for that
+(§3).
 
 - **Never publish by hand**, from any machine, and never add a publish step outside the standard
   `publish` job: the shared CI fails such a pull request, and the review loop grades it a
