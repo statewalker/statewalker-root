@@ -34,7 +34,10 @@ Over a rolling window of the four weeks before the run, for every pull request m
 The record line ends the pass's comment; a footer appended after it by tooling is ignored. A
 merged pull request without a valid record line is listed as **missing a record** (and counted
 in time to merge only); a `<!-- gate:` line that does not parse is counted as **malformed**. Both
-point at a gate that was skipped or recorded wrongly.
+point at a gate that was skipped or recorded wrongly. A lockfile-only pull request merged by
+`merge-lockfile.yml` carries a `<!-- lockfile-gate: … -->` line instead ([merging.md](merging.md),
+"Lockfile-only pull requests"): it is counted apart, as a lockfile-only merge, neither as a record
+nor as missing one.
 
 ## Thresholds
 

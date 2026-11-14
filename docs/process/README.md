@@ -73,8 +73,11 @@ Rules that make parallel sessions work:
 
    Dependents the change did not touch are updated automatically after a publish
    ([#15](https://github.com/statewalker/statewalker-root/issues/15)): a compatible version only
-   moves their lockfile. Until that lands, `node tools/packages.mjs deps <project>` lists them and
-   `status` shows which references are behind. A project whose `ci.yml` has no `publish` job yet
+   moves their lockfile, in a pull request that merges itself once green (`merging.md`,
+   "Lockfile-only pull requests"). This covers the projects with the release App installed and
+   statewalker-ci's `statewalker-update.yml` adopted (statewalker-ci's README, "Dependents update
+   themselves after a publish"); for the others, `node tools/packages.mjs deps <project>` lists
+   them and `status` shows which references are behind. A project whose `ci.yml` has no `publish` job yet
    cannot release: block the ticket on that project's CI-publishing ticket (open one if missing).
 
 ## 4. Release
