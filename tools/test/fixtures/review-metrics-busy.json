@@ -59,7 +59,7 @@
  ],
  "repos/statewalker/webrun-files/issues/10/comments": [
   {
-   "body": "## Merge gate: pass 1\n\n| # | Proposed / judged | Verdict | Outcome |\n|---|---|---|---|\n| 1 | critical / critical | real | fixed (abc123) |\n\n<!-- gate: pass=1 critical=1 downgraded=0 high=0 rejected=0 -->"
+   "body": "## Merge gate: pass 1\n\n| # | Proposed / judged | Verdict | Outcome |\n|---|---|---|---|\n| 1 | critical / critical | real: an override is a record saying \"overridden\" | fixed (abc123) |\n\n<!-- gate: pass=1 critical=1 downgraded=0 high=0 rejected=0 -->"
   },
   {
    "body": "Looks good, merging soon."

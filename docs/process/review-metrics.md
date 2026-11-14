@@ -26,7 +26,7 @@ Over a rolling window of the four weeks before the run, for every pull request m
 | Signal | Computed from |
 |---|---|
 | Gate passes per pull request: median and maximum | the highest `pass` among a pull request's record lines |
-| Critical findings per merge, with downgrades and overrides | the sum of `critical` over all passes, per merged pull request with a record; `downgraded` summed; an override is a pull request whose record says "overridden" (its Outcome column, `merging.md`) |
+| Critical findings per merge, with downgrades and overrides | the sum of `critical` over all passes, per merged pull request with a record; `downgraded` summed; an override is a pull request whose record has a row with the Outcome "overridden" (`merging.md`); the word elsewhere in the comment does not count |
 | Share of findings rejected as speculative | `rejected` / (`critical` + `high` + `rejected`), over all passes |
 | Open deferred bugs per project, plus escalations | open issues labelled `bug` with `review-followup` or `health-review`, per project; open root issues labelled `bug` and `ready-for-agent` that are not deferred bugs themselves (escalated bug tickets, `prevention.md`) |
 | Time to merge: median | from a pull request's creation to its merge |
