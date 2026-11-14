@@ -16,6 +16,10 @@ follows it (`CLAUDE.md`, "Skills only a human can start").
 | Code-health survey | `/improve-codebase-architecture` on one project, every few days |
 | After a session | `/retro`: findings become `area:root` tickets |
 
+Whatever the route: tickets reach `ready-for-agent` only with acceptance criteria, bug fixes and
+new behaviour carry tests, and a session lists a project's deferred bugs before changing it
+([prevention.md](prevention.md)).
+
 Every route ends in issues on this repository (`docs/agents/issue-tracker.md`). Specs, tickets
 and Wayfinder tickets carry `repo:<name>` labels naming the projects they concern.
 
