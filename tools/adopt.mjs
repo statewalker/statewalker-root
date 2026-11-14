@@ -1,5 +1,7 @@
 #!/usr/bin/env node
 // adopt.mjs REPO_DIR : bring a repository to the current conventions. Idempotent; prints what changed.
+// adopt.mjs --lockfile REPO_DIR : only the automatic lockfile updates (last item below), leaving
+//                                 everything else, Dependabot included, as it is.
 //
 //   .github/workflows/ci.yml   the shared CI (statewalker/statewalker-ci), created when missing. Publishing
 //                              jobs are left alone: CI publishing is the release path
@@ -9,15 +11,25 @@
 //   .changeset/                config and README, for a repository with public packages
 //   package.json               devDependency @changesets/cli (catalog:) and a "changeset" script
 //   pnpm-workspace.yaml        catalog entry for @changesets/cli
+//   lockfile updates           .github/workflows/statewalker-update.yml, ci.yml's `lockfile` job and,
+//                              with a `publish` job, its `notify` job (lib/adopt-lockfile.mjs;
+//                              statewalker-root#15). The repository also needs the statewalker-release
+//                              App and its organization variable and secret (a human step)
 // Run `pnpm install` and `pnpm exec biome format --write .github .changeset package.json` afterwards.
 import { execFileSync } from "node:child_process";
 import fs from "node:fs";
 import path from "node:path";
+import { adoptLockfile } from "./lib/adopt-lockfile.mjs";
 
-const dir = process.argv[2];
+const lockfileOnly = process.argv[2] === "--lockfile";
+const dir = process.argv[lockfileOnly ? 3 : 2];
 if (!dir || !fs.existsSync(dir)) {
-  console.error("usage: node tools/adopt.mjs REPO_DIR");
+  console.error("usage: node tools/adopt.mjs [--lockfile] REPO_DIR");
   process.exit(2);
+}
+if (lockfileOnly) {
+  for (const change of adoptLockfile(dir)) console.log(change);
+  process.exit(0);
 }
 const CHANGESETS_CLI = "^3.0.3";
 const at = (p) => path.join(dir, p);
@@ -163,3 +175,6 @@ A changeset records a package release: which packages, which bump, and the chang
     );
   }
 }
+
+// Lockfile updates after a publish, once ci.yml exists.
+for (const change of adoptLockfile(dir)) console.log(change);

@@ -10,7 +10,7 @@ serves. Nothing here publishes: releases happen only in CI (`docs/process/README
 | `ws.mjs new \| list \| sync \| rm` | Per-feature workspaces under `ws/<feature>/`: worktrees on one branch, linked by a generated `pnpm-workspace.yaml` (`docs/process/sessions.md`, "Local") |
 | `packages.mjs status \| deps` | Versions not `latest` on npm and `@statewalker` references behind npm, in dependency order (`--deep` also builds and compares contents); the projects that depend on one, in update order |
 | `check-metadata.mjs [project…]` | `repository` / `homepage` / `bugs` of every manifest, GitHub references that are renamed or archived, and what npm serves as `latest` |
-| `adopt.mjs <dir>` | Bring a project to the conventions: shared CI, Dependabot, changesets. Idempotent |
+| `adopt.mjs [--lockfile] <dir>` | Bring a project to the conventions: shared CI, Dependabot, changesets, the automatic lockfile updates after a publish (#15). Idempotent. `--lockfile`: only the last, leaving everything else as it is |
 | `fix-repo-metadata.mjs <dir> <repo>` | Point every manifest's `repository` / `homepage` / `bugs` at the repository it lives in |
 | `rename-package.mjs <repo> OLD=NEW…` | Rename `@statewalker` packages inside one project, references included |
 | `rename-dirs.mjs <dir> <parent> OLD=NEW…` | Move package folders and rewrite the paths that point at them |
