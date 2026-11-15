@@ -27,8 +27,8 @@ projects a session changes, all on one branch, linked by one `pnpm-workspace.yam
 across projects build and test together before any release (`tools/ws.mjs`).
 
 **Version pull request**: the "version packages" pull request CI opens from a project's pending
-changesets; merging it publishes the versions it applies. The target release path for every
-project (`docs/process/README.md` §4, "Transition").
+changesets; merging it publishes the versions it applies. The release path of every publishing
+project (`docs/process/README.md` §4).
 _Avoid_: cascade (umbrella's retired local release of a project and all its dependents).
 
 **Merge gate**: the short review every pull request passes before it merges. It blocks only
