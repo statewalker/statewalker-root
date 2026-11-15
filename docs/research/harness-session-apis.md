@@ -273,8 +273,13 @@ id, the same protocol on Node and Cloudflare
   `tool-output-error`, `message-completed`, `submission-settled`, `data-part`.
 - `POST /:id/abort` aborts the running submission and the queue behind it, asynchronously.
 - Child conversations (subagents) are not exposed on this surface.
-- No approval primitive appears in the wire protocol or the docs (searched for approval,
-  permission, human-in-the-loop); tools carry MCP-style `annotations` such as `destructiveHint`
+- No approval primitive appears in the wire protocol, and Flue has "no built-in approval API",
+  but its docs give a supported **approval-gate pattern** (`docs/guide/tools.md`, "Approval
+  gates"): the tool's `run` stores the arguments in persistent state keyed by `toolCallId` and
+  returns a `pending_approval` result with `terminate: true`, so the response ends and nothing
+  waits; a trusted route delivers the decision as a signal; a `useAgentStart` callback runs the
+  stored call on approval (also referenced from `docs/guide/mcp.md` and
+  `reference/agent-api.md`). Tools also carry MCP-style `annotations` such as `destructiveHint`
   that "trusted application code can inspect" (`reference/agent-api.md`).
 - Auth: "A mounted agent has no built-in authentication"; the docs advise server-issued ids
   derived from the principal (`guide/routing.md`). On Cloudflare, each agent is one DO class
@@ -309,7 +314,7 @@ id, the same protocol on Node and Cloudflare
 | Content | Items | `UIMessage` parts | `UIMessage` parts | Message + state values | messages + parts | Message, Part, Artifact |
 | Resume stream | `starting_after` | GET `/stream` replay | `Last-Event-ID`, `?from=` | `since`, `Last-Event-ID` | `offset` | `:subscribe` |
 | Cancel | `POST .../cancel` | app stop endpoint | cancel message, `cancelSubmission` | `POST /runs/{id}/cancel` | `POST /:id/abort` | `:cancel` |
-| Approval | `mcp_approval_request` → new Response | `tool-approval-request` → next call | `approval-requested` part | `input.requested` → `input.respond` | none | `INPUT_REQUIRED` → new message |
+| Approval | `mcp_approval_request` → new Response | `tool-approval-request` → next call | `approval-requested` part | `input.requested` → `input.respond` | pattern: pending result + signal | `INPUT_REQUIRED` → new message |
 | Concurrency | caller's job | caller's job | `messageConcurrency`, FIFO | `enqueue`/`reject`/`interrupt`/`rollback` | FIFO queue | per task |
 | Auth | bearer API key | app | app (Worker hooks) | app | app | Agent Card schemes |
 
@@ -385,8 +390,9 @@ external API constrains the core.
 
 - Whether the harness's approval decisions (`edit`, `respond`) survive projection to OpenAI,
   whose `mcp_approval_response` carries only `approve` and an optional reason.
-- How Flue exposes a pause for approval at all: its docs show no hook; the harness may need it
-  in Flue or in the capability environment (tool wrapper that parks the submission).
+- Whether the harness adopts Flue's approval-gate pattern (pending result, `terminate: true`,
+  a signal, `useAgentStart`) for "ask", or wraps tools in the capability environment so the
+  pause works the same for every execution core.
 - Whether runs inside a thread may overlap (subagents, scheduled work) or stay strictly FIFO.
 
 ## Sources
