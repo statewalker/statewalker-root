@@ -23,10 +23,11 @@ For each: file system hooks onto a custom VFS/`FilesApi`, npm packages, child pr
   from strings (`new Function`, used by every JS-level Node emulator, lifo included) or threads
   and `SharedArrayBuffer` (Wasmer, WebContainers, just-bash's `python3`). Workers forbid
   `eval()`, `new Function` and compiling WebAssembly from bytes
-  (https://developers.cloudflare.com/workers/runtime-apis/web-standards/). On Cloudflare the
-  sanctioned route is a **Dynamic Worker** (Worker Loader): run the script as its own isolate,
-  JS or Python, with `globalOutbound: null` to block the network
-  (https://developers.cloudflare.com/dynamic-workers/).
+  (https://developers.cloudflare.com/workers/runtime-apis/web-standards/). The route there is a
+  **Dynamic Worker** (Worker Loader): run the script as its own isolate, with
+  `globalOutbound: null` to block the network (https://developers.cloudflare.com/dynamic-workers/).
+  The Worker Loader is not Cloudflare-only: the prototype runs it on workerd, celld and cellb
+  (browser, and Node for approved bundles), see recommendation 4.
 - **lifo.sh is a credible browser/Node Node-simulator, but not a sandbox and not for workerd.**
   It is an MIT, alpha (0.10.x, first npm release 2026-02-23) TypeScript re-implementation of a
   Linux-like OS: shell, 60+ commands, `node`, real `npm`/`npx`. Its `node` loads modules with
