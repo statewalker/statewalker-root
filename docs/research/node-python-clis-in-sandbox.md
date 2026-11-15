@@ -269,7 +269,7 @@ For each: file system hooks onto a custom VFS/`FilesApi`, npm packages, child pr
 | Wasmer + `python/python` + Edge.js | `storageHost` (sync bridge), working | real npm in Edge.js | in WASIX | off unless granted | WASIX sandbox | yes (COOP/COEP) | yes | no | Modified MIT / MIT | SDK mature; Edge.js 0.2, 2026 |
 | WebContainers | mount tree only | yes | yes | yes | browser tab | yes | no | no | commercial for production | mature |
 | quickjs-emscripten | embedder-defined; asyncify allows sync-over-async | no (bundle first) | embedder | embedder | WASM | yes | yes | yes | MIT | mature |
-| Dynamic Workers | bindings (a FilesApi binding) | bundled | no | `globalOutbound` | separate V8 isolate | no | no | workerd on Cloudflare (Paid) | proprietary service | GA docs |
+| Dynamic Workers (Worker Loader) | bindings (a FilesApi binding) | bundled | no | `globalOutbound` | separate V8 isolate | yes (cellb runs each isolate in a Dedicated Worker) | yes on cellb, approved bundles only (`bundled-only`) | workerd on Cloudflare (Paid); celld (token transport, `env.FILES`) | Cloudflare service; cellb and celld implement the binding | GA docs; working in the prototype on all four runtimes |
 | almostnode | own sync VFS | yes | via just-bash | not documented | cross-origin iframe | yes | no | no | MIT | experimental |
 | Nodebox | own | yes | async only | limited | hosted iframe | yes | no | no | Sustainable Use | stale |
 
@@ -293,18 +293,25 @@ In priority order of runtimes:
    `node`/`npm`/`npx` forwarded from just-bash. Watch the roadmap items that would change this:
    the Worker-hosted VM, async or pluggable backends, and Python. Do not treat it as an isolation
    boundary, and do not run it in a realm whose CSP forbids eval.
-4. **workerd and CellD: Dynamic Workers for real code; QuickJS (asyncify) for an in-process
-   `node`-lite.** On Cloudflare, run `node script.js` / `python script.py` as a Dynamic Worker
-   whose only binding is a capability-scoped `FilesApi` RPC and `globalOutbound: null`; this
-   gives no synchronous `fs` and no `child_process`, so it fits tools written against an async
-   API rather than arbitrary CLIs. For CellD (no Worker Loader), a QuickJS-asyncify `node` with a
-   small `fs`/`path`/`process` shim over the `FilesApi` is the only in-process route; otherwise
-   report `ENOSYS` as Python and Wasmer do today.
+4. **workerd, CellD and cellb: the Worker Loader for real code; QuickJS (asyncify) only as an
+   in-process fallback.** The Worker Loader is on every runtime here: workerd on Cloudflare
+   (Paid), celld, and cellb in a browser and on Node. The prototype already runs a fresh Worker
+   Loader isolate per tool call on all of them (`statewalker-sandbox/apps/flue-capfs-do/README.md`
+   lines 29, 110-116, 230-231 and 613; the celld 0.6.0 column of its results table passes). On
+   celld the capability reaches the isolate as the `env.FILES` service binding (the token
+   transport). On cellb's Node host, isolates can see the host's files, so only approved bundles
+   run there (`bundled-only`). Run `node script.js` / `python script.py` as such an isolate whose
+   only binding is a capability-scoped `FilesApi` and `globalOutbound: null`; this gives no
+   synchronous `fs` and no `child_process`, so it fits tools written against an async API rather
+   than arbitrary CLIs. A QuickJS-asyncify `node` with a small `fs`/`path`/`process` shim over the
+   `FilesApi` remains a fallback for running code inside the agent's own isolate.
 
 ## Open questions
 
-- Does CellD (or cellb's workerd-compatible mode) offer anything like the Worker Loader, so
-  Dynamic-Worker style tool runs work off Cloudflare?
+- Python modules in Worker Loader isolates off Cloudflare (Cloudflare's `python_workers` flag):
+  do cellb and celld support them, or does Python stay on Pyodide/Wasmer there?
+- Running npm-bundled CLIs as Worker Loader isolates through the prototype's bundler Worker:
+  which CLIs survive bundling without `fs` sync calls or `child_process`?
 - Edge.js under the browser SDK: is a host N-API engine available there, or only the embedded
   QuickJS package, and how compatible is that build?
 - Can lifo's `VFS` take an async-backed provider in its planned "choose the backing store"
