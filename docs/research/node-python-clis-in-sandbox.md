@@ -18,8 +18,10 @@ For each: file system hooks onto a custom VFS/`FilesApi`, npm packages, child pr
 
 ## Short answer
 
-- **Yes in the browser and on cellb's Node host; on workerd and CellD not with an in-process
-  emulator.** Everything that gives real Node or CPython semantics needs either code generation
+- **Yes in the browser and on cellb's Node host; on workerd not with an in-process emulator.**
+  CellD is built on Deno and allows `eval`, so emulators that rely on `new Function` run there
+  (tested later with almostnode, `docs/research/almostnode-on-do-runtimes.md`), though without
+  isolation; threads and `SharedArrayBuffer` remain unavailable. Everything that gives real Node or CPython semantics needs either code generation
   from strings (`new Function`, used by every JS-level Node emulator, lifo included) or threads
   and `SharedArrayBuffer` (Wasmer, WebContainers, just-bash's `python3`). Workers forbid
   `eval()`, `new Function` and compiling WebAssembly from bytes
@@ -228,7 +230,7 @@ For each: file system hooks onto a custom VFS/`FilesApi`, npm packages, child pr
   embedder provides. just-bash's `js-exec` is such an embedding (via `run`, Apache-2.0).
 - **(inference)** Asyncify is the one mechanism that gives a guest synchronous
   `fs.readFileSync` over our async `FilesApi` **without** threads or `SharedArrayBuffer`, so it
-  is the only in-process `node`-like option for workerd and CellD; Node compatibility would be a
+  is the only in-process `node`-like option for workerd (on CellD, `eval`-based emulators also run, without isolation); Node compatibility would be a
   small shim set, far below lifo's.
 
 ### Node or Deno compiled to WASM
