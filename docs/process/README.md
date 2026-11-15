@@ -99,6 +99,14 @@ the merge gate on the version pull request is the release decision.
   the packages that depend on it. A human publishes its first version once, with their 2FA, and adds the trusted
   publisher; a session that adds a package comments `Waiting on human: first publish of <package>`
   on the ticket.
+- **Publishing is off** in statewalker-ai and statewalker-kernel for now
+  ([#66](https://github.com/statewalker/statewalker-root/issues/66)): their `version` job is
+  disabled (`if: false && …`), so no version pull request opens and nothing is published; changes
+  and changesets accumulate on `main`. Projects above them (statewalker-shell-react, sandclaw)
+  keep resolving the versions already on npm, and §3's "land bottom-up, with a publish between
+  layers" cannot pass through these two: a change that needs a new version of one of them waits
+  until publishing is back on, which is the human's call. To turn it back on, remove `false && `
+  from the `version` job's `if:` and drop this note.
 - To check what a project has not published, or which references are behind npm:
   `node tools/packages.mjs status [project…]` over the clones in `repos/`
   (`node tools/repos.mjs clone`, later `pull`).
