@@ -18,8 +18,11 @@ For each: file system hooks onto a custom VFS/`FilesApi`, npm packages, child pr
 
 ## Short answer
 
-- **Yes in the browser and on cellb's Node host; on workerd and CellD not with an in-process
-  emulator.** Everything that gives real Node or CPython semantics needs either code generation
+- **Yes in the browser and on cellb's Node host; on workerd not with an in-process emulator.**
+  CellD is built on Deno and allows `eval`, so emulators that rely on `new Function` run there
+  (tested later with almostnode, `docs/research/almostnode-on-do-runtimes.md`), though without
+  isolation. Threads remain unavailable there (no `Worker`); `SharedArrayBuffer` exists, but
+  without threads Wasmer still answers `ENOSYS`. Everything that gives real Node or CPython semantics needs either code generation
   from strings (`new Function`, used by every JS-level Node emulator, lifo included) or threads
   and `SharedArrayBuffer` (Wasmer, WebContainers, just-bash's `python3`). Workers forbid
   `eval()`, `new Function` and compiling WebAssembly from bytes
@@ -228,7 +231,7 @@ For each: file system hooks onto a custom VFS/`FilesApi`, npm packages, child pr
   embedder provides. just-bash's `js-exec` is such an embedding (via `run`, Apache-2.0).
 - **(inference)** Asyncify is the one mechanism that gives a guest synchronous
   `fs.readFileSync` over our async `FilesApi` **without** threads or `SharedArrayBuffer`, so it
-  is the only in-process `node`-like option for workerd and CellD; Node compatibility would be a
+  is the only in-process `node`-like option for workerd (on CellD, `eval`-based emulators also run, without isolation); Node compatibility would be a
   small shim set, far below lifo's.
 
 ### Node or Deno compiled to WASM
@@ -264,14 +267,14 @@ For each: file system hooks onto a custom VFS/`FilesApi`, npm packages, child pr
 
 | Option | FS onto our `FilesApi` | npm | child processes | network, blockable | isolation | browser | Node (cellb) | workerd / CellD | licence | maturity |
 |---|---|---|---|---|---|---|---|---|---|---|
-| lifo | sync providers: copy-in/out, or SAB bridge in a Worker | real registry | async only, to lifo commands | host `fetch`; block by removing globals | JS-level, host realm, `new Function` | yes | yes | shell only; `node` no | MIT | alpha, 2026 |
+| lifo | sync providers: copy-in/out, or SAB bridge in a Worker | real registry | async only, to lifo commands | host `fetch`; block by removing globals | JS-level, host realm, `new Function` | yes | yes | workerd: shell only, `node` no; CellD: untested (`new Function` is allowed there) | MIT | alpha, 2026 |
 | just-bash `python3` / `js-exec` | the shell's own fs (`CapFs`) | no | `js-exec`: sync, to the shell | allow-lists | CPython/QuickJS WASM in a worker | no | yes | no | Apache-2.0 | stable lib, 3.x |
 | Pyodide | Emscripten FS (sync): copy-in/out today | micropip (pure Python, Pyodide wheels) | no | `fetch`; block by removing globals | WASM, in our Worker/child | yes | yes | Dynamic Worker (Python) only | MPL-2.0 | mature |
 | Wasmer + `python/python` + Edge.js | `storageHost` (sync bridge), working | real npm in Edge.js | in WASIX | off unless granted | WASIX sandbox | yes (COOP/COEP) | yes | no | Modified MIT / MIT | SDK mature; Edge.js 0.2, 2026 |
 | WebContainers | mount tree only | yes | yes | yes | browser tab | yes | no | no | commercial for production | mature |
 | quickjs-emscripten | embedder-defined; asyncify allows sync-over-async | no (bundle first) | embedder | embedder | WASM | yes | yes | yes | MIT | mature |
 | Dynamic Workers (Worker Loader) | bindings (a FilesApi binding) | bundled | no | `globalOutbound` | separate V8 isolate | yes (cellb runs each isolate in a Dedicated Worker) | yes on cellb, approved bundles only (`bundled-only`) | workerd on Cloudflare (Paid); celld (token transport, `env.FILES`) | Cloudflare service; cellb and celld implement the binding | GA docs; working in the prototype on all four runtimes |
-| almostnode | own sync VFS | yes | via just-bash | not documented | cross-origin iframe | yes | no | no | MIT | experimental |
+| almostnode | own sync VFS (in memory; copy-in/out) | yes (registry, no allow-list) | via just-bash | host `fetch`, no allow-list | none in DO runtimes (cross-origin iframe in browsers) | yes | yes, shared realm | workerd no (eval); CellD yes, no isolation (`almostnode-on-do-runtimes.md`) | MIT | experimental |
 | Nodebox | own | yes | async only | limited | hosted iframe | yes | no | no | Sustainable Use | stale |
 
 ## Recommendation (inference)
