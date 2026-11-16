@@ -386,6 +386,83 @@ The layering above takes resource names from the Agent Protocol, the wire detail
 202 admission, settlements) from Flue, and keeps OpenAI and AI SDK as projections, so no single
 external API constrains the core.
 
+## Addendum (2026-11-16): resource shapes, and how Flue and ai-agent.core store messages
+
+Gathered while resolving "What is the session API?" (`statewalker/statewalker-root#83`). Statements
+marked **(inference)** are this note's own reasoning.
+
+### Endpoint shapes compared
+
+Two more APIs: **Anthropic Managed Agents** (beta `managed-agents-2026-04-01`) and the **Google ADK
+`api_server`**. Abbreviations: LG = LangSmith Agent Server, MA = Managed Agents, CF = Cloudflare.
+
+| Operation | LG / Agent Protocol | OpenAI | CF Agents / Think | Flue 2.3.0 | Anthropic MA | Google ADK |
+|---|---|---|---|---|---|---|
+| Create session | `POST /threads {thread_id?, metadata, if_exists, ttl}` | `POST /v1/conversations` | implicit by name | implicit on first `POST /:id` (`uid`) | `POST /v1/sessions {agent, initial_events}` | `POST .../sessions` |
+| List / delete | `POST /threads/search`, `DELETE`, `/threads/prune` | no list; `DELETE` | in-process only | none | list (paged), `archive`, `DELETE` (refused while running) | list, `DELETE` |
+| User input while busy | `multitask_strategy: enqueue\|reject\|interrupt\|rollback` | `response.steer` (WebSocket); old response ends `incomplete`/`steered` | `messageConcurrency: queue\|latest\|merge\|drop\|debounce` | FIFO; `POST /:id/abort` drops the queue | `[user.interrupt, user.message]` in one batch | none |
+| Start-turn reply | Run object, `/runs/stream`, `/runs/wait` | Response (`background`) | submission id | `202 {streamUrl, offset, submissionId}` + `Location`, `Stream-Next-Offset` | events queued, no turn id | events or SSE |
+| Items | `/threads/{id}/state`, `/history` | `GET /v1/conversations/{id}/items?after&limit&order&include` | message list | `GET /:id?limit&before&from` | `GET /v1/sessions/{id}/events?types[]=` | inline |
+| Stream resume | `Last-Event-ID` | `starting_after=<sequence_number>` | `Last-Event-ID`, `?from=` | `offset`, `live=sse\|long-poll` | live only (list, then dedupe) | none |
+| Approval answer | new run with `{command:{resume}}` | `mcp_approval_response` item | tool-approval message | signal pattern | `user.tool_confirmation {tool_use_id, result: allow\|deny, deny_message}` | `/run` with `function_call_event_id` |
+| Permission mode | `interrupt_before/after` per run | `require_approval` per request | none | none | `permission_policy: always_allow\|always_ask\|auto`, changeable while idle | none |
+| Sub-agents | subgraph streams; DeepAgents async subagents are separate threads | none | `/agents/{cls}/{name}/sub/...` | not exposed | session threads: `/sessions/{id}/threads`, child approvals cross-posted to the primary stream | `author` field only |
+
+Things the draft lacked, by API:
+- metadata and search (OpenAI, LG);
+- fork, rewind, edit and regenerate (LG `copy` and checkpoints, ADK `rewind`, CF regenerate);
+- long-term memory (LG `/store`, MA memory stores);
+- usage and budgets (MA `session.usage`, `budget_reached`);
+- webhooks and scheduled turns (LG, CF, MA);
+- trace context (Flue `traceparent`).
+
+Sources:
+- https://docs.langchain.com/langsmith/agent-server-openapi.json
+- https://docs.langchain.com/langsmith/double-texting.md
+- https://docs.langchain.com/oss/python/deepagents/async-subagents.md
+- https://developers.openai.com/api/reference/resources/conversations.md
+- https://developers.openai.com/api/docs/guides/steering.md
+- https://developers.cloudflare.com/agents/agent-class/communication-channels/chat/chat-agents/index.md
+- https://raw.githubusercontent.com/withastro/flue/main/apps/docs/src/content/docs/reference/streaming-protocol.md
+- https://platform.claude.com/docs/en/managed-agents/sessions.md
+- https://platform.claude.com/docs/en/managed-agents/permission-policies.md
+- https://platform.claude.com/docs/en/managed-agents/session-threads.md
+- https://raw.githubusercontent.com/google/adk-docs/main/docs/runtime/api-server.md
+
+### How Flue stores conversations and compacts them (`@flue/runtime` 2.3.0, built JS)
+
+- **Storage.** Flue uses Durable Object SQLite only; a class must be in `new_sqlite_classes`. Each agent instance has one stream, `agents/<agent>/<instanceId>`.
+  - `flue_conversation_streams`: the head offset and producer epoch/sequence, which make appends idempotent.
+  - `flue_conversation_stream_batches`: one JSON array of records per append; data over 1 MB spills into chunk rows, and an append is capped at 12 MB.
+  - `flue_conversation_fold_checkpoints`: a cache of the folded state, safe to discard.
+  - `flue_agent_submissions`: the queue (`queued`, `running`, `joining`, `settled`, …), drained on an alarm.
+- **Records, not messages.** The records are `user_message`, `assistant_text_delta`, `assistant_tool_call`, `tool_outcome`, `compaction`, `submission_settled` and others. They fold into entries with `id`/`parentId` and an active leaf, and appends stay linear.
+- **Context per turn.** Flue walks from the leaf to the root. After a `compaction` entry, the context is that summary, the entries from its `firstKeptEntryId`, then everything after it. This is written into pi's `agentLoop.state.messages`.
+- **Compaction is Flue's, not pi's.** pi-agent-core offers only a `prepareNextTurn` hook.
+  - Flue triggers compaction after an assistant message when context exceeds the window minus `reserveTokens` (20k), on an overflow error, or through `compact()`.
+  - It keeps the most recent 8k tokens, estimated as characters/4.
+  - It makes one or two model calls and updates an existing summary incrementally.
+  - The result is **one rolling summary**, appended as a record. The originals stay in the log.
+  - `compaction: false` turns it off.
+- **Steering.** pi-agent-core has `steer()`, `followUp()` and `abort()`. Flue adds a durable "join at the turn boundary", which moves queued submissions of the same session into the running one. Abort marks every active submission, with a 60 s grace period.
+
+### How statewalker-ai's `ai-agent.core` compacts (0.4.3)
+
+- **Tree.** The tree is `session` → `turn` → messages, tool calls and reasoning. A `turn_group` holds a summary and `sections[{title, body, refs}]` over a contiguous run of turns, or over lower groups at the next depth.
+- **When it runs.** Compaction runs before each model call, but only if a token budget and a summarizer are configured. The runtime configures neither, so it is off by default. The steps:
+  1. Try trimming long tool results, which changes only what is sent to the model.
+  2. Wrap up to 6 old turns outside the last 4, none of them pinned, into a depth-1 group.
+  3. Otherwise promote 4 or more same-depth groups one level up.
+  4. Otherwise report thrashing.
+- **What is kept.** Originals are kept, re-parented under the group. The pins are the latest user message, the latest call of each stateful tool, and anything marked pinned.
+- **Building the context.** Turns become messages and groups become one summary message each. A group holding a pin is expanded. If the result is over budget, the deepest expansions are collapsed. The default selector reads only direct turn children, so grouped turns would be dropped.
+- **Persistence.** One Markdown file per session, rewritten whole, because compaction re-parents earlier blocks.
+- **(inference)** The same model fits two append-only tables:
+  - `items(seq, id, turn_id, kind, body)`;
+  - `summaries(id, depth, from_seq, to_seq, parent_id, content, sections, tokens)`, whose rows point at ranges of items.
+
+  The context is the top-level summaries plus the items no summary covers. The summarizer, tool-result trimming, token estimator, compaction decisions and hierarchical selector port directly; only the code that walks the tree becomes range queries.
+
 ## Open questions
 
 - Whether the harness's approval decisions (`edit`, `respond`) survive projection to OpenAI,
