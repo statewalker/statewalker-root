@@ -47,7 +47,7 @@ Problems referenced as P1–P10 are listed in `docs/projects.md`.
 | `packages/httpeers.core`, `packages/httpeers-conformance` | Retire; port anything missing into httpeers first | P3 |
 | `apps/httpeers-stack`, `httpeers-protos`, `httpeers-lib-protos`, `httpeers-shell-protos` | `httpeers/protos/` (or delete what `httpeers/apps` and `deploy/` cover) | P4 |
 | `apps/peershare-protos`, `peershare-ui-protos` | Next to the peershare apps (decision 0.3) | |
-| `apps/flue-capfs-do`, `apps/flue-workbench` | `cellb.dev/examples/` | |
+| `apps/flue-capfs-do`, `apps/flue-workbench` | `statewalker-ai`: seed code of the AI harness packages, and its private `apps/workbench` ([#84](https://github.com/statewalker/statewalker-root/issues/84)) | |
 | `apps/notes-demo` | `webrun-sites/examples/` | |
 | `apps/vcs-protos` | `webrun-vcs/protos/` | |
 | `apps/openai-proxy.app` | `statewalker-ai/apps/` | |
@@ -104,9 +104,9 @@ If decided in-repo: `statewalker-sites/packages/site-fsm` → `statewalker-fsm/s
 | httpeers | 1.7; 2 (receives httpeers protos, retires sandbox duplicates); 3.4 (peershare, if decided) |
 | webrun-vcs | 1.7; 2 (receives vcs-protos); 4 (examples) |
 | statewalker-knowledge | 1.7; 4 (examples) |
-| cellb.dev | 1.7; 2 (receives flue apps) |
+| cellb.dev | 1.7; no other change |
 | statewalker-kernel | 1.7; 3.3 (receives file-mounts.core, file-panels.core) |
-| statewalker-ai | 1.7; 2 (receives openai-proxy.app) |
+| statewalker-ai | 1.7; 2 (receives openai-proxy.app and the flue apps, as the AI harness) |
 | statewalker-shell-react | 1.7; 2 (receives byok prototype, mvc blueprints); 3.2 (app-shell) |
 | sandclaw | 1.7; 2 (receives fm-protos); 3 (all) |
 | statewalker-sandbox | 2 (dissolved; archived or labs) |
