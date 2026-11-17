@@ -149,8 +149,7 @@ Two more facts shape a multi-project design:
   MiB in total); "a loaded Worker entrypoint cannot transfer to another Worker"; `stub.dispose()`
   releases a loaded Worker (`docs/services/dynamic-workers.md`, lines 28–32, 66–69, 121–124).
 - The process limit is now **256 live Dynamic Workers** (255 per script generation), and the
-  process **rejects the removed `CELLD_MAX_LOADED_WORKERS`** (same page, lines 99–105). The ADR's
-  "Runtime gaps" bullet still names that variable.
+  process **rejects the removed `CELLD_MAX_LOADED_WORKERS`** (same page, lines 99–105).
 
 ### workerd
 
@@ -251,8 +250,7 @@ fragment and instance. That is where `idFromName(fragmentId)` naturally appears.
    `getDurableObjectClass` ignores `props` (`docs/gaps.md` 17).
 5. **celld parity**: celld runs one application per fleet and gives loaded Workers only
    structured-clone values and service-binding capabilities, so on celld per-fragment Workers need
-   either a loader host inside one deployment or HTTP between fleets. The ADR's
-   `CELLD_MAX_LOADED_WORKERS` note should become "256 live Dynamic Workers per process".
+   either a loader host inside one deployment or HTTP between fleets.
 
 ## Sources
 

@@ -45,11 +45,14 @@ That makes a `wrangler.jsonc` project a server packaging that runs unchanged in 
 
 - **Calls between fragments.** On the client, fragments call each other only through commands. On
   the server, a fragment calls only the fragments it declares as dependencies, through service
-  bindings with a typed contract (Zod, projected to OpenAPI and MCP). Whether named fragment DOs
-  called over RPC refine this is the open research ticket #147.
+  bindings with a typed contract (Zod, projected to OpenAPI and MCP). The research for #147
+  (`docs/research/fragment-do-rpc.md`) refines it: the binding is a service binding to the
+  dependency's `WorkerEntrypoint`, routing to the fragment's own named DOs, with no `script_name`
+  bindings across fragments.
 - **The boundary between halves.** It is native HTTP and WebSocket at a base URL. A route table
   places each fragment on a host, and moving a fragment is a configuration change.
-- **Runtime gaps.** CellB and CellD must load, isolate and unload many small projects: Worker
-  Loader isolates cannot be terminated yet (cellb 0.8.1 notes), and celld caps a process at 256
+- **Runtime gaps.** CellB and CellD must load, isolate and unload many small projects: the host
+  cannot end a loaded Worker's isolate (`dispose()` only drops the cached id; only the loaded
+  code's own `abortIsolate()` ends it), and celld caps a process at 256
   live Dynamic Workers (`docs/research/fragment-do-rpc.md`). CellB runs one project per runtime
   today, so loading and wiring several fragment projects is new work.

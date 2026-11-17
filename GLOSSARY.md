@@ -59,6 +59,9 @@ _Avoid_: plug-in, extension, module (informal synonyms at most; never as names i
 **Server half**: the part of a fragment that runs as Workers and Durable Objects, declared as a
 `wrangler.jsonc` project. A fragment has no other kind of server code.
 
+**Agent half**: the part of a fragment that serves AI agents: skills, tools and agent
+definitions, in the harness plugin layout.
+
 **Client half**: the part of a fragment that contributes to the shell: commands, menus, views,
 components, settings, messages, themes.
 
