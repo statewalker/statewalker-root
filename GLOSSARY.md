@@ -49,3 +49,29 @@ _Avoid_: blocker, showstopper.
 **Deferred bug**: a known bug in a project, not yet fixed: an open issue labelled `bug` in the
 project's own tracker, whatever filed it (a merge-gate follow-up, a health review, a session that
 found it while working).
+
+## Platform
+
+**Fragment**: the unit of extension of the platform: a manifest plus at least one of a server half,
+a client half or an agent half. It has its own identity, version and lifecycle.
+_Avoid_: plug-in, extension, module (informal synonyms at most; never as names in code or docs).
+
+**Server half**: the part of a fragment that runs as Workers and Durable Objects, declared as a
+`wrangler.jsonc` project. A fragment has no other kind of server code.
+
+**Agent half**: the part of a fragment that serves AI agents: skills, tools and agent
+definitions, in the harness plugin layout.
+
+**Client half**: the part of a fragment that contributes to the shell: commands, menus, views,
+components, settings, messages, themes.
+
+**Platform**: the core and the shell that load, run and manage fragments; empty without them.
+_Avoid_: kernel (one of its packages today), framework.
+
+**Application**: what a user runs: a brand, a chosen set of fragments and a default layout, on the
+platform. Sandclaw is meant to be one.
+_Avoid_: app (the repository term above: a private package), product, distribution.
+
+**Host**: a place where server halves run: the browser (CellB), a server (CellD or workerd), or
+the cloud (Cloudflare Workers).
+_Avoid_: runtime (the software, not the place), target.
