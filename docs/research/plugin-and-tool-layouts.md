@@ -331,7 +331,8 @@ tag, one export per operation) if plugins with many operations need it.
 
 ### What this means for the `.agents/` mount (inference)
 
-- Flue only discovers `<cwd>/.agents/skills/*/SKILL.md` and `<cwd>/AGENTS.md`. Mounting the
+- Flue only discovers `<cwd>/.agents/skills/*/SKILL.md` and `<cwd>/AGENTS.md` (and `<cwd>/CLAUDE.md`
+  if present: @flue/runtime 2.3.0 `readAgentsMd` reads both). Mounting the
   merged skills of all enabled plugins at `<project>/.agents/skills/` gives native discovery; an
   `AGENTS.md` placed at `<project>/.agents/AGENTS.md` would **not** be read by Flue, which looks in
   the working directory itself.
@@ -356,7 +357,7 @@ tag, one export per operation) if plugins with many operations need it.
 - Should a tools folder without an OpenAPI file be allowed (OpenCode V1 style, schema in the
   module), or should the loader always require the document and generate it for authors?
 - Where does a plugin-level `AGENTS.md`-like instruction go, given Flue reads only the working
-  directory's `AGENTS.md` and Claude Code ignores a plugin `CLAUDE.md` (it says to use a skill)?
+  directory's `AGENTS.md` (and `CLAUDE.md`) and Claude Code ignores a plugin `CLAUDE.md` (it says to use a skill)?
 - Should `extensions["dev.cellb.harness"]` hold role filters (which roles may see which
   components), or should role filtering stay outside the plugin, in the loader's configuration?
 - Is Claude Code compatibility (reading `.claude-plugin/plugin.json` plugins as OpenAI and Copilot
