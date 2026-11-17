@@ -50,5 +50,6 @@ That makes a `wrangler.jsonc` project a server packaging that runs unchanged in 
 - **The boundary between halves.** It is native HTTP and WebSocket at a base URL. A route table
   places each fragment on a host, and moving a fragment is a configuration change.
 - **Runtime gaps.** CellB and CellD must load, isolate and unload many small projects: Worker
-  Loader isolates cannot be terminated yet (cellb 0.8.1 notes), and celld caps the number of
-  loaded Workers (`CELLD_MAX_LOADED_WORKERS`, 256 by default according to the 2026-10-23 notes).
+  Loader isolates cannot be terminated yet (cellb 0.8.1 notes), and celld caps a process at 256
+  live Dynamic Workers (`docs/research/fragment-do-rpc.md`). CellB runs one project per runtime
+  today, so loading and wiring several fragment projects is new work.
