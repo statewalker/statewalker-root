@@ -16,8 +16,9 @@ L0  statewalker-shared · statewalker-fsm · statewalker-db · webrun-wire
 L1  webrun-files (→db) · statewalker-search (→db)
 L2  webrun-sites · webrun-sync · httpeers             (→files, wire)
 L3  webrun-vcs (→sync) · statewalker-knowledge · cellb.dev (its private packages →knowledge, vcs)
+    · statewalker-ai (→files, sites, wire; webrun-biscuit from httpeers)
 L4  statewalker-kernel (→shared, files, sites, vcs)
-L5  statewalker-ai (→kernel, fsm)
+L5  (none since statewalker-ai's reset)
 L6  statewalker-shell-react (→ai, kernel)
 L7  sandclaw (→shell-react, search, kernel)
 ──  apps: statewalker-sandbox · statewalker-shell-theia · statewalker-sites · webrun-devtools (published)
@@ -40,7 +41,7 @@ L7  sandclaw (→shell-react, search, kernel)
 | statewalker-knowledge | 3 | 1 | `apps/demo` |
 | cellb.dev | 1 | 27 | platform packages, `examples/*`, `apps/sandbox`, `apps/sandbox-hub`, `site` |
 | statewalker-kernel | 17 | 0 | |
-| statewalker-ai | 6 | 0 | |
+| statewalker-ai | 0 | 10 | the harness packages, private skeletons until their tickets (#111); `ai-conformance` |
 | statewalker-shell-react | 15 | 0 | |
 | sandclaw | 4 | 10 | apps: chat-mini, peershare, wiki-viewer, ui-protos; `app-shell`; chat libraries under `apps/` |
 | statewalker-sandbox | 0 | 25 | 18 apps and prototype ladders, 7 packages (`docs/refactoring/`) |

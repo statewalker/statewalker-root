@@ -59,8 +59,8 @@ statewalker-knowledge and webrun-vcs, so cellb.dev must come after them. Invento
 | L3 | webrun-vcs | Git-compatible VCS in TypeScript; examples, demos, benchmarks |
 | L3 | statewalker-knowledge | Observable notebooks on a FilesApi, built to static sites |
 | L3 | cellb.dev | cellb: isomorphic Durable Objects runtime; platform packages, examples, site (after statewalker-knowledge) |
+| L3 | statewalker-ai | The AI harness: environment, access, definitions, sessions, Flue adapter, hosting, OpenAI/UHP projections (spec statewalker-root#111) |
 | L4 | statewalker-kernel | Headless workbench kernel: backbone, platform, workspace, explorer, shell |
-| L5 | statewalker-ai | Agent runtime, model config, local models, OpenAI-compatible providers |
 | L6 | statewalker-shell-react | Workbench React views (shell, explorer, settings, mime viewers, shadcn) |
 | L7 | sandclaw | Chat and wiki apps; wiki.core, file-mounts.core, file-panels.core |
 | app | statewalker-sandbox | Experimental apps and private prototypes; being dissolved (`docs/refactoring/`) |
