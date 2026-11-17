@@ -49,8 +49,9 @@ Schema subset do LLM providers accept for tool parameters? What is pi-agent-core
   `[A-Za-z0-9_-]{1,64}`; Anthropic: `^[a-zA-Z0-9_-]{1,128}$`); tasks moved out of the MCP core
   into an extension in 2026-07-28.
 - **Provider strict modes are the tightest constraint:** OpenAI and Anthropic strict mode both
-  require `additionalProperties: false` everywhere and (OpenAI) every property `required`, reject
-  `allOf`/`not`/`if`, and Anthropic rejects recursion and numeric/length bounds. pi-ai 1.4.0
+  require `additionalProperties: false` everywhere and (OpenAI) every property `required`; OpenAI
+  rejects `allOf`/`not`/`if`, and Anthropic rejects recursion, `allOf` with `$ref`, and
+  numeric/length bounds. pi-ai 1.4.0
   already rewrites schemas to that subset and falls back to non-strict when it cannot.
 - **pi-agent-core's `AgentTool`** = pi-ai `Tool` (`name`, `description`, `parameters: TSchema`,
   `constrainedSampling?`) + `label`, `prepareArguments?`, `outputSchema?`, `execute`, `replay?`,
@@ -115,8 +116,7 @@ export interface Tool<TParameters extends TSchema = TSchema> {
 `ConstrainedSamplingConfig` is `{ type: "json_schema"; strict: "prefer" | "require" }` or
 `{ type: "grammar"; variants: GrammarVariants }` (lines 521–527).
 
-**pi-agent-core `AgentTool`** (`@earendil-works/pi-agent-core@1.4.0`, `dist/types.d.ts`; the five
-installed copies are byte-identical):
+**pi-agent-core `AgentTool`** (`@earendil-works/pi-agent-core@1.4.0`, `dist/types.d.ts`):
 - `ToolExecutionMode = "sequential" | "parallel"` (line 26); "parallel": "tool calls are prepared
   sequentially, then allowed tools execute concurrently" (lines 20–25).
 - `AgentToolResult<T>` (lines 370–393): `content: (TextContent | ImageContent)[]` ("returned to
