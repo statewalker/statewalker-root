@@ -13,7 +13,7 @@ What has already been designed, prototyped, built or decided for a published, is
 
 ## Sources
 
-- **Google Drive:** session notes, about 25 read in full out of more than 150 hits. Folder and file names are given in the text; file ids are in the map's comments where needed.
+- **Google Drive:** session notes, about 25 read in full out of more than 150 hits. Folder and file names are given in the text.
 - **Claude Code sessions:** about 250 listed (June to November 2026), about 20 read, mostly their latest events only. They are named by title and date.
 - **Code:** shallow clones of statewalker-shared, cellb.dev, statewalker-kernel, statewalker-shell-react, statewalker-ai, httpeers, sandclaw, statewalker-shell-theia, statewalker-knowledge, webrun-sites and statewalker-sandbox (default branches, 2026-11-17).
 - **This repository:** issues, ADRs and `docs/research/`.
