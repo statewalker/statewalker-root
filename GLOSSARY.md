@@ -52,15 +52,19 @@ found it while working).
 
 ## Platform
 
-**Fragment**: the unit of extension of the platform: a manifest plus at least one of a server half,
-a client half or an agent half. It has its own identity, version and lifecycle.
+**Fragment**: the unit of extension and of distribution of the platform: a manifest plus at least
+one of a server half, a client half or an agent half. It has its own identity, version and
+lifecycle, and is installed, activated, deactivated and removed as a whole.
 _Avoid_: plug-in, extension, module (informal synonyms at most; never as names in code or docs).
 
 **Server half**: the part of a fragment that runs as Workers and Durable Objects, declared as a
 `wrangler.jsonc` project. A fragment has no other kind of server code.
 
-**Agent half**: the part of a fragment that serves AI agents: skills, tools and agent
-definitions, in the harness plugin layout.
+**Agent half**: the agent plugins a fragment carries, if any; they come and go with the fragment.
+
+**Agent plugin**: a package of skills, tools and agent definitions for AI harnesses, in the Agent
+Plugins format. A different thing from a fragment: a fragment may carry agent plugins, but is not
+one.
 
 **Client half**: the part of a fragment that contributes to the shell: commands, menus, views,
 components, settings, messages, themes.
