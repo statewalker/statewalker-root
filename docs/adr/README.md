@@ -8,3 +8,4 @@ line per ADR, newest last.
 - [2026-11-14 two-tier-review](2026-11-14-two-tier-review.md): a short merge gate blocking only critical findings on every pull request, plus a weekly health review per project.
 - [2026-11-14 issues-placed-by-subject](2026-11-14-issues-placed-by-subject.md): an issue about one project goes to that project's tracker; root holds plans and the process; deferred bugs are every open `bug` in a project.
 - [2026-11-16 harness-in-statewalker-ai](2026-11-16-harness-in-statewalker-ai.md): the AI harness replaces statewalker-ai's agent stack; statewalker-ai drops to L3; Biscuit moves to its own L0 project.
+- [2026-11-17 fragments-with-wrangler-server-halves](2026-11-17-fragments-with-wrangler-server-halves.md): the fragment is the platform's unit of extension; its optional server half is always a `wrangler.jsonc` project, one Worker per fragment.
