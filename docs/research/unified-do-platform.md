@@ -33,7 +33,7 @@ The gaps are the **joining parts**:
 - a runtime plug-in lifecycle (install, activate, deactivate, remove, versions);
 - i18n, branding and a mobile shell.
 
-There is one **decision conflict** to settle first. In the Sandclaw grilling session (2026-10-20, Q2) you decided: *"Durable Objects are one more way to package apps, not the base. Fragments stay the base"*, because the DO design was "still a spike". Today's request makes `wrangler.jsonc` per fragment the base. Since then cellb has matured (0.11.1, 70 conformance scenarios, the platform composed of `wrangler.jsonc` apps, the sandbox). So the reason behind Q2 may no longer hold, but the decision should be reopened explicitly.
+There is one **decision conflict** to settle first. In the Sandclaw grilling session (2026-10-20, Q2) the human decided: *"Durable Objects are one more way to package apps, not the base. Fragments stay the base"*, because the DO design was "still a spike". The request that opened the map makes `wrangler.jsonc` per fragment the base. Since then cellb has matured (0.11.1, 70 conformance scenarios, five DO apps composed through one `wrangler.jsonc` in `packages/platform`, the sandbox's `wrangler.jsonc` project format). So the reason behind Q2 may no longer hold, but the decision should be reopened explicitly.
 
 ---
 
@@ -46,9 +46,9 @@ There is one **decision conflict** to settle first. In the Sandclaw grilling ses
 - `@statewalker/cellb` 0.11.1 (cellb.dev) is a celld/Cloudflare-compatible runtime for the browser (ServiceWorker, shard Dedicated Worker, SQLite WASM on OPFS) and for Node.
   - Bindings: Workers, DOs, facets, KV, Queues, D1, R2, Workflows, cron, assets, Worker Loader (dynamic workers), WebSockets, and the `ai` binding.
   - `loadProject(source)` takes a `wrangler.json(c)` folder or a FilesApi. `loadProjectBindings` loads only the bindings the project declares (the demo dropped from 2.18 MB to 0.52 MB, cellb#90).
-  - Extension seams in `src/ports.ts`: `OpenCellSql`, `CellDurability`, `ObjectStore`, `Clock`/`Lease`, Worker Loader, `CellRouter`/`shardOf`.
+  - Extension seams: `OpenCellSql`, `CellDurability`, `ObjectStore` and `Clock`/`Lease` in `src/ports.ts`; the Worker Loader in `src/bindings/worker-loader.ts`; `CellRouter` in `src/router/cell-router.ts` and `shardOf` in `src/core/shard.ts` (all exported from `src/index.ts`).
   - Drive: "Cellb as an Extension Platform", 2026-11-09.
-- `cellb.dev/packages/platform` (private) holds five DO apps, **each with its own `wrangler.jsonc`, composed into one Worker**: the package store, the ESM CDN, user projects, the bundler (producing a `loader.json` Worker Loader payload) and notebooks. They run on Wrangler, celld, CellB Node and CellB in the browser. This is the closest existing thing to "fragment = wrangler.jsonc", but the composition happens **at build time**.
+- `cellb.dev/packages/platform` (private) holds five DO apps (the package store, the ESM CDN, user projects, the bundler producing a `loader.json` Worker Loader payload, and notebooks), in separate packages (`platform-core`, `esm-cdn`, `bundler`, `astro-builder`, `notebooks`) but **declared together in one shared `packages/platform/wrangler.jsonc` and composed into one Worker**. They run on Wrangler, celld, CellB Node and CellB in the browser. This is the closest existing thing to "fragment = wrangler.jsonc", but there is no `wrangler.jsonc` per app, and the composition happens **at build time**. The sandbox's projects (below) are the per-unit `wrangler.jsonc` precedent.
 - `cellb.dev/apps/sandbox` (private) is a CodeSandbox-like tool and the most complete precedent:
   - project = `wrangler.jsonc` + `client/index.html` + `AGENTS.md`;
   - a Flue agent in a DO;
