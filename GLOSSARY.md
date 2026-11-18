@@ -106,3 +106,11 @@ _Avoid_: widget.
 
 **Component catalog**: the set of catalog components a surface may use: the platform's base
 catalog plus those of the installed fragments.
+
+**Zone**: a named region of the workbench layout where views are placed: left side, right side,
+bottom panel, centre.
+_Avoid_: area, region, slot (the runtime mechanism behind extension points).
+
+**Device mode**: the layout regime the shell picks from its available width: desktop, compact or
+mobile. Each mode keeps its own saved layout.
+_Avoid_: breakpoint (the threshold, not the regime), form factor.
