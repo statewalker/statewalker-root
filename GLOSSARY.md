@@ -54,7 +54,8 @@ found it while working).
 
 **Fragment**: the unit of extension and of distribution of the platform: a manifest plus at least
 one of a server half, a client half or an agent half. It has its own identity, version and
-lifecycle, and is installed, activated, deactivated and removed as a whole.
+lifecycle, and is installed, enabled, disabled and removed as a whole; each of its halves
+activates on its own.
 Eclipse calls this a plug-in; an Eclipse "fragment" (a partial bundle attached to a host) is a
 different thing.
 _Avoid_: plug-in, module (informal synonyms at most; never as names in code or docs).
