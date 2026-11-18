@@ -10,7 +10,7 @@ The Drive note "06 Cross-Cutting Comparison and Recommended Shell Direction" (20
 
 - `statewalker-shell-react` has shipped `dockview-react`, shadcn and Tailwind v4.
 - [Client spec layer](https://github.com/statewalker/statewalker-root/issues/115) decided that hand-written views are plain React and that the A2UI catalog is built on shadcn.
-- dockview 8.9 added a pointer drag backend with long-press touch support, which removes the reason to avoid dockview on touch devices.
+- dockview (8.9.1 today; since 6.4) ships a pointer drag backend with long-press touch support (`dnd/pointer/longPress`, `touchOnly`), so the Drive note's "cannot drag panels by touch" is out of date. The shell's current `dockview-react` ^8.4 already includes it.
 
 Fragments are installed while the platform runs ([fragment-manifest-and-extension-points](2026-11-18-fragment-manifest-and-extension-points.md)), so their client code and CSS arrive after the shell has been built.
 
