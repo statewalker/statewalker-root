@@ -69,9 +69,14 @@ one.
 **Client half**: the part of a fragment that contributes to the shell: commands, menus, views,
 components, settings, messages, themes.
 
-**Extension point**: a named, schema-typed place where fragments may contribute, declared by a
-fragment (or by the platform's core).
-_Avoid_: aspect, hook, slot (a slot is one way to implement it).
+**Aspect**: one application-wide dimension that every fragment may fill: server, client, agent.
+Each aspect has its own configuration file per fragment.
+_Avoid_: layer (a project's place in the dependency order), half (the part of one fragment in one
+aspect).
+
+**Extension point**: a named, schema-typed place, declared by one fragment within one aspect, where
+other fragments may contribute (menus in a UI fragment, data sources in a server fragment).
+_Avoid_: hook, slot (a slot is the runtime mechanism behind it).
 
 **Extension**: one fragment's contribution to an extension point.
 _Avoid_: contribution (fine in prose), plug-in.
