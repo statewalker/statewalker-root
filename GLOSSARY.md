@@ -94,3 +94,14 @@ _Avoid_: app (the repository term above: a private package), product, distributi
 **Host**: a place where server halves run: the browser (CellB), a server (CellD or workerd), or
 the cloud (Cloudflare Workers).
 _Avoid_: runtime (the software, not the place), target.
+
+**Surface**: a piece of UI described by an A2UI message stream from outside the client (an agent
+or a server half) and rendered only from catalog components.
+_Avoid_: generated UI (fine in prose), spec.
+
+**Catalog component**: a component a fragment defines once, with typed props and events, that
+surfaces may name; privileged code, reviewed like any fragment code.
+_Avoid_: widget.
+
+**Component catalog**: the set of catalog components a surface may use: the platform's base
+catalog plus those of the installed fragments.
