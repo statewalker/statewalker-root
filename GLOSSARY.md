@@ -55,7 +55,7 @@ found it while working).
 **Fragment**: the unit of extension and of distribution of the platform: a manifest plus at least
 one of a server half, a client half or an agent half. It has its own identity, version and
 lifecycle, and is installed, activated, deactivated and removed as a whole.
-_Avoid_: plug-in, extension, module (informal synonyms at most; never as names in code or docs).
+_Avoid_: plug-in, module (informal synonyms at most; never as names in code or docs).
 
 **Server half**: the part of a fragment that runs as Workers and Durable Objects, declared as a
 `wrangler.jsonc` project. A fragment has no other kind of server code.
@@ -68,6 +68,13 @@ one.
 
 **Client half**: the part of a fragment that contributes to the shell: commands, menus, views,
 components, settings, messages, themes.
+
+**Extension point**: a named, schema-typed place where fragments may contribute, declared by a
+fragment (or by the platform's core).
+_Avoid_: aspect, hook, slot (a slot is one way to implement it).
+
+**Extension**: one fragment's contribution to an extension point.
+_Avoid_: contribution (fine in prose), plug-in.
 
 **Platform**: the core and the shell that load, run and manage fragments; empty without them.
 _Avoid_: kernel (one of its packages today), framework.
