@@ -95,8 +95,9 @@ _Avoid_: app (the repository term above: a private package), product, distributi
 the cloud (Cloudflare Workers).
 _Avoid_: runtime (the software, not the place), target.
 
-**Surface**: a piece of UI described by an A2UI message stream from outside the client (an agent
-or a server half) and rendered only from catalog components.
+**Surface**: a piece of UI described by an A2UI message stream, usually from outside the client
+(an agent or a server half) and rarely declared statically by a client half, rendered only from
+catalog components.
 _Avoid_: generated UI (fine in prose), spec.
 
 **Catalog component**: a component a fragment defines once, with typed props and events, that
