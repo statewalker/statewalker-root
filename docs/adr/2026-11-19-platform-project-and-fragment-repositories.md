@@ -24,7 +24,7 @@ A fragment's client half depends on the platform's client API. Fragments must th
    - `packages-react/`: views, catalog components, the A2UI renderer, the shell.
    - `fragments/`: the core fragments.
    - `apps/`: the demo applications, each with its own fragments and launch configurations for each host.
-3. **Sandclaw is an application** in its own project above the platform. Its packages become fragments. The consolidation branch's useful code moves to statewalker-platform, and the branch is dropped.
+3. **Sandclaw is an application** in its own project above the platform. Its `wiki.core`, `file-mounts.core` and `file-panels.core` become fragments. The consolidation branch's useful code moves to statewalker-platform, and the branch is dropped.
 4. **One repository per high-level fragment**, named `statewalker-fragment-<name>`:
    - it publishes `@statewalker/fragment-<name>` (further packages `@statewalker/fragment-<name>.<aspect>`);
    - its fragment id is `org.statewalker.fragment-<name>`;
@@ -41,6 +41,6 @@ A fragment's client half depends on the platform's client API. Fragments must th
 
 ## Consequences
 
-- When the spec is built, the repository is renamed (an organisation admin's action). `repos.json`, the `CLAUDE.md` project table and `docs/projects.md` follow. Layers L5 and L6 empty out.
+- When the spec is built, the repository is renamed (an organisation admin's action). `repos.json`, the `CLAUDE.md` project table and `docs/projects.md` follow. statewalker-shell-react leaves L6, and the layers above L4 are recomputed: the fragment repositories and sandclaw land above the platform.
 - Steps 3.2 and 3.3 of `docs/refactoring/README.md` are superseded.
 - Each new fragment repository joins the ecosystem's CI baseline and merge gate like any project.
