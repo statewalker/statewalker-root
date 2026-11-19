@@ -33,7 +33,7 @@ Two existing documents bound the choices:
 2. **Only system code holds root authority.** The kernel and the core fragments ship with the platform and cannot be uninstalled. Only they hold root keys and issue capabilities: the user's identity, Biscuit roots, and grants to sandboxes and agent sessions.
 3. **Untrusted code runs only in sandboxes**, and becomes a fragment only through an explicit, consented install. This covers user- or agent-written code and apps served by peers.
    - In the browser, a sandbox is an iframe on a random origin, which may hold its own CellB runtime or virtual Node.
-   - On servers and in the cloud, a sandbox is a Dynamic Worker, a separate process or a container, reusing the AI harness's executor kinds. CellB worker threads are not a boundary.
+   - On servers and in the cloud, a sandbox is a Dynamic Worker on Cloudflare, or a separate process or container (Wasmer pools) on CellD or Node, reusing the AI harness's executor kinds. CellB worker threads, and Dynamic Workers loaded by CellB or CellD, are not a boundary.
 
    A sandbox reaches the system only through a broker. Its grants are deny-by-default, visible to the user, and expressed in the AI harness's capability model, so agent sessions and sandboxes share one security system.
 
@@ -47,5 +47,5 @@ Two existing documents bound the choices:
 ## Consequences
 
 - Installing a fragment is a security decision for the user. Signing and publisher verification come later; until then the record is source and hash.
-- Agent tools and the sandbox fragment (as in cellb.dev/sandbox) run on the harness executors and broker grants, not as fragments.
+- Code that agent tools or a sandboxing fragment (as in cellb.dev/sandbox) build and run executes on the harness executors under broker grants, never as a fragment.
 - A fragment's client half can read anything the shell origin holds. Secrets such as LLM keys belong in server halves or behind proxies, not in client storage.

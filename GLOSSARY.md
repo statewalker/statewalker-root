@@ -124,8 +124,9 @@ the core fragments that define extensions, commands, agent sessions, the user's 
 capability model, l10n and branding, and the UI that installs and manages fragments.
 _Avoid_: core (alone, ambiguous), framework.
 
-**Sandboxed code**: code the user did not install as a fragment, typically written by the user or
-an agent and built on the fly from files; never trusted, so it runs only inside a sandbox.
+**Sandboxed code**: code that is neither system code nor an installed fragment, such as code
+written by the user or an agent and built on the fly from files, or a peer's app; never trusted,
+so it runs only inside a sandbox.
 _Avoid_: user code (also covers fragments the user wrote), plugin.
 
 **Sandbox**: an execution environment isolated from system code and fragments, such as an iframe
