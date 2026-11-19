@@ -114,3 +114,21 @@ _Avoid_: area, region, slot (the runtime mechanism behind extension points).
 **Device mode**: the layout regime the shell picks from its available width: desktop, compact or
 mobile. Each mode keeps its own saved layout.
 _Avoid_: breakpoint (the threshold, not the regime), form factor.
+
+**Runtime**: the software that runs Workers and Durable Objects: CellB, CellD, workerd or wrangler,
+Cloudflare. The platform runs on a runtime; a host is where one runs.
+_Avoid_: platform (the layer above), engine.
+
+**System code**: the platform's own code on top of a runtime, client and server: the kernel and
+the core fragments that define extensions, commands, agent sessions, the user's security and
+capability model, l10n and branding, and the UI that installs and manages fragments.
+_Avoid_: core (alone, ambiguous), framework.
+
+**Sandboxed code**: code that is neither system code nor an installed fragment, such as code
+written by the user or an agent and built on the fly from files, or a peer's app; never trusted,
+so it runs only inside a sandbox.
+_Avoid_: user code (also covers fragments the user wrote), plugin.
+
+**Sandbox**: an execution environment isolated from system code and fragments, such as an iframe
+on a random origin with its own runtime or virtual Node, reaching the system only through a broker.
+_Avoid_: container (one possible implementation), playground.
