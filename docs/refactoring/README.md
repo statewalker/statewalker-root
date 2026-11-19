@@ -68,8 +68,8 @@ commit message), make it build and test in the destination, then delete from the
 | Step | Change | Fixes |
 |---|---|---|
 | 3.1 | Move `apps/chat-mini.chat`, `apps/chat-mini.chat-react` to `packages/` | P5 |
-| 3.2 | Publish `app-shell` from statewalker-shell-react | P6 |
-| 3.3 | Move `file-mounts.core`, `file-panels.core` down to statewalker-kernel; merge the overlap with `webrun-files-composite` | P6 |
+| 3.2 | ~~Publish `app-shell` from statewalker-shell-react~~ Superseded: shell-react merges into statewalker-platform ([platform-project-and-fragment-repositories](../adr/2026-11-19-platform-project-and-fragment-repositories.md)) | P6 |
+| 3.3 | ~~Move `file-mounts.core`, `file-panels.core` down to statewalker-kernel~~ Superseded: they become fragments (same ADR); the overlap with `webrun-files-composite` still needs merging | P6 |
 | 3.4 | peershare per decision 0.3; rename the project if decided | P5 |
 
 ## Phase 4 — examples convention (one ticket per project, lowest layer first; blocked by 0.2)
