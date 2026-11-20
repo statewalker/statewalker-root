@@ -132,3 +132,18 @@ _Avoid_: user code (also covers fragments the user wrote), plugin.
 **Sandbox**: an execution environment isolated from system code and fragments, such as an iframe
 on a random origin with its own runtime or virtual Node, reaching the system only through a broker.
 _Avoid_: container (one possible implementation), playground.
+
+**Kernel**: the minimal part of the platform that loads fragments, routes extensions to the
+extension points' owners, runs the lifecycle and places fragments on hosts; it declares no
+extension points of its own.
+_Avoid_: platform (the whole), core (alone, ambiguous).
+
+**Core fragment**: a fragment that ships with the platform as system code, under the reserved
+`system.` id prefix; it cannot be uninstalled.
+_Avoid_: built-in plugin, system plugin.
+
+**Profile**: the user's stored state on one host: settings values, saved layouts and the vault.
+_Avoid_: account (implies a server-side user), workspace.
+
+**Vault**: the encrypted part of a profile that holds secrets, unlocked by the user.
+_Avoid_: keychain, keystore, secret store.
