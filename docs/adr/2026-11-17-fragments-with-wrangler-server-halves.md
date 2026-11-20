@@ -1,6 +1,6 @@
 # Fragments are the unit of the platform; their server halves are wrangler projects, one Worker each
 
-**Status**: accepted, 2026-11-17. Decided in
+**Status**: accepted, 2026-11-17; amended by [kernel-and-core-fragments](2026-11-20-kernel-and-core-fragments.md) (extension references are a third channel between fragments). Decided in
 [Destination and base unit: fragment or wrangler.jsonc per fragment?](https://github.com/statewalker/statewalker-root/issues/113),
 on the map [statewalker-root#112](https://github.com/statewalker/statewalker-root/issues/112).
 
