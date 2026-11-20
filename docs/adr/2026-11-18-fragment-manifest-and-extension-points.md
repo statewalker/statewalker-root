@@ -1,6 +1,6 @@
 # Fragment manifest: per-aspect files, extension points and a minimal kernel
 
-**Status**: accepted, 2026-11-18. Decided in
+**Status**: accepted, 2026-11-18; amended by [kernel-and-core-fragments](2026-11-20-kernel-and-core-fragments.md) (core fragment ids use the reserved `system.` prefix, not reverse-domain). Decided in
 [Fragment manifest: which files declare server services and client contributions?](https://github.com/statewalker/statewalker-root/issues/114),
 on the map [statewalker-root#112](https://github.com/statewalker/statewalker-root/issues/112).
 It builds on [fragments-with-wrangler-server-halves](2026-11-17-fragments-with-wrangler-server-halves.md).
@@ -55,5 +55,5 @@ The harness already loads Agent Plugins directories (`docs/research/plugin-and-t
 
 - Existing kernel and shell-react fragments need static declarations generated for them. Their `init(ctx)` code shrinks to registering handlers.
 - Which core fragments ship, and which extension points each one declares, is the next decision: [Which core fragments ship with the empty platform?](https://github.com/statewalker/statewalker-root/issues/150).
-- **Open conflict with [fragments-with-wrangler-server-halves](2026-11-17-fragments-with-wrangler-server-halves.md).** That ADR lets fragments call each other only through commands on the client, and only declared dependencies on the server. An extension's code reference lets the owner of an extension point call into a contributing fragment that neither side declares, on the client possibly through a module export rather than a command. How these calls are routed and allowed is not decided yet; it is a question for [Which core fragments ship with the empty platform?](https://github.com/statewalker/statewalker-root/issues/150).
+- **Conflict with [fragments-with-wrangler-server-halves](2026-11-17-fragments-with-wrangler-server-halves.md), resolved** in [kernel-and-core-fragments](2026-11-20-kernel-and-core-fragments.md): extension references are a third legitimate channel between fragments, wired by the kernel and scoped to the owner of the extension point.
 - The lifecycle (states, version resolution, upgrades, removal) is decided in [Fragment lifecycle](https://github.com/statewalker/statewalker-root/issues/151).
