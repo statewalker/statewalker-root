@@ -1,6 +1,6 @@
 # Fragment manifest: per-aspect files, extension points and a minimal kernel
 
-**Status**: accepted, 2026-11-18; amended by [kernel-and-core-fragments](2026-11-20-kernel-and-core-fragments.md) (core fragment ids use the reserved `system.` prefix, not reverse-domain). Decided in
+**Status**: accepted, 2026-11-18; amended by [kernel-and-core-fragments](2026-11-20-kernel-and-core-fragments.md) (core fragment ids use the reserved `system.` prefix, not reverse-domain) and by [fragment-lifecycle](2026-11-20-fragment-lifecycle.md) (no manifest namespace). Decided in
 [Fragment manifest: which files declare server services and client contributions?](https://github.com/statewalker/statewalker-root/issues/114),
 on the map [statewalker-root#112](https://github.com/statewalker/statewalker-root/issues/112).
 It builds on [fragments-with-wrangler-server-halves](2026-11-17-fragments-with-wrangler-server-halves.md).
@@ -29,7 +29,7 @@ The harness already loads Agent Plugins directories (`docs/research/plugin-and-t
    An optional `fragment.config.ts` generates all of them, and the generated JSON is the contract:
    - every file carries a versioned `$schema`;
    - every schema inside is JSON Schema 2020-12;
-   - the namespace is `org.statewalker.fragment` (provisional).
+   - there is no namespace key; `$schema` URLs are versioned, neutral and configurable ([fragment-lifecycle](2026-11-20-fragment-lifecycle.md) replaced the provisional `org.statewalker.fragment`).
 3. **The platform fixes the aspects** (`server`, `client`, `agent`). Fragments cannot add aspects. They open **extension points** instead: an id qualified by the declaring fragment (`<fragment-id>/<name>`) plus a schema, declared inside one aspect file. Other fragments contribute **extensions** in the same aspect.
 4. **Extensions are static data plus an optional lazy code reference**: a client module export, a server service-binding entrypoint method, or a command id. Code may add runtime extensions through slots. The owner of an extension point reads one registry per aspect, with change events.
    - Contributing needs no dependency on the owner.
