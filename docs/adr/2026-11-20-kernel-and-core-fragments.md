@@ -27,7 +27,7 @@ The packages in statewalker-kernel and statewalker-shell-react, and the vaults b
 2. **Extension references are a third channel** between fragments, beside commands and declared dependencies.
    - By contributing, a fragment exposes the referenced code only to the owner of that extension point.
    - The kernel wires it: it imports the module export on the client, and adds the service binding on the server, with no `requires`.
-3. **Eleven core fragments, under the reserved prefix `system.`.** The kernel refuses that prefix from any fragment not shipped with the platform.
+3. **Eleven core fragments, under the reserved prefix `system.`.** The kernel refuses that prefix from any fragment not shipped with the platform. Core fragment ids are the one exception to the reverse-domain ids of [fragment-manifest-and-extension-points](2026-11-18-fragment-manifest-and-extension-points.md) (decision 1).
 
    | Core fragment | Extension points it declares |
    |---|---|
@@ -62,6 +62,6 @@ The packages in statewalker-kernel and statewalker-shell-react, and the vaults b
 
 ## Consequences
 
-- statewalker-platform's `fragments/` holds these eleven fragments. Their packages come from statewalker-kernel, statewalker-shell-react, statewalker-ai and sandclaw.
+- statewalker-platform's `fragments/` holds these eleven fragments. Their packages come from statewalker-kernel, statewalker-shell-react, statewalker-ai, sandclaw, statewalker-shared (`shared-commands`, `shared-slots`) and httpeers (`webrun-biscuit`).
 - Syncing a profile across devices is not designed yet.
 - The lifecycle ([Fragment lifecycle](https://github.com/statewalker/statewalker-root/issues/151)) must keep extension references valid while fragments are enabled, disabled and removed.
