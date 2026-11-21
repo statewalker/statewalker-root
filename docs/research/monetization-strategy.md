@@ -1,6 +1,6 @@
 # How can the StateWalker projects make money, and what is the shortest path?
 
-Research requested in a session on 2026-11-21 (no ticket yet). Sources: the README of every
+Research for the map [Monetization: StateWalker's first paid product](https://github.com/statewalker/statewalker-root/issues/193), 2026-11-21. Sources: the README of every
 project in `repos.json` (shallow clones of `main`, 2026-11-21), this repository's ADRs, research
 notes and open issues, and the public web pages listed under **Sources**. Statements marked
 **(inference)** are this note's own reasoning; figures from third-party sites are marked as such.
@@ -435,10 +435,10 @@ For each community: who they are, what StateWalker offers them, the concrete fir
 
 ## 8. Suggested next steps in this repository
 
-1. File a Wayfinder map "Monetization: the CellB Sandbox as the first product" on
-   `statewalker/statewalker-root`, with decision tickets: the wedge; the pricing and plans; the
-   licence of the control plane (private, source-available or MIT); the brand and domain;
-   billing provider; what the free tier includes for hosted models.
+1. Work the map [Monetization: StateWalker's first paid product](https://github.com/statewalker/statewalker-root/issues/193),
+   which turns this note's proposals into decisions: the wedge, the free beta's contents, plans
+   and prices, the licence of the commercial parts, the brand and domain, the billing provider,
+   the partner channels and the first outreach moves.
 2. Re-rank the harness tickets so meters, limits, the usage API and the model gateway (#134,
    #179–#181) come before less revenue-critical ones, since they are the billing hooks.
 3. Ask #186 ("which 2–3 demo applications ship") to pick the Sandbox as one of the demos.
