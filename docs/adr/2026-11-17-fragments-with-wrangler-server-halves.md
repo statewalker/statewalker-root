@@ -1,6 +1,6 @@
 # Fragments are the unit of the platform; their server halves are wrangler projects, one Worker each
 
-**Status**: accepted, 2026-11-17; amended by [kernel-and-core-fragments](2026-11-20-kernel-and-core-fragments.md) (extension references are a third channel between fragments). Decided in
+**Status**: accepted, 2026-11-17; amended by [kernel-and-core-fragments](2026-11-20-kernel-and-core-fragments.md) (extension references are a third channel between fragments) and by [fragment-host-and-routing](2026-11-21-fragment-host-and-routing.md) (one fragment DO per fragment). Decided in
 [Destination and base unit: fragment or wrangler.jsonc per fragment?](https://github.com/statewalker/statewalker-root/issues/113),
 on the map [statewalker-root#112](https://github.com/statewalker/statewalker-root/issues/112).
 
@@ -48,7 +48,8 @@ That makes a `wrangler.jsonc` project a server packaging that runs unchanged in 
   bindings with a typed contract (Zod, projected to OpenAPI and MCP). The research for #147
   (`docs/research/fragment-do-rpc.md`) refines it: the binding is a service binding to the
   dependency's `WorkerEntrypoint`, routing to the fragment's own named DOs, with no `script_name`
-  bindings across fragments.
+  bindings across fragments. [fragment-host-and-routing](2026-11-21-fragment-host-and-routing.md)
+  later chose one fragment DO per fragment as the entry point instead.
 - **The boundary between halves.** It is native HTTP and WebSocket at a base URL. A route table
   places each fragment on a host, and moving a fragment is a configuration change.
 - **Runtime gaps.** CellB and CellD must load, isolate and unload many small projects: the host

@@ -147,3 +147,11 @@ _Avoid_: account (implies a server-side user), workspace.
 
 **Vault**: the encrypted part of a profile that holds secrets, unlocked by the user.
 _Avoid_: keychain, keystore, secret store.
+
+**Fragment DO**: the one Durable Object that anchors a fragment's server half, named after the
+fragment; it is awake while the server half serves and idle otherwise.
+_Avoid_: main DO, root object.
+
+**Fragment host**: the multi-project runtime on a CellB host (browser or server) that loads the
+server halves of all enabled fragments side by side and wires them together; Cloudflare has none.
+_Avoid_: container, plugin host (Theia's, a different thing).
