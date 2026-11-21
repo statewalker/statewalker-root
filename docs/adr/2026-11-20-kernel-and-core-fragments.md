@@ -1,6 +1,6 @@
 # A minimal kernel, eleven `system.*` core fragments, and extension references as a third channel
 
-**Status**: accepted, 2026-11-20. Decided in
+**Status**: accepted, 2026-11-20; amended by [commands-exposures-and-agents](2026-11-21-commands-exposures-and-agents.md) (`tools` holds only commands exposed to agents; `system.agents` also declares `agent-context`). Decided in
 [Which core fragments ship with the empty platform, and which extension points does each declare?](https://github.com/statewalker/statewalker-root/issues/150),
 on the map [statewalker-root#112](https://github.com/statewalker/statewalker-root/issues/112).
 It amends [fragments-with-wrangler-server-halves](2026-11-17-fragments-with-wrangler-server-halves.md).
@@ -38,7 +38,7 @@ The packages in statewalker-kernel and statewalker-shell-react, and the vaults b
    | `system.l10n` | `l10n` |
    | `system.a2ui` | `catalog`, plus the surface renderer |
    | `system.security` | `capabilities` (identity, grants, Allow/Ask/Block) |
-   | `system.agents` | `agent-plugins`, `tools` (commands as tools), plus the harness session API |
+   | `system.agents` | `agent-plugins`, `tools` (commands exposed to agents), `agent-context` (workbench context for agents), plus the harness session API |
    | `system.fragments` | none; it is the fragment manager and consent screen |
    | `system.host` | `host-services` (clipboard, file pickers, URL state) |
    | `system.profile` | `secrets`; it stores settings values, saved layouts and the vault |

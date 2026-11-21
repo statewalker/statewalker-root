@@ -1,6 +1,6 @@
 # Fragment manifest: per-aspect files, extension points and a minimal kernel
 
-**Status**: accepted, 2026-11-18; amended by [kernel-and-core-fragments](2026-11-20-kernel-and-core-fragments.md) (core fragment ids use the reserved `system.` prefix, not reverse-domain) and by [fragment-lifecycle](2026-11-20-fragment-lifecycle.md) (no manifest namespace). Decided in
+**Status**: accepted, 2026-11-18; amended by [kernel-and-core-fragments](2026-11-20-kernel-and-core-fragments.md) (core fragment ids use the reserved `system.` prefix, not reverse-domain) and by [fragment-lifecycle](2026-11-20-fragment-lifecycle.md) (no manifest namespace), and by [commands-exposures-and-agents](2026-11-21-commands-exposures-and-agents.md) (agent exposure is opt-in). Decided in
 [Fragment manifest: which files declare server services and client contributions?](https://github.com/statewalker/statewalker-root/issues/114),
 on the map [statewalker-root#112](https://github.com/statewalker/statewalker-root/issues/112).
 It builds on [fragments-with-wrangler-server-halves](2026-11-17-fragments-with-wrangler-server-halves.md).
@@ -35,7 +35,7 @@ The harness already loads Agent Plugins directories (`docs/research/plugin-and-t
    - Contributing needs no dependency on the owner.
    - Extensions whose owner is missing stay dormant until the owner arrives, and are validated against the owner's schema when it does. Files are validated against their `$schema` at install time.
 5. **The kernel is minimal.** It loads fragments, routes extensions and runs the lifecycle. Commands, menus, views, settings, l10n and branding are extension points of core fragments, with short reserved ids.
-6. **Commands** are declared statically, handled by the client or server half of any fragment and ranked by priority. Every command is also offered to agents as a tool, under Allow/Ask/Block.
+6. **Commands** are declared statically, handled by the client or server half of any fragment and ranked by priority. Every command is also offered to agents as a tool, under Allow/Ask/Block. (Amended: exposure to agents, HTTP and MCP is opt-in per command; see [commands-exposures-and-agents](2026-11-21-commands-exposures-and-agents.md).)
 7. **l10n and branding.** Message bundles are namespaced per fragment; language packs may translate other fragments' keys; `Intl` is used, and locale changes need no reload. One brand is active at a time (name, logo, colour tokens, default layout).
 8. **Distribution and activation.**
    - The built folder is packed as one archive identified by its content hash; installing needs no build.
