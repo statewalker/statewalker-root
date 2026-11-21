@@ -162,3 +162,11 @@ _Avoid_: origin (a browser term), owner.
 **Route table**: the user's mapping from fragments to their homes; fragments not listed are at
 home on the local host.
 _Avoid_: registry, placement map.
+
+**Command**: a named, typed operation a fragment offers, with its input, output and errors; the one
+representation behind bus calls, agent tools, HTTP endpoints and MCP.
+_Avoid_: action, endpoint, tool (each is one exposure of a command).
+
+**Exposure**: one way a command is offered beyond the internal bus: to agents as a tool, over HTTP,
+or through MCP; each is chosen per command.
+_Avoid_: export, publish.
