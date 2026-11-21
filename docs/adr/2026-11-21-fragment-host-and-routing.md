@@ -20,7 +20,7 @@ On Cloudflare, Dynamic Workers can't take DO namespaces.
 
 ## Decision
 
-1. **One fragment host per host.** A multi-project CellB runtime loads every enabled fragment's project side by side, with namespaces per project. Fragments share the host's realm because they are trusted.
+1. **One fragment host per CellB host** (browser or server; Cloudflare has none). A multi-project CellB runtime loads every enabled fragment's project side by side, with namespaces per project. Fragments share the host's realm because they are trusted.
    - Servers run CellB on Node; CellD joins once it can run several applications.
    - On Cloudflare, each fragment is a separately deployed Worker with native service bindings, and its lifecycle is a deploy through the Cloudflare API.
 2. **One fragment DO per fragment**, at `idFromName(<fragment-id>)`, is the entry point and the anchor of the server lifecycle: awake is active, hibernating is idle, and disabled means never woken. Private DO classes behind it are allowed.
@@ -28,10 +28,11 @@ On Cloudflare, Dynamic Workers can't take DO namespaces.
    - In the browser, one ServiceWorker and a shared pool of shard workers route by fragment prefix, then by DO id.
    - Locally the prefix is `/fragments/{fragment-id}/{path}`; across HTTPeers it is `/peers/{peerId}/fragments/{fragment-id}/{path}`.
    - The route table maps each prefix to its serving host.
-   - For a fragment that isn't installed, or is disabled or unresolved, the ServiceWorker answers 404 or 503 itself.
-   - Fragments are exposed to peers only through a capability the user grants.
-4. **Wiring and transport.** The kernel computes the wiring from the manifests, and bindings exist only while the fragment is active. A binding is in-runtime on the same shard, MessagePort across shards, and HTTP across hosts. **Contracts between fragments carry only cloneable values and streams.**
-5. **Unload and upgrade:** stop routing, drain in-flight requests, then gracefully restart the affected shard workers or Node worker threads. DO state is durable, and there are no realms per fragment.
+   - For a fragment that isn't installed, or is disabled or unresolved, the ServiceWorker answers 404 or 503 itself, without waking a DO.
+   - Fragments are not exposed to peers by default. The user grants exposure per fragment and per peer or team, as a Biscuit capability checked by HTTPeers; only HTTP data crosses.
+4. **Wiring and transport.** The kernel computes the wiring from the manifests, and bindings exist only while the fragment is active, and later calls raise the defined unavailable error. A binding is in-runtime on the same shard, MessagePort across shards, and HTTP across hosts. **Contracts between fragments carry only cloneable values and streams.**
+5. **Unload and upgrade:** stop routing, drain in-flight requests with a timeout, then gracefully restart the affected shard workers or Node worker threads. DO state is durable, and there are no realms per fragment.
+6. **Capacity:** no fixed cap. Memory and shard counts are measured in the demo applications. celld's limit of 256 live Dynamic Workers doesn't apply, because the fragment host loads projects, not Dynamic Workers.
 
 ## Considered options
 

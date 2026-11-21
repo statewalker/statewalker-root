@@ -152,6 +152,6 @@ _Avoid_: keychain, keystore, secret store.
 fragment; it is awake while the server half serves and idle otherwise.
 _Avoid_: main DO, root object.
 
-**Fragment host**: the runtime on one host that loads the server halves of all enabled fragments
-side by side and wires them together.
+**Fragment host**: the multi-project runtime on a CellB host (browser or server) that loads the
+server halves of all enabled fragments side by side and wires them together; Cloudflare has none.
 _Avoid_: container, plugin host (Theia's, a different thing).
