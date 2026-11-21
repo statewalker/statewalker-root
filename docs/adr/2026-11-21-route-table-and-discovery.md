@@ -23,7 +23,7 @@ A Durable Object's data may be written by only one runtime at a time (cellb `doc
    - `/fragments/.well-known/index.json`: the installed fragments, filtered to what the caller may see.
 
    `/peers/{self}/…` answers exactly as `/fragments/…`.
-4. **Moving a fragment is an explicit Move:** check bindings, install, deactivate the old home, export and import the DO data, switch the route, activate. One home serves at a time, and the old data is kept until the user confirms deleting it.
+4. **Moving a fragment is an explicit Move:** check bindings, install, deactivate the old home, export and import the DO data, switch the route, activate. One home serves at a time, and the old data is kept until the user confirms deleting it. Switching the route without moving data is allowed only before the fragment has any data.
 5. **Placement is local by default.** A fragment needing bindings the local host lacks goes to a capable host the user picks, or is refused.
 
 ## Considered options
@@ -38,5 +38,5 @@ A Durable Object's data may be written by only one runtime at a time (cellb `doc
 - **CellB work,** filed in cellb.dev:
   - [#198](https://github.com/statewalker/cellb.dev/issues/198): host description;
   - [#199](https://github.com/statewalker/cellb.dev/issues/199): import with a single-writer hand-over.
-- **Fixed addresses.** The `.well-known` addresses become part of the platform's public contract between peers; changing them later needs a versioned transition.
+- **Fixed addresses.** The `.well-known` addresses become part of the platform's public contract between peers.
 - **Sync.** Sharing one fragment's data across devices without a peer or URL home waits for profile sync, which is not designed yet.

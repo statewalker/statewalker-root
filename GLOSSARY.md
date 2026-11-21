@@ -156,8 +156,7 @@ _Avoid_: main DO, root object.
 server halves of all enabled fragments side by side and wires them together; Cloudflare has none.
 _Avoid_: container, plugin host (Theia's, a different thing).
 
-**Home**: the one host whose fragment host serves a fragment's server half and keeps its data for
-a user; every device that shares the fragment's data routes to it.
+**Home**: the one host that serves a fragment's server half and keeps its data for a user; every device that shares the fragment's data routes to it.
 _Avoid_: origin (a browser term), owner.
 
 **Route table**: the user's mapping from fragments to their homes; fragments not listed are at
