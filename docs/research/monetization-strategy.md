@@ -47,7 +47,7 @@ notes and open issues, and the public web pages listed under **Sources**. Statem
 - **Revenue that needs no product, starting now:** sponsored development and integration work
   (the EclipseSource model around Theia), GitHub Sponsors, and conference talks that feed the
   Sandbox's funnel.
-- **Focus is the main risk.** Twenty projects and five possible product lines; picking one wedge
+- **Focus is the main risk.** Twenty-one projects and five possible product lines; picking one wedge
   and letting the others be its features is the strategy. Section 6 says which.
 
 ---
@@ -369,7 +369,7 @@ For each community: who they are, what StateWalker offers them, the concrete fir
 
 **Phase 0 (now, weeks 0–2): decide and announce, earn from expertise.**
 
-- Decide the wedge (this note recommends the Sandbox) as a Wayfinder map on this repository, so
+- Decide the wedge (this note recommends the Sandbox) on the map #193, so
   the platform map (#112) and the harness spec (#111) order their work by it.
 - Open a services page (integration work on CellB, browser-only Theia, httpeers) and GitHub
   Sponsors; first revenue without new code.
@@ -421,7 +421,7 @@ For each community: who they are, what StateWalker offers them, the concrete fir
 - **Cloudflare builds the same thing.** It now owns celld; a browser runtime is a plausible
   roadmap item. Defence: partner early, be the reference implementation, make acquisition the
   natural outcome.
-- **Focus.** Twenty projects, five lines. The plan in section 6 makes everything else a feature of
+- **Focus.** Twenty-one projects, five lines. The plan in section 6 makes everything else a feature of
   one product for at least two quarters.
 - **Security and abuse.** Published sites and shared services attract abuse; the httpeers security
   model warns that code does not cross the mesh safely. A paid service needs abuse handling,
