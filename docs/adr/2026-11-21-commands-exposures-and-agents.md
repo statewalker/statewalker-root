@@ -26,7 +26,10 @@ The AI harness already defines tools as one OpenAPI 3.1 document each, with an `
    - HTTP-exposed commands are served at their operation's path under `/fragments/{id}/`, and under `/peers/{peerId}/fragments/{id}/` across HTTPeers;
    - MCP is at `/fragments/{id}/.well-known/mcp`, aggregated at `/.well-known/mcp`;
    - all of them go through the same capability checks.
-6. **Humans are tools.** Agents ask the user through `system.agents/ask-user`, with an A2UI surface or a simple question schema. The answer is the tool result. It maps onto the harness's `input_requests`, shares one UI with approvals, is never blocked by mode, and returns "unavailable" when nobody can answer.
+6. **Humans are tools.** Agents ask the user through `system.agents/ask-user`, with an A2UI surface or a simple question schema. The answer is the tool result. It maps onto the harness's `input_requests`, shares one UI with approvals, is a read-class action, so it is never blocked by mode, and returns "unavailable" when nobody can answer.
+
+7. **Surfaces** appear inline in the session view. The user, or an agent through the write tool `system.workbench/open-surface`, pops them out into a dock in a chosen zone, with no remount.
+8. **Workbench context on request only.** The read tool `system.workbench/get-context` returns what views describe through the `agent-context` extension point, owned by `system.agents`. Nothing is sent automatically.
 
 ## Considered options
 
@@ -36,5 +39,5 @@ The AI harness already defines tools as one OpenAPI 3.1 document each, with an `
 
 ## Consequences
 
-- `system.agents` also handles surfaces popped out to docks (`system.workbench/open-surface`), pending approvals and questions from any view, and workbench context on request (`system.workbench/get-context`, fed by the `agent-context` extension point). The chat UI is a separate fragment.
+- `system.agents` is plumbing: it mounts tools, streams session events, shows pending approvals and agents' questions from any view (a notification plus a dialog), and offers mode switching. The chat UI is a separate fragment, so agents and approvals work without it.
 - The `.well-known/openapi.json` of [route-table-and-discovery](2026-11-21-route-table-and-discovery.md) is now the full catalogue, not only the HTTP contract. A peer's index and catalogue still show only what the caller may see.
