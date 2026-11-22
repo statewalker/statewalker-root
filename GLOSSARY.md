@@ -50,6 +50,24 @@ _Avoid_: blocker, showstopper.
 project's own tracker, whatever filed it (a merge-gate follow-up, a health review, a session that
 found it while working).
 
+## Project sites
+
+**Project site**: a project's public documentation website, built from the project's own `site/`
+folder: its goal, how to use it, its architecture and APIs, examples and demos.
+**Hub**: statewalker.com, the site that links every project site.
+_Avoid_: docs site (ambiguous with a project's `docs/` folder).
+
+**Notebook page**: a Markdown source of a project site, with cells, from which one page is built.
+_Avoid_: notebook alone when the page is meant (a Notebook Kit document is also a notebook).
+
+**Live cell**: a cell of a notebook page that runs in the visitor's browser and shows its result.
+**Snippet**: code a page shows without running it, cut from a file the site's checks build or run,
+never typed into the page.
+_Avoid_: code example (say live cell or snippet).
+
+**Demo**: a deployed app that a project site links to or embeds, showing several features together.
+An **Example** (above) shown on a site is a runnable package, not a page cell.
+
 ## Platform
 
 **Fragment**: the unit of extension and of distribution of the platform: a manifest plus at least
