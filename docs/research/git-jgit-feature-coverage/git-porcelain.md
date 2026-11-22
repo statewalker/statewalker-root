@@ -17,13 +17,13 @@ Native git's user-facing commands (`command-list.txt` categories mainporcelain, 
 | Branching | 46 | 12 | 12 | 0 | 0 | 70 |
 | Rewriting | 37 | 8 | 19 | 0 | 1 | 65 |
 | Inspection | 34 | 9 | 25 | 2 | 5 | 75 |
-| Sharing | 25 | 10 | 18 | 0 | 0 | 53 |
+| Sharing | 25 | 10 | 19 | 0 | 0 | 54 |
 | Maintenance | 7 | 7 | 7 | 1 | 0 | 22 |
 | Foreign | 0 | 0 | 6 | 0 | 0 | 6 |
 | Tools | 0 | 0 | 0 | 3 | 0 | 3 |
 | Servers | 1 | 2 | 0 | 0 | 0 | 3 |
 | Helpers (outside scope) | 2 | 5 | 2 | 0 | 0 | 9 |
-| **All** | 226 | 68 | 110 | 6 | 10 | 420 |
+| **All** | 226 | 68 | 111 | 6 | 10 | 421 |
 
 Rows are not weighted: a Full row for a whole command (`git merge`) and a None row for one flag group count the same.
 
@@ -52,7 +52,7 @@ Rows are not weighted: a Full row for a whole command (`git merge`) and a None r
 | Setup | Separate git dir | `init --separate-git-dir` | t0001-init | ? | C/init-command.ts (`setGitDir`) | `setGitDir` places the git directory; whether a gitfile is written as git does was not verified. |
 | Setup | Templates, shared repo | `init --template`, `--shared[=perm]` | t0001-init, t1301-shared-repo | None | - | No setters. `core.sharedRepository` is honoured on index writes (CLAUDE.md, split index). |
 | Setup | Object/ref format | `init --object-format=sha256`, `--ref-format=reftable` | t1016-compatObjectFormat, t0610-reftable-basics | None | SF/repository-format.ts | sha256 and reftable repositories are recognised and refused. |
-| Setup | Clone (all transports) | `git clone <url>` | t5601-clone, t5603-clone-dirname | Full | C/clone-command.ts; T/clone-fetch-native-git.test.ts, T/git-native-protocol.test.ts, T/http-served-native.test.ts | Smart HTTP, dumb HTTP, git://, ssh, file; config, `origin/HEAD`, FETCH_HEAD compared byte for byte. |
+| Setup | Clone (all transports) | `git clone <url>` | t5601-clone, t5603-clone-dirname | Full | C/clone-command.ts; T/clone-fetch-native-git.test.ts, T/git-native-protocol.test.ts, T/http-served-native.test.ts | Smart HTTP, git://, ssh (over a host-supplied command), file; no dumb-HTTP client (native git cloning from our dumb-HTTP server is tested). Config, `origin/HEAD`, FETCH_HEAD compared byte for byte. |
 | Setup | Clone into existing destination | `clone` into a non-empty dir, of an empty or corrupt repo | t5600-clone-fail-cleanup, t5601-clone | Full | T/clone-destination-native.test.ts | |
 | Setup | Bare / mirror clone | `clone --bare`, `--mirror` | t5601-clone, t5612-clone-refspec | Full | T/clone-initial-transaction-native.test.ts, T/clone-fetch-native-git.test.ts | Initial ref transaction straight into packed-refs as git. |
 | Setup | Branch selection | `clone -b`, `--single-branch`, `--no-tags` | t5609-clone-branch, t5612-clone-refspec | Full | T/clone-initial-transaction-native.test.ts (followed tags of single-branch) | |
@@ -401,7 +401,8 @@ Rows are not weighted: a Full row for a whole command (`git merge`) and a None r
 | Sharing | Push options | `-o/--push-option` | t5545-push-options | Partial | C/push-command.ts (`setPushOptions`) | |
 | Sharing | Pre-push | pre-push hook, `--no-verify` | t5571-pre-push-hook | Full | T/hooks-push-native.test.ts | |
 | Sharing | Push to checked-out branch | `receive.denyCurrentBranch`, `updateInstead`, push-to-checkout | t5516-fetch-push | Full | T/push-local-receive-native.test.ts, T/hooks-push-native.test.ts | |
-| Sharing | Push URL rewriting | `pushInsteadOf`, `remote.pushDefault`, `protocol.allow` | t5516-fetch-push | Full | T/remote-url-rewrite-native.test.ts | |
+| Sharing | Push URL rewriting | `pushInsteadOf`, `protocol.allow` | t5516-fetch-push | Full | T/remote-url-rewrite-native.test.ts | |
+| Sharing | Default push remote | `branch.<name>.pushRemote`, `remote.pushDefault`, `branch.<name>.remote` | t5516-fetch-push | None | C/push-command.ts | `push()` without `setRemote` always pushes to `origin`; `remote.pushDefault` is read only by `@{push}` and remote rename/remove (statewalker/webrun-vcs#219). |
 | Sharing | Set upstream on push | `push -u/--set-upstream` | t5523-push-upstream | None | - | |
 | Sharing | Push misc | `--follow-tags`, `--signed`, `--recurse-submodules`, `--force-if-includes` | t5516-fetch-push, t5534-push-signed, t5531-deep-submodule-push | None | - | |
 | Sharing | Remote add | `git remote add <name> <url>` | t5505-remote | Partial | C/remote-command.ts; T/remote-command.test.ts | No twin; no `-f`, `-t`, `-m`, `--mirror`, `--tags`. |

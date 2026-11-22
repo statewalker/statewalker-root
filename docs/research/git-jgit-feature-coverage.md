@@ -8,11 +8,11 @@ applied](https://github.com/statewalker/statewalker-root/issues/218), 2026-11-22
 - Eclipse JGit `master` of 2026-11-22 (`org.eclipse.jgit` and its bundles, `*.test` bundles).
 - webrun-vcs `main` at P4.82 (`5a488ed`, statewalker/webrun-vcs#210): `packages/*/src`, the native-twin tests, `CLAUDE.md`.
 
-**How it was built.** Three surveys read the sources; no test suite was run for them. Coverage was judged from code, setters and tests, not from names. "Full" needs a test that compares webrun-vcs with native git, and a sample of Full claims was checked against the test bodies.
+**How it was built.** Three surveys read the sources; no test suite was run for them. Coverage was judged from code, setters and tests, not from names. In the two git tables, "Full" needs a test that compares webrun-vcs with native git. The JGit table counts a feature as Full once webrun-vcs implements it, and marks "(twin)" where a native-twin test covers it. A sample of Full claims was checked against the test bodies.
 
 The full tables, with a row per feature, its git `t/` scripts or JGit test classes, and the webrun-vcs evidence:
 
-- [git porcelain](git-jgit-feature-coverage/git-porcelain.md): user-facing commands and their modes, 420 rows.
+- [git porcelain](git-jgit-feature-coverage/git-porcelain.md): user-facing commands and their modes, 421 rows.
 - [git internals](git-jgit-feature-coverage/git-internals.md): plumbing, object and repository formats, protocols, the server side, hooks, and the config/attributes/ignore/environment subsystems, 341 rows.
 - [JGit](git-jgit-feature-coverage/jgit.md): JGit's `api` commands and subsystems, 299 features, plus 22 rows on what webrun-vcs has and JGit lacks. It also holds the JGit test classes worth porting.
 
@@ -32,9 +32,9 @@ Rows are not weighted. A Full row for the whole of `git merge` counts the same a
 
 | Table | Rows | Full | Partial | None | N/A | ? |
 |---|---:|---:|---:|---:|---:|---:|
-| git porcelain | 420 | 226 (54%) | 68 | 110 | 6 | 10 |
+| git porcelain | 421 | 226 (54%) | 68 | 111 | 6 | 10 |
 | git internals | 341 | 199 (58%) | 60 | 64 | 13 | 5 |
-| JGit (its features only) | 299 | 216 (72%) | 28 | 37 | 13 | 5 |
+| JGit (its features only) | 299 | 216 (72%), 122 (41%) twin-tested | 28 | 37 | 13 | 5 |
 
 ### Per area
 
@@ -45,7 +45,7 @@ Rows are not weighted. A Full row for the whole of `git merge` counts the same a
 | Branching (branch, checkout, switch, merge, tag, worktree, sparse-checkout) | 46 | 12 | 12 | 70 |
 | Rewriting (rebase, cherry-pick, revert, am, apply, notes) | 37 | 8 | 19 | 65 |
 | Inspection (log, show, blame, describe, bisect, grep, shortlog) | 34 | 9 | 25 | 75 |
-| Sharing (fetch, pull, push, remote, submodule, bundle, archive) | 25 | 10 | 18 | 53 |
+| Sharing (fetch, pull, push, remote, submodule, bundle, archive) | 25 | 10 | 19 | 54 |
 | Maintenance (gc, repack, fsck, maintenance) | 7 | 7 | 7 | 22 |
 | Foreign SCM, tools, servers, helpers | 3 | 7 | 8 | 21 |
 
@@ -63,7 +63,7 @@ Rows are not weighted. A Full row for the whole of `git merge` counts the same a
 - **Transfer and server side:** protocol v0/v2, smart and dumb HTTP serving, shallow and partial clones with lazy fetch, upload-pack and receive-pack with quarantine.
 - **Hooks:** 24 of git's 28.
 
-**Against JGit**, webrun-vcs covers 72% of JGit's features fully, and it does much that JGit does not:
+**Against JGit**, webrun-vcs implements 72% of JGit's features fully, and 41% are also compared with native git in a twin test. It also does much that JGit does not:
 - sparse checkout and split or sparse indexes;
 - partial clone as a client;
 - linked-worktree commands;
@@ -86,6 +86,7 @@ Each group is filed in webrun-vcs, where the work belongs (`docs/agents/issue-tr
 | Bundles, bundle-uri, `git archive` with `export-ignore`/`export-subst` | porcelain, internals, JGit | statewalker/webrun-vcs#215 |
 | History search and diff presentation: grep, shortlog, range-diff, name-rev; `log --grep/-S/-G/-L`; word-diff, `--color-moved`, `--check`; blame `-M/-C/--reverse/--ignore-rev` | porcelain, JGit | statewalker/webrun-vcs#216 |
 | Receive side: `receive.fsckObjects` (fetch checks objects, push does not), `receive.maxInputSize`, `GIT_NAMESPACE`, auto gc | internals | statewalker/webrun-vcs#217 |
+| A bug, not a gap: `push()` without a remote ignores `branch.<name>.pushRemote`, `remote.pushDefault` and `branch.<name>.remote`, and always pushes to `origin` | porcelain | statewalker/webrun-vcs#219 |
 
 Smaller gaps are in the tables and not filed one by one:
 - **Commit options:** `--fixup/--squash`, `-C/-c`, `-s`, `--trailer`.
