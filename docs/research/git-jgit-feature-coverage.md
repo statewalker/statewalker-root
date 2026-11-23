@@ -147,6 +147,10 @@ The [JGit table](git-jgit-feature-coverage/jgit.md#porting-jgit-tests) lists the
 
 The plan, and the decision on the CLI shim, are in statewalker/webrun-vcs#218.
 
+The gaps in these tables became tickets, ordered in waves: the roadmap is
+[`docs/roadmap/webrun-vcs.md`](../roadmap/webrun-vcs.md) and the plan issue is
+statewalker/statewalker-root#282.
+
 ### First port: JGit's ignore rule cases (statewalker/webrun-vcs#211)
 
 **What was ported.** 709 distinct (pattern, path) cases from `IgnoreRuleSpecialCasesTest`, `FastIgnoreRuleTest` and `IgnoreMatcherParametrizedTest`, extracted by a script into a fixture.
