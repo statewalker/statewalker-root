@@ -54,8 +54,9 @@ found it while working).
 
 **Project site**: a project's public documentation website, built from the project's own `site/`
 folder: its goal, how to use it, its architecture and APIs, examples and demos.
-**Hub**: statewalker.com, the site that links every project site.
-_Avoid_: docs site (ambiguous with a project's `docs/` folder).
+**Hub site**: statewalker.com, the site that links every project site.
+_Avoid_: docs site (ambiguous with a project's `docs/` folder); hub alone (an httpeers hub is the
+Node daemon of `@statewalker/httpeers-hub`).
 
 **Notebook page**: a Markdown source of a project site, with cells, from which one page is built.
 _Avoid_: notebook alone when the page is meant (a Notebook Kit document is also a notebook).
