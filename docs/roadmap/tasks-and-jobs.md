@@ -78,7 +78,8 @@ plan's intent, not acceptance criteria: those are on the issues.
 
 ### T1: shared-tasks, the queue contract at L0 (#403)
 
-- **Approach.** Copy, don't redesign. Bring ai-tasks' `types`, `subjects`, `queue`, `local` and
+- **Approach.** Copy, don't redesign, and keep ai-tasks 0.1.0's table layout unchanged, so
+  stores it created open as they are (T4 relies on this). Bring ai-tasks' `types`, `subjects`, `queue`, `local` and
   `runner` modules and their tests into a new `packages/shared-tasks` in statewalker-shared. Then
   rename `Executor` to `Processor` and `ExecutorContext` to `ProcessorContext`. Keep the defaults:
   64 KB payloads, 7-day expiry, 5-minute leases, 3 attempts, 14 days of dead letters.
@@ -120,10 +121,12 @@ plan's intent, not acceptance criteria: those are on the issues.
   ai-sessions (`api`) and ai-conformance from `@statewalker/ai-tasks` to `@statewalker/shared-tasks`,
   rename `Executor` to `Processor`, then remove `packages/ai-tasks` and its entries in pending
   changesets.
-- **Data.** ai-host-do's queue tables were created by ai-tasks 0.1.0. shared-tasks upgrades them
-  in place (T2), so the switch needs no separate migration. A test opens a store with ai-tasks'
-  layout through shared-tasks. Rollback to ai-tasks is not supported once a store has been
-  upgraded, and the pull request says so.
+- **Data.** ai-host-do's queue tables were created by ai-tasks 0.1.0. shared-tasks' first release
+  (T1) keeps that layout unchanged, so the stores open as they are and the switch needs no
+  migration code in statewalker-ai. A test opens a store with ai-tasks' layout through
+  shared-tasks. When statewalker-ai later moves to the shared-tasks version with T2, T2's in-place
+  upgrade covers these stores, and from then on rollback to ai-tasks is not supported. The pull
+  request says so.
 - **Glossary.** statewalker-ai's `GLOSSARY.md` keeps "Executor" for where session code runs, and
   uses "Processor" for the queue.
 
@@ -131,8 +134,12 @@ plan's intent, not acceptance criteria: those are on the issues.
 
 - **Approach.** In `system.commands`, extend `CallOptions` with `signal` and `onProgress`, and
   `CommandContext` with `callId`, `signal` and `progress`. The bus passes `signal` to the
-  substrate (T3). `callId` is a fresh id unless the caller passes one (only the task runner does,
-  in T6), and `progress` calls `onProgress` in order.
+  substrate (T3), and `progress` calls `onProgress` in order. `callId` is a fresh id for every
+  call. Only system code can supply one, through an option honoured for the user and system
+  callers and refused for any caller that goes through the gate (agents, peers, sandboxes). The
+  projections never set it. The task runner (T6) uses it to pass the task id. Handlers
+  deduplicate by `callId`, so an outside caller choosing one could make a handler skip someone
+  else's work.
 - **Projections.** Agent tools and MCP pass the harness's or the request's cancellation through
   as `signal`. Nothing else in the projections changes.
 - **Compatibility.** Existing handlers ignore the new fields, and existing tests must pass
@@ -150,8 +157,9 @@ plan's intent, not acceptance criteria: those are on the issues.
   `<fragment-id>/<command-id>` on `fragments.<fragment-id>.<command-id>` for each `task`-exposed
   command. It runs `serveSubscription` with a processor that calls the command on the bus, passing
   the task id as `callId`, the lease's signal and a progress callback. On deactivation it stops the
-  runner and keeps the subscription, so tasks wait for the fragment's return. Removing the fragment
-  removes the subscription.
+  runner and keeps the subscription, so tasks wait for the fragment's return: the queue's
+  `unsubscribe` drops waiting deliveries and dead letters. Removing the fragment removes the
+  subscription. #408's criteria say the same.
 - **Core list.** The kernel's core-fragment list and the tests of the reserved prefix count
   twelve, and disabling `system.tasks` is refused.
 - **Tests.** Seam 1 only, as the spec says. This is the tracer every later ticket builds on.
@@ -187,8 +195,8 @@ plan's intent, not acceptance criteria: those are on the issues.
   hosts lack the binding, so the install is refused there with the reason.
 - **Trust.** Only scripts shipped in installed fragments run (ADR `2026-11-19-code-kinds-and-trust`).
   User and agent scripts never reach this processor: they go through the sandbox broker.
-- **Afterwards.** A pull request in statewalker-sandbox removes `apps/jobs-manager`, and
-  `docs/refactoring/README.md` records where it went.
+- **Afterwards.** A pull request in statewalker-sandbox removes `apps/jobs-manager`. A separate
+  pull request here, in statewalker-root, records in `docs/refactoring/README.md` where it went.
 
 ## Not in this plan
 
