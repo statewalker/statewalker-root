@@ -2,7 +2,8 @@
 
 Candidates to port or adapt to the statewalker platform, collected 2026-11-23. This is a list of
 candidates, not a plan: each port gets its own ticket when it is picked up. Facts were read from
-the projects' public pages on 2026-11-23; the storytold section was updated the same day from the repositories themselves.
+the projects' public pages on 2026-11-23, and the storytold section from the repositories
+themselves the same day.
 
 ## HeyPuter/everything
 
