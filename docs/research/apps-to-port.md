@@ -2,7 +2,7 @@
 
 Candidates to port or adapt to the statewalker platform, collected 2026-11-23. This is a list of
 candidates, not a plan: each port gets its own ticket when it is picked up. Facts were read from
-the projects' public pages on 2026-11-23; statements marked **(unverified)** were not checked.
+the projects' public pages on 2026-11-23; the storytold section was updated the same day from the repositories themselves.
 
 ## HeyPuter/everything
 
@@ -31,11 +31,43 @@ the projects' public pages on 2026-11-23; statements marked **(unverified)** wer
 - Port: the viewers and file browser fit the workbench's mime viewers and explorer
   (statewalker-shell-react, which already uses shadcn), reading documents through a FilesApi.
 
-## ArtCraft
+## ArtCraft and the storytold Craft apps
 
-- Site: [getartcraft.com](https://getartcraft.com/). The site was not reachable from the session
-  that wrote this note, so its source repository, license and stack are **(unverified)**.
-- Port: reuse its core built to WebAssembly and plug a React-based UI (menus, dialogs and the rest
-  of the chrome) from the platform around it.
-- To check first: the source repository and its license, whether the core builds to Wasm as a
-  separable library, and the API between core and UI.
+- Sources: the [storytold](https://github.com/storytold) organization (84 public repositories,
+  site [getartcraft.com](https://getartcraft.com/)), read at
+  [artcraft](https://github.com/storytold/artcraft) `de571bb`,
+  [photocraft](https://github.com/storytold/photocraft) `42ade5f`,
+  [craft-anything](https://github.com/storytold/craft-anything) `3d5eb25` and
+  [craft-libs](https://github.com/storytold/craft-libs) `15cd58b`. Each is dual-licensed MIT or
+  Apache-2.0; `NOTICE` covers third-party material and the wordmark and icons (not read).
+- **ArtCraft itself has no Wasm core.** It is a Tauri 2 desktop app: a React 18 front end (Nx,
+  Vite, Tailwind, three.js, Konva, zustand) over Rust crates that are API clients for an ArtCraft
+  server and third-party generation models (images, video, audio, 3D). There is also a native
+  egui front end (`artcraft-native`). The only Wasm in the repository comes from front-end build
+  tools. Porting it means porting its React UI and talking to its HTTP API, not reusing a Wasm
+  core.
+- **The Wasm-built cores are the other Craft apps** (photocraft, craft-anything, and by their
+  names designcraft, vectorcraft, pdfcraft, texturecraft, wordcraft and others; those were not
+  read). Each is a Rust workspace whose engine crates (photocraft: `engine`, `engine-core`, `ops`,
+  `raster`, `paint`, ...) are kept free of the UI crate (`ui-egui`), and whose `apps/<app>-web`
+  builds the whole app, egui UI included, to wasm32 with Trunk and wasm-bindgen (WebGPU, WebGL2
+  fallback) into a static site with no server code. craft-libs holds about 200 shared crates
+  (file formats from PSD and PDF to DWG and Figma, codecs, color, fonts, GPU).
+- **They already have a host protocol**, which is where the platform plugs in:
+  - `craft-web-host` (craft-libs `crates/web-host`): messages between a Craft web build and the
+    page hosting it (`ready`, `open`, `save`, `saved`, `dirty`, `failed`, `handoff`), by
+    same-origin `postMessage` to a parent frame or as `CustomEvent`s on the canvas. The host
+    opens documents and stores saves, so a FilesApi-backed host gives every Craft app our files;
+    `handoff` routes a file to the app that edits it (the workbench's mime viewers).
+  - `craft-web-api` (`crates/web-api`): "one `window.<app>` shape over the app's JSON control
+    channel", the page command API. React menus and dialogs can drive the app through it.
+- Port, in order of cost:
+  1. Host the Craft web builds unchanged in a workbench panel, through `craft-web-host`, with
+     open and save over a FilesApi.
+  2. Replace the egui chrome (menus, dialogs, panels) by React components that drive the app
+     through `craft-web-api`, keeping the egui canvas.
+  3. Build the engine crates to Wasm without `ui-egui`, behind our own bindings: only if 2 falls
+     short; the engines expose no wasm-bindgen API of their own today.
+- To check first: what `craft-web-api` exposes per app (enough to drive menus and dialogs?), the
+  sizes of the web builds (photocraft's app ships in gzipped 20 MiB parts), and the `NOTICE`
+  terms for the names and icons.
