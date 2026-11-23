@@ -1,6 +1,6 @@
 # One command model in OpenAPI with opt-in exposures; humans are tools
 
-**Status**: accepted, 2026-11-21. Decided in
+**Status**: accepted, 2026-11-21; amended by [commands-tasks-and-jobs](2026-11-23-commands-tasks-and-jobs.md) (a fourth exposure, `task`, and `callId`/`signal`/`progress` in the command context). Decided in
 [What does a fragment expose to agents: tools, A2UI surfaces, and the harness session link?](https://github.com/statewalker/statewalker-root/issues/185),
 on the map [statewalker-root#112](https://github.com/statewalker/statewalker-root/issues/112).
 It amends [fragment-manifest-and-extension-points](2026-11-18-fragment-manifest-and-extension-points.md) and [kernel-and-core-fragments](2026-11-20-kernel-and-core-fragments.md).
