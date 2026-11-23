@@ -47,7 +47,7 @@ Problems referenced as P1–P10 are listed in `docs/projects.md`.
 | `packages/httpeers.core`, `packages/httpeers-conformance` | Retire; port anything missing into httpeers first | P3 |
 | `apps/httpeers-stack`, `httpeers-protos`, `httpeers-lib-protos`, `httpeers-shell-protos` | `httpeers/protos/` (or delete what `httpeers/apps` and `deploy/` cover) | P4 |
 | `apps/peershare-protos`, `peershare-ui-protos` | Next to the peershare apps (decision 0.3) | |
-| `apps/flue-capfs-do`, `apps/flue-workbench` | `statewalker-ai`: seed code of the AI harness packages, and its private `apps/workbench` ([#84](https://github.com/statewalker/statewalker-root/issues/84)) | |
+| ~~`apps/flue-capfs-do`, `apps/flue-workbench`~~ | Done ([#146](https://github.com/statewalker/statewalker-root/issues/146)): `statewalker-ai` covers what they proved (the harness packages, its private `apps/workbench`, [#84](https://github.com/statewalker/statewalker-root/issues/84)); deleted from the sandbox in [statewalker-sandbox#170](https://github.com/statewalker/statewalker-sandbox/pull/170) | |
 | `apps/notes-demo` | `webrun-sites/examples/` | |
 | `apps/vcs-protos` | `webrun-vcs/protos/` | |
 | `apps/openai-proxy.app` | `statewalker-ai/apps/` | |
