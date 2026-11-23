@@ -1,6 +1,6 @@
 # A minimal kernel, eleven `system.*` core fragments, and extension references as a third channel
 
-**Status**: accepted, 2026-11-20; amended by [commands-exposures-and-agents](2026-11-21-commands-exposures-and-agents.md) (`tools` holds only commands exposed to agents; `system.agents` also declares `agent-context`). Decided in
+**Status**: accepted, 2026-11-20; amended by [commands-exposures-and-agents](2026-11-21-commands-exposures-and-agents.md) (`tools` holds only commands exposed to agents; `system.agents` also declares `agent-context`), and by [commands-tasks-and-jobs](2026-11-23-commands-tasks-and-jobs.md) (a twelfth core fragment, `system.tasks`, which cannot be disabled). Decided in
 [Which core fragments ship with the empty platform, and which extension points does each declare?](https://github.com/statewalker/statewalker-root/issues/150),
 on the map [statewalker-root#112](https://github.com/statewalker/statewalker-root/issues/112).
 It amends [fragments-with-wrangler-server-halves](2026-11-17-fragments-with-wrangler-server-halves.md).
