@@ -23,7 +23,7 @@ isolate; **W** = a Web Worker / worker thread / child process the host owns (cel
 
 | Engine | cellb, browser | cellb, Node | celld 0.6.3 | workerd / Cloudflare |
 |---|---|---|---|---|
-| **WASI runner in pure JS** (CPython 3.12 WASI under `@bjorn3/browser_wasi_shim`) | runs: DO, WL, W (sourced + inference) | **runs**: DO, WL (verified) | runs with conditions: DO with bundled wasm, WL with `{wasm}` modules; not run here (inference) | **runs**: DO with the wasm bundled, WL with wasm bytes supplied at run time; JSPI serves files from async storage per operation (verified) |
+| **WASI runner in pure JS** (CPython 3.12 WASI under `@bjorn3/browser_wasi_shim`) | runs: DO, WL, W (sourced + inference) | **runs**: WL (verified); DO (inference: the same runner ran in plain Node 22, not in a cellb DO) | runs with conditions: DO with bundled wasm, WL with `{wasm}` modules; not run here (inference) | **runs**: DO with the wasm bundled, WL with wasm bytes supplied at run time; JSPI serves files from async storage per operation (verified) |
 | **QuickJS** (`quickjs-emscripten`, sync and asyncify) | runs: DO, WL, W (sourced) | runs (sourced; `wasmer/quickjs` measured in cellb) | runs with conditions: bundled wasm or `{wasm}` modules (inference) | **runs**: DO with bundled wasm (sync and asyncify), WL with wasm bytes at run time (verified) |
 | **Pyodide** (npm) | runs: W (harness, sourced) | runs: W, a child process (harness, sourced) | no as a DO engine; only Python *Workers* (fetch handlers, no DOs, no JSPI) (sourced) | no in DO or WL as a library (runtime compile and package fetch, verified for compile); only Cloudflare's own Python Workers / `py` Dynamic Workers (sourced, not run here) |
 | **Wasmer** (`@wasmer/sdk`, WASIX) | runs: W, needs COOP/COEP (sourced) | runs: W (sourced) | no: needs threads (sourced) | no: needs threads; `Atomics.wait` refused, no `Worker` (verified) |
@@ -337,7 +337,7 @@ interface Sandbox {                // ctx.container's shape, minus what WASI can
   Wasmer and Lifo.
 - **Where it lives.** The shared package needs only `@statewalker/webrun-files` (L1) and the
   Worker Loader's types, so it can sit in cellb.dev next to `@statewalker/cellb-containers`
-  (published, with no dependency on the cellb runtime, so a workerd or celld DO can import it), or
+  (private today); the new package must be published and must not depend on the cellb runtime, so a workerd or celld DO can import it; or
   as a lower-layer package if other L2 projects want it. statewalker-ai should consume it from
   `ai-environment`'s executor plan (`executors.ts`: `python` → `pyodide | wasmer | pool`) as one
   more executor kind, not own it; on workerd and celld it would become the default `python` there,
