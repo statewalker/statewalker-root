@@ -166,14 +166,14 @@ What the sessions can see:
   `status: "allowed_warning"` with `resetsAt` 2026-11-25 07:00 UTC. That window ran from 2026-11-18
   07:00. It held the `VCS - w4` session's $2,057, plus 61 VCS PRs merged between 2026-11-18 07:00
   and that session's start (2026-11-22 18:25), about $1.5k–1.9k at $25–31 each, plus the other
-  projects' sessions. Last week's VCS usage was therefore about $3.6k–4.0k. Since then every session reports `status: "allowed"`,
-  with the new window ending 2026-12-02 07:00 UTC.
+  projects' sessions. Last week's VCS usage was therefore about $3.6k–4.0k. Sessions
+  then reported `status: "allowed"` until 18:31 UTC (below), in a window ending 2026-12-02 07:00 UTC.
 - **No percentage is reported.** Sessions see only `allowed` or `allowed_warning`, never how much of
   the window is used, so the exact headroom cannot be checked from a session.
 
 What follows from it:
 
-- **This week so far:** about $610 of VCS work (orchestrator, 19 finished and 4 running children)
+- **This week so far (18:20 UTC):** about $610 of VCS work (orchestrator, 19 finished and 4 running children)
   plus the other projects' sessions running at the same time (cellb.dev, Flue, sites).
 - **Observed at 18:31 UTC the same day: `allowed_warning`.** The estimate above said the remaining
   plan should fit. The window turned to `allowed_warning` after only ~$650 of VCS usage since its
