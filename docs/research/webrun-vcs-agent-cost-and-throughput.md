@@ -1,6 +1,6 @@
 # What did two weeks of agent work on webrun-vcs produce, and what did it cost?
 
-Measured on 2026-11-25 (about 18:30 UTC) for the plan `statewalker/statewalker-root#282`. The
+Measured on 2026-11-25 (about 18:30 UTC; the limit observation was added at 18:45) for the plan `statewalker/statewalker-root#282`. The
 sources are primary but partial:
 
 - `git log origin/main --since=2026-11-11 --numstat --date=short` of `statewalker/webrun-vcs`, up to
@@ -174,10 +174,17 @@ What follows from it:
 
 - **This week so far:** about $610 of VCS work (orchestrator, 19 finished and 4 running children)
   plus the other projects' sessions running at the same time (cellb.dev, Flue, sites).
-- **The remaining plan should fit.** The ~$1.0k–1.2k of new usage takes this week's VCS usage to
-  about $1.6k–1.8k: roughly half of last week's ~$3.6k–4.0k, which reached `allowed_warning` only
-  near the window's end. So the remaining plan, the 12 follow-up bugs included, very likely fits in
-  this week's window. There is room for the optional enhancements (~$135) too.
+- **Observed at 18:31 UTC the same day: `allowed_warning`.** The estimate above said the remaining
+  plan should fit. The window turned to `allowed_warning` after only ~$650 of VCS usage since its
+  reset (18 Wave 5 sessions, a bug fix, the orchestrator and sha1dc's $32). The warning therefore
+  does not track VCS usage alone. Either it starts at a much lower share of the window than last
+  week suggested, or other sessions this week (cellb.dev, Flue, sites) used much more than the
+  VCS sessions. Sessions cannot tell which.
+- **Decision taken.** The human paused the plan at that point. The three running children finish;
+  nothing new starts until the human sees the account's usage and decides the budget allows it.
+- **Lesson.** Last week's VCS usage at the moment of the warning does not size this week's
+  headroom. Read the account's usage page before committing to a batch, and keep the orchestrator's
+  check of `rate_limit_info` before each child.
 - **The risk is the other projects.** If they run heavily at the same time, the window can reach
   `allowed_warning` before Wave 6 ends.
 - **Mitigation.** Sessions see `status` change to `allowed_warning` (and `isUsingOverage`). The
