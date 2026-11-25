@@ -162,6 +162,11 @@ check if origin($o), connection_origin($o);
 check if time_ms($t), $t < {exp};
 ```
 
+For a token that must also be a valid **mesh** token (the "local mesh" unification below), the
+`origin` condition has to move into the broker's authorizer
+(`allow if ..., origin($o), connection_origin($o)`): `verifyToken` cannot satisfy a check that needs
+a fact only the broker asserts ([multi-mesh note](webrun-devtools-multi-mesh.md)).
+
 Instead of listing rights, a grant may name **bundles**, defined once in the broker's rule set with
 `httpeers-access`'s `ruleSet`, which validates them:
 
@@ -273,18 +278,22 @@ participating in a mesh".
 
 - The broker's rule set maps mesh roles to extension rights:
   ```datalog
-  right("tabs","captureVisibleTab") <- app_mesh_role({meshX}, "screenshots");
-  right("debugger","sendCommand"), cdp_domain("Page") <- app_mesh_role({meshX}, "automation");
+  capability("tabs.captureVisibleTab") <- mesh("<meshX>"), role("screenshots");
+  capability("debugger.Page")          <- mesh("<meshX>"), role("automation");
+  allow if capability($c), operation($c);
   ```
-- Two ways an app gets `app_mesh_role`:
+  This is the form `ruleSet` accepts, with one line per trusted mesh and the mesh id written into the
+  rule. The design's first form, `right(...) <- app_mesh_role(meshX, r)`, is refused by `ruleSet`'s
+  closed vocabulary ([multi-mesh note](webrun-devtools-multi-mesh.md)).
+- Two ways an app gets mesh roles:
   - **The extension is that mesh's hub.** Pairing then *is* joining. The approval screen offers
     "add this app to mesh X with roles R", the broker calls `hub.members.add(appId, R)`, and the app's
     token is the hub's membership token plus the local facts of §5.1. One token, one revocation path
     (`hub.revocations`), and the same roles are honoured by every other peer in mesh X.
   - **Another hub issued the app's membership.** The app presents its httpeers membership token on
     `hello`. The broker checks it with `verifyToken(token, { issuer: meshX, connectionPeer: appId })`
-    (the PoP of §4.3 proves `connection_peer`). Then it asserts `app_mesh_role(meshX, r)` for each
-    claimed role, subject to a user-approved trust entry "trust mesh X's roles", because an outside
+    (the PoP of §4.3 proves `connection_peer`). Then the claims' `mesh`/`role` facts feed the rules above,
+    subject to a user-approved trust entry "trust mesh X's roles", because an outside
     hub must not grant browser control silently.
 
 **C. Remote mesh peers automate this browser.**
@@ -292,6 +301,8 @@ participating in a mesh".
 - The broker mounts the devtools API as HTTP under `/devtools/` on the extension's node for a chosen
   mesh: REST per method, or `webrun-rpc-http`'s `newRpcServer`, with events as SSE via
   `webrun-http-events`.
+- For case A, the broker must strip any `x-httpeers-token` the app sends before dispatching:
+  `createGateway` passes a caller-supplied token through.
 - It is guarded by `withAccess({ issuer: meshX, rules })`, with `operation`/`resource` mapped to the
   same rights:
   ```datalog
@@ -360,5 +371,5 @@ own note, linked here when it lands:
 | `chrome.runtime.Port` pipe adapter for webrun-rpc | [webrun-devtools-port-pipe.md](webrun-devtools-port-pipe.md): works, 3–10× faster than webrun-ports; found a `throughAbort` leak in webrun-rpc |
 | Pairing, proof of possession, Biscuit mint and authorize in an MV3 service worker | [webrun-devtools-pairing-biscuit.md](webrun-devtools-pairing-biscuit.md): works; ownership rule and hello checks corrected (§5.2) |
 | httpeers hub and member in an extension offscreen document | pending |
-| Several hubs and memberships in one runtime; app ⇄ mesh cases A, B, C | pending |
+| Several hubs and memberships in one runtime; app ⇄ mesh cases A, B, C | [webrun-devtools-multi-mesh.md](webrun-devtools-multi-mesh.md): all work; one libp2p node per hub and per membership; rule and token corrections (§5.1, §6.2) |
 | Local debugging and CI testing of extensions; Obscura | pending |
