@@ -52,11 +52,15 @@ found it while working).
 
 ## Project sites
 
-**Project site**: a project's public documentation website, built from the project's own `site/`
-folder: its goal, how to use it, its architecture and APIs, examples and demos.
+**Project site**: a project's public documentation website, built from the content in the project's
+own `site/` folder: its goal, how to use it, its architecture and APIs, examples and demos.
 **Hub site**: statewalker.com, the site that links every project site.
 _Avoid_: docs site (ambiguous with a project's `docs/` folder); hub alone (an httpeers hub is the
 Node daemon of `@statewalker/httpeers-hub`).
+
+**Site kit**: the shared packages every project site is checked and built with: the notebook
+pipeline, the theme and components, the checks and the API reference generator.
+_Avoid_: site template, scaffold (nothing is copied into a site).
 
 **Notebook page**: a Markdown source of a project site, with cells, from which one page is built.
 _Avoid_: notebook alone when the page is meant (a Notebook Kit document is also a notebook).

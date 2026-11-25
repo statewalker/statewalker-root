@@ -29,8 +29,8 @@ Problems referenced as P1–P10 are listed in `docs/projects.md`.
    peershare); alternative: peershare moves to `httpeers/apps`.
 - **0.4** **Fate of statewalker-sandbox** after phase 2: archive, or keep as `labs` with one folder per
    experiment, an owner and a review date, and no inbound dependencies.
-- **0.5** **Docs location**: library doc sites next to their code (cellb.dev pattern) or all in
-   statewalker-sites.
+- **0.5** ~~**Docs location**~~ Decided (`docs/adr/2026-11-25-site-kit-and-site-placement.md`): site
+   content in each project's `site/`, one site build and deploy in statewalker-sites.
 
 ## Phase 1 — hygiene (small, independent; parallel)
 
@@ -84,10 +84,13 @@ commit message), make it build and test in the destination, then delete from the
 | cellb.dev | already `examples/`; platform fixtures stay with their package |
 | all | CI runs every `examples/*` `test` (or `build`) script as a smoke test |
 
-## Phase 5 — docs location (blocked by 0.5)
+## Phase 5 — docs location (decided by 0.5)
 
-If decided in-repo: `statewalker-sites/packages/site-fsm` → `statewalker-fsm/site`,
-`site-webrun` → `webrun-sites/site`; statewalker-sites keeps the main site, the blog and site-dots.
+Per `docs/adr/2026-11-25-site-kit-and-site-placement.md`: `site-fsm`'s pages move to
+`statewalker-fsm/site` as content; statewalker-sites keeps the build of every site, the hub and the
+blog. The fate of `site-webrun` and `site-dots` and the rollout order are open on the map
+[statewalker-root#232](https://github.com/statewalker/statewalker-root/issues/232); its spec's
+tickets do the moves.
 
 ## Every project at a glance
 
