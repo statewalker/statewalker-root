@@ -319,7 +319,7 @@ The only difference is how `connection_peer` is proven:
 
 | Where | Gap |
 |---|---|
-| webrun-wire | No `chrome.runtime.Port` pipe adapter (JSON, base64 frames, disconnect → closeSignal). |
+| webrun-wire | No `chrome.runtime.Port` pipe adapter (JSON, base64 frames, disconnect → closeSignal). Prototyped: [port-pipe note](webrun-devtools-port-pipe.md). Also: `throughAbort` does not return its source when the consumer stops early (leaks `listenBidi` producers); `callBidi` leaves its port open. |
 | webrun-biscuit (moving to `webrun-capabilities`, statewalker-root#98) | No revocation-id helper; third-party blocks not wire-compatible (acceptable here). |
 | httpeers-access | `mintToken` writes only roles/audience. It needs extra authority facts (origin, scopes) or a documented way to append them; `generateSigner` needs extractable keys. |
 | httpeers-hub | `idbStorage` db name/snapshot key fixed per origin (several hubs per runtime need distinct names; check). |
@@ -357,7 +357,7 @@ own note, linked here when it lands:
 
 | Subject | Note |
 |---|---|
-| `chrome.runtime.Port` pipe adapter for webrun-rpc | pending |
+| `chrome.runtime.Port` pipe adapter for webrun-rpc | [webrun-devtools-port-pipe.md](webrun-devtools-port-pipe.md): works, 3–10× faster than webrun-ports; found a `throughAbort` leak in webrun-rpc |
 | Pairing, proof of possession, Biscuit mint and authorize in an MV3 service worker | [webrun-devtools-pairing-biscuit.md](webrun-devtools-pairing-biscuit.md): works; ownership rule and hello checks corrected (§5.2) |
 | httpeers hub and member in an extension offscreen document | pending |
 | Several hubs and memberships in one runtime; app ⇄ mesh cases A, B, C | pending |
