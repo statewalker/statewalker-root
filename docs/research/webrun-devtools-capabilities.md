@@ -182,23 +182,26 @@ target_tab({tabId}); target_owned(true|false); target_url({url}); target_origin(
 request_host({host}); request_method({m}); request_credentials(false);
 connection_peer({app}); connection_origin({origin}); time_ms({now}); root_mesh({ext});
 
-allow if operation($n, $m), right($n, $m), tab_ok();
-allow if cdp_call($d, $m), cdp_domain($d), right("debugger", "sendCommand"), tab_ok(), !cdp_denied($d, $m);
+allow if operation($n, $m), right($n, $m), tab_ok(true);
+allow if cdp_call($d, $m), cdp_domain($d), right("debugger", "sendCommand"), tab_ok(true), !cdp_denied($d, $m);
 allow if operation("http", "fetch"), request_host($h), http_host($h), request_method($m), http_method($m);
-tab_ok() <- tab_scope("any");
-tab_ok() <- tab_scope("own"), target_owned(true);
-tab_ok() <- tab_scope($p), target_origin($o), $o.matches($p) ...   // origin-pattern form
+tab_ok(true) <- tab_scope("any");
+tab_ok(true) <- tab_scope("own"), target_owned(true);
+tab_ok(true) <- tab_scope($p), target_origin($o), $o.matches($p) ...   // origin-pattern form
 deny if true;
 ```
 
 Supporting rules:
 
 - **Ownership:**
-  - The broker keeps an owner map: windows and tabs an app created, plus tabs whose `openerTabId`
-    is owned. That feeds `target_owned`.
+  - The broker keeps an owner map: tabs and windows the app created through the API, plus tabs
+    whose `webNavigation.onCreatedNavigationTarget` `sourceTabId` is owned. That feeds
+    `target_owned`. Not window membership and not `openerTabId`: the prototype showed both give the
+    app tabs it never opened ([pairing note](webrun-devtools-pairing-biscuit.md)).
+  - At hello only the authority block's checks count; an attenuation's operation checks run per call.
   - On `done`, or when the app's last port disconnects, owned resources can optionally be closed.
 - **Event streams** are filtered through the same authorizer *per event*: `tabs.onUpdated` delivers
-  only tabs that pass `tab_ok()`. This closes the history leak.
+  only tabs that pass `tab_ok(true)`. This closes the history leak.
 - **Revocation:**
   - `VerifiedBiscuit.revocationIds` against a revoked-ids set in the broker (webrun-biscuit has no
     helper for this; a few lines in the broker).
@@ -355,7 +358,7 @@ own note, linked here when it lands:
 | Subject | Note |
 |---|---|
 | `chrome.runtime.Port` pipe adapter for webrun-rpc | pending |
-| Pairing, proof of possession, Biscuit mint and authorize in an MV3 service worker | pending |
+| Pairing, proof of possession, Biscuit mint and authorize in an MV3 service worker | [webrun-devtools-pairing-biscuit.md](webrun-devtools-pairing-biscuit.md): works; ownership rule and hello checks corrected (§5.2) |
 | httpeers hub and member in an extension offscreen document | pending |
 | Several hubs and memberships in one runtime; app ⇄ mesh cases A, B, C | pending |
 | Local debugging and CI testing of extensions; Obscura | pending |
