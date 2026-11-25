@@ -1,6 +1,6 @@
 # What did two weeks of agent work on webrun-vcs produce, and what did it cost?
 
-Measured on 2026-11-25 (about 18:30 UTC; the limit observation was added at 18:45) for the plan `statewalker/statewalker-root#282`. The
+Measured on 2026-11-25 (about 18:30 UTC; limit observation added at 18:45) for the plan `statewalker/statewalker-root#282`. The
 sources are primary but partial:
 
 - `git log origin/main --since=2026-11-11 --numstat --date=short` of `statewalker/webrun-vcs`, up to
@@ -44,8 +44,9 @@ cost? Do the subscription's limits allow it?
 
 - **Limits.** The account is on a subscription, so `cost_usd` is not billed. It measures usage at
   API rates, and usage counts against the plan's limits. Sessions report only
-  `rate_limit_info: {rateLimitType: "seven_day", status}`, never the percentage used, so the
-  remaining headroom cannot be read exactly. See "Subscription limits" below.
+  `rate_limit_info: {rateLimitType: "seven_day", status}`, never the percentage used. The weekly
+  window was already at `allowed_warning` at 18:31 UTC on 2026-11-25, after ~$650 of VCS usage, so
+  the plan is paused until the human resumes it. See "Subscription limits" below.
 
 ## Two weeks of work in webrun-vcs
 
@@ -176,7 +177,8 @@ What follows from it:
   plus the other projects' sessions running at the same time (cellb.dev, Flue, sites).
 - **Observed at 18:31 UTC the same day: `allowed_warning`.** The estimate above said the remaining
   plan should fit. The window turned to `allowed_warning` after only ~$650 of VCS usage since its
-  reset (18 Wave 5 sessions, a bug fix, the orchestrator and sha1dc's $32). The warning therefore
+  reset: ~$566 for the 19 finished sessions, the orchestrator and sha1dc's $32, plus the three
+  children still running (~$80). The warning therefore
   does not track VCS usage alone. Either it starts at a much lower share of the window than last
   week suggested, or other sessions this week (cellb.dev, Flue, sites) used much more than the
   VCS sessions. Sessions cannot tell which.
@@ -185,11 +187,12 @@ What follows from it:
 - **Lesson.** Last week's VCS usage at the moment of the warning does not size this week's
   headroom. Read the account's usage page before committing to a batch, and keep the orchestrator's
   check of `rate_limit_info` before each child.
-- **The risk is the other projects.** If they run heavily at the same time, the window can reach
-  `allowed_warning` before Wave 6 ends.
+- **The other projects are one possible cause.** They share the weekly window, and the warning
+  arrived before Wave 6 started.
 - **Mitigation.** Sessions see `status` change to `allowed_warning` (and `isUsingOverage`). The
-  orchestrator checks its own `rate_limit_info` before starting each child and stops starting new
-  ones when it sees `allowed_warning`, leaving the rest for the next window (2026-12-02).
+  orchestrator checks its own `rate_limit_info` before starting each child and starts none unless
+  it reads `allowed`. After a warning the plan stays paused until the human resumes it, whatever
+  the window's reset date (2026-12-02 07:00 UTC this time).
 - **The exact figure** is in the account's usage settings on claude.ai, which a session cannot read.
 
 ## Method and caveats
