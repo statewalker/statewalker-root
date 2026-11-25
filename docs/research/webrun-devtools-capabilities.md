@@ -242,10 +242,28 @@ most one day).
 |---|---|---|
 | webrun-biscuit, httpeers-access, httpeers-hub logic, httpeers-person | Service worker or offscreen | Pure TS / WebCrypto, no DOM. |
 | libp2p node (`createBrowserNode`: websockets + WebRTC + circuit relay) | **Offscreen document** (`chrome.offscreen.createDocument`, reason `WEB_RTC`) | The service worker lacks WebRTC and is suspended when idle. |
-| ServiceWorker edge (`mountEdge`) | Not applicable | It needs a same-origin page. The broker uses `member.fetch` / `createGateway` directly, behind its own message routing. |
+| ServiceWorker edge (`mountEdge`) | The extension's own service worker | An extension cannot register a second ServiceWorker, but its own worker receives `fetch` events from extension pages and the offscreen document, so it can forward to `member.fetch` / `createGateway`. Web apps use the app channel. |
 | Keys | Extension IndexedDB | One Ed25519 key per hub (= the mesh id). A member key per membership, or one device key shared. Hub signers must be extractable seeds (Biscuit signs from raw bytes). |
 
-Broker ⇄ offscreen uses the same `chrome.runtime.Port` pipe adapter as §3.
+Broker ⇄ offscreen: the worker is stopped 30 s after its last event while the offscreen hub keeps
+serving, so the worker stays stateless and both sides talk by `chrome.runtime.sendMessage` (which
+wakes the worker); a `chrome.runtime.Port` pipe (§3) is opened lazily for streams only.
+
+**Managed page instead of (or beside) the offscreen document.** The extension can open a page in a
+pinned tab that runs the existing hub/member page code and talks to the broker over the app channel
+like any app. Prototyped ([offscreen-hub note](webrun-devtools-offscreen-hub.md)):
+
+- it works, with direct WebRTC links, over 13 minutes, while the tab holds a WebRTC connection; with
+  none (relay WebSocket only) a hidden tab falls to one timer wake-up per minute;
+- the user can close it and Memory Saver can discard it, so the worker must watch and reopen it;
+- it can show File System Access pickers, which an offscreen document cannot;
+- a web-origin page means the extension trusts whatever that origin serves next with hub keys and a
+  mesh-host grant; an extension page ships its code with the extension.
+
+**Recommendation:** hubs and members in one offscreen document (reason `WEB_RTC`, one libp2p node per
+mesh); a managed **extension page** only for gesture-bound features such as folder pickers. In the
+service worker itself a hub works in relay mode only (no `RTCPeerConnection`; needs
+`serveOnLimitedConnection: true`).
 
 - **Several hubs** in one runtime: `createHub` keeps no globals. Each hub needs its own key, its own
   storage (pass a distinct `idbStorage` db name; the default name is fixed) and its own libp2p
@@ -370,6 +388,6 @@ own note, linked here when it lands:
 |---|---|
 | `chrome.runtime.Port` pipe adapter for webrun-rpc | [webrun-devtools-port-pipe.md](webrun-devtools-port-pipe.md): works, 3–10× faster than webrun-ports; found a `throughAbort` leak in webrun-rpc |
 | Pairing, proof of possession, Biscuit mint and authorize in an MV3 service worker | [webrun-devtools-pairing-biscuit.md](webrun-devtools-pairing-biscuit.md): works; ownership rule and hello checks corrected (§5.2) |
-| httpeers hub and member in an extension offscreen document | pending |
+| httpeers hub and member in an extension offscreen document; managed tab | [webrun-devtools-offscreen-hub.md](webrun-devtools-offscreen-hub.md): offscreen document recommended; managed extension page for pickers |
 | Several hubs and memberships in one runtime; app ⇄ mesh cases A, B, C | [webrun-devtools-multi-mesh.md](webrun-devtools-multi-mesh.md): all work; one libp2p node per hub and per membership; rule and token corrections (§5.1, §6.2) |
 | Local debugging and CI testing of extensions; Obscura | [webrun-devtools-debugging.md](webrun-devtools-debugging.md): Playwright (`channel: "chromium"`) headless, no Xvfb; Obscura cannot load extensions |
