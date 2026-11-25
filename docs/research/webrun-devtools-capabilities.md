@@ -272,6 +272,8 @@ UI (options page):
 - The app **never sees the mesh token**, and the target peer's Datalog still has the final say. This
   is security-model §6 ("isolated + broker"): the narrower `mesh_fetch` scope is exactly what the
   session shell's `/peers/` lacks today.
+- The broker must strip any `x-httpeers-token` the app sends before dispatching: `createGateway`
+  passes a caller-supplied token through ([multi-mesh note](webrun-devtools-multi-mesh.md)).
 
 **B. Mesh membership grants local capabilities.** This is "access = capabilities for an app
 participating in a mesh".
@@ -301,8 +303,6 @@ participating in a mesh".
 - The broker mounts the devtools API as HTTP under `/devtools/` on the extension's node for a chosen
   mesh: REST per method, or `webrun-rpc-http`'s `newRpcServer`, with events as SSE via
   `webrun-http-events`.
-- For case A, the broker must strip any `x-httpeers-token` the app sends before dispatching:
-  `createGateway` passes a caller-supplied token through.
 - It is guarded by `withAccess({ issuer: meshX, rules })`, with `operation`/`resource` mapped to the
   same rights:
   ```datalog
@@ -372,4 +372,4 @@ own note, linked here when it lands:
 | Pairing, proof of possession, Biscuit mint and authorize in an MV3 service worker | [webrun-devtools-pairing-biscuit.md](webrun-devtools-pairing-biscuit.md): works; ownership rule and hello checks corrected (§5.2) |
 | httpeers hub and member in an extension offscreen document | pending |
 | Several hubs and memberships in one runtime; app ⇄ mesh cases A, B, C | [webrun-devtools-multi-mesh.md](webrun-devtools-multi-mesh.md): all work; one libp2p node per hub and per membership; rule and token corrections (§5.1, §6.2) |
-| Local debugging and CI testing of extensions; Obscura | pending |
+| Local debugging and CI testing of extensions; Obscura | [webrun-devtools-debugging.md](webrun-devtools-debugging.md): Playwright (`channel: "chromium"`) headless, no Xvfb; Obscura cannot load extensions |
