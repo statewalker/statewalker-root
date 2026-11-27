@@ -14,7 +14,8 @@ are placed where concurrent edits do not collide:
 |---|---|---|
 | Wayfinder maps, specs, their tickets | Issues here | Not files. Claimed with assignee + claim comment |
 | Bugs and other issues about one project | Issues in that project (`docs/agents/issue-tracker.md`) | Not files. Claimed the same way |
-| Progress, handoff, decisions in flight | Comments on the ticket | Append-only |
+| Progress, decisions in flight | Comments on the ticket | Append-only |
+| Handoff notes | `docs/handoffs/YYYY-MM-DD.<note-name>.md`, one file each, linked from a ticket comment (`docs/handoffs/README.md`) | New files never conflict; a note is never edited after it merges |
 | Code | Pull requests in the project repositories | Never in this repository |
 | ADRs | `docs/adr/YYYY-MM-DD-<slug>.md`, one file each | New files never conflict |
 | Research | `docs/research/<slug>.md`, one file each | New files never conflict |
@@ -116,9 +117,11 @@ dev-server ports.
 1. Project PRs opened, each referencing the ticket (`#<n>` for a ticket in the same project,
    `statewalker/statewalker-root#<n>` for one in root), and taken through the merge gate in
    `merging.md` before merging (lowest layer first).
-2. **Handoff comment** on the ticket (not the `/handoff` skill's file): what was done, links to
-   every follow-up issue the merge gate filed or reused, links to
-   every PR, what is left, anything the next session must know. Close the ticket if it is
+2. **Handoff note** in `docs/handoffs/YYYY-MM-DD.<note-name>.md` (`docs/handoffs/README.md`; not
+   the `/handoff` skill's `$TMPDIR` file). It covers what was done, links to every follow-up issue
+   the merge gate filed or reused, links to every PR, what is left, and anything the next session
+   must know. It is committed in this session's root PR, and a one-line comment on the ticket links
+   it. Close the ticket if it is
    resolved; otherwise comment `Released: <why>` and remove the assignee, or
    `Waiting on human: <what>` when the next step is the human's.
 3. New work discovered → new tickets (with blocking edges), not notes in files.
