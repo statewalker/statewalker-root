@@ -75,13 +75,13 @@ Versions: unkernel `0.2.0-261126-fd204d3`, tabc at `fzakaria/tabc@9c38eb7`, Node
   - It costs more: 60+ MiB per kernel against 17 to 28 MiB per QuickJS sandbox. Python starts in
     0.7 s warm against about 0.1 to 0.2 s for CPython on WASI.
   - It is new and unaudited, and its kernel is GPL-2.0 (the SDK is MIT).
-  - Recommendation (inference): use unkernel where compatibility matters (real `npm`/`pip`
-    packages, CLIs, native modules, Docker images), and keep QuickJS or WASI CPython for short,
-    pure scripts on the hot path.
+  - Recommendation at the time of the experiment (inference), superseded by [unkernel-not-integrated-now](../adr/2026-11-27-unkernel-not-integrated-now.md): unkernel is not integrated now:
+    use unkernel where compatibility matters (real `npm`/`pip` packages, CLIs, native modules,
+    Docker images), and keep QuickJS or WASI CPython for short, pure scripts.
 - **workerd caveat, still open.** Kernels in a workerd DO stall intermittently: the same request
   succeeds, then hangs on the next try (section 6). alpine, Python and Bun images did run there.
   Fetch counts, concurrency limits, kernels per isolate and the image do not explain it, and
-  plain Node never stalled with the same code. unkernel is ready for cellb, not yet for workerd.
+  plain Node never stalled with the same code. It worked on cellb; it is not usable on workerd yet.
 
 ## Findings
 
@@ -340,7 +340,7 @@ cellb-containers' `docs/capacity.md` (Wasmer, measured).
   large).
 - **Risk:** new, unaudited, GPL kernel.
 
-**So (inference):**
+**So, at the time of the experiment (inference), superseded by [unkernel-not-integrated-now](../adr/2026-11-27-unkernel-not-integrated-now.md): unkernel is not integrated now; this is the shape to revisit:**
 
 - unkernel as the **compatibility tier**: full Linux containers from images, `npm`/`pip`, native
   code, long-lived sessions with snapshots.
@@ -376,7 +376,8 @@ modes and symlinks (section 4) never matters.
 
 The first export took 185 s for 76 MB because the `Fs` adapter grew its write buffer to the
 exact new size on every write, which is quadratic. Growing it geometrically brought that to
-1.2 s. The adapter in the first note's appendix has the fix.
+1.2 s. The fixed adapter is in the appendix of `docs/research/unkernel-evaluation-procedure.md`
+(the first note's appendix has the first, quadratic version).
 
 **Running them** with the image read-only from the store and a `MemFilesApi` at `/data` (guest
 128 MiB; numpy 256 MiB, below which OpenBLAS fails to load with "Out of memory"):
@@ -434,4 +435,5 @@ CPU and memory limits per container; Firefox and Safari.
 - `oci/bench-node.mjs`, `oci/pkgs.mjs`, `oci/snapshot.mjs`, `density.mjs`: the measurements above.
   `wd3/worker.mjs` is the workerd DO, its layers over `HttpFilesApi` (with `maxConcurrent`).
 
-The FilesApi adapters (`filesApiFs`, `filesApiDisk`) are in the first note's appendix.
+The FilesApi adapters (`filesApiFs` with the geometric write buffer, `filesApiDisk`) and the modules
+above are in the appendix of `docs/research/unkernel-evaluation-procedure.md`.

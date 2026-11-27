@@ -25,8 +25,9 @@ in the guest.
 - **It is not reliable on workerd.** Kernels in a Durable Object stall at random. The same request
   succeeds, then hangs, and the cause is unknown.
 - **It is young.** It was weeks old when tested (0.2.0 nightlies), with one author, an unaudited
-  emulator, and a GPL-2.0 kernel. Our usage also needs workarounds: a pre-bundled web entry, no
-  fetch cache modes on workerd, and our own disk adapter.
+  emulator, and a GPL-2.0 kernel. Our usage also needs three workarounds: a web entry pre-bundled
+  with `import.meta.url` defined, a `fetch` without cache modes on workerd, and our own disk adapter
+  where its `distro` URL path reads `location`.
 
 ## Decision
 

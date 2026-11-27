@@ -68,13 +68,14 @@ JavaScript/TypeScript (Node, Bun, Deno) and Python run in these containers?
 - **Long-lived kernels stall on workerd under many concurrent FilesApi fetches** (verified,
   cause open). One DO stopped answering after 79 to about 1,500 ranged fetches, depending on the
   run. The same commands, with the same FilesApi over HTTP, finished in plain Node (3,922 files in
-  13.6 s). With the fetches serialised, one kernel got past 3,294 requests without stalling, so
-  concurrent subrequests are the likely cause, but this is not proven. See section 6.
-- **Recommendation (inference).** Add unkernel as a third engine behind cellb-containers'
+  13.6 s). With the fetches serialised, one kernel got past 3,294 requests without stalling. Later
+  runs ruled concurrency out: a cap of 4 fetches still stalled, and the same request succeeded, then
+  hung on retry (`unkernel-oci-images-js-python.md`, section 6). The cause is unknown.
+- **Recommendation at the time of the experiment (inference), superseded by [unkernel-not-integrated-now](../adr/2026-11-27-unkernel-not-integrated-now.md): unkernel is not integrated now.** The
+  recommendation was to add unkernel as a third engine behind cellb-containers'
   `ContainerEngine` port, next to Wasmer and Lifo. It is the only one of the three that runs
-  unmodified Linux binaries (Alpine and Debian packages) behind a wasm sandbox. Unlike Wasmer it
-  also runs inside a workerd DO, because it needs no threads, only JSPI. Mount FilesApis with the
-  adapter below. Open the issues listed at the end upstream.
+  unmodified Linux binaries behind a wasm sandbox, and unlike Wasmer it runs inside a workerd DO
+  (JSPI, no threads). The ADR defers this; Docker images on unkernel are the option to revisit.
 
 ## Findings
 
@@ -241,10 +242,12 @@ what the guest pulled from the runtimes' FilesApi:
 console output, `kwtty` silent. Every request the server saw had completed, so the DO's `fetch`
 promise was what never settled. It happened after 79, 342 and about 1,500 requests in three runs,
 and never in plain Node with the same FilesApi over HTTP. Serialising the FilesApi's fetches got
-one kernel past 3,294 requests without a stall. Concurrent subrequests are the suspect: the 9p
-server runs up to 16 requests at once (sourced: `.agents/js.md`, Connection), and workerd caps
-the open connections of one request. Unconfirmed. Before an engine relies on this, reproduce it
-with a minimal JSPI-plus-fetch probe and report it to unkernel or workerd.
+one kernel past 3,294 requests without a stall, which first pointed at concurrent subrequests (the
+9p server runs up to 16 requests at once, sourced: `.agents/js.md`, Connection). Later runs ruled
+that out: a cap of 4 fetches still stalled, and the same request succeeded, then hung on retry
+(`unkernel-oci-images-js-python.md`, section 6). The cause is unknown. Before anything relies on
+unkernel in workerd, reproduce it with a minimal JSPI-plus-fetch probe and report it to unkernel or
+workerd.
 
 ## How it would plug into cellb-containers (inference)
 
@@ -261,8 +264,8 @@ isolates with `limits.cpuMs` are the place for untrusted code there, as for the 
 - `docs/research/unkernel-oci-images-js-python.md`: official Docker images (Python, Node, Bun, Deno)
   run from their layers through a FilesApi, per-case resources, `pip`/`npm` with native packages,
   snapshots, and the comparison with Wasmer and QuickJS.
-- statewalker/cellb.dev#256: the unkernel engine for cellb-containers, with these findings as
-  acceptance criteria (the workerd stall first).
+- statewalker/cellb.dev#256: the unkernel engine for cellb-containers, deferred by
+  [unkernel-not-integrated-now](../adr/2026-11-27-unkernel-not-integrated-now.md).
 
 ## Upstream asks
 
@@ -276,7 +279,11 @@ isolates with `limits.cpuMs` are the place for untrusted code there, as for the 
    that fails to mount reported to `createKernel`'s caller, not booted around in silence.
 5. `distroSpec` resolving a relative URL only where `location` exists.
 
-## Appendix: the FilesApi → unkernel `Fs` adapter (as run)
+## Appendix: the FilesApi → unkernel `Fs` adapter (first version)
+
+This first version grows its write buffer to the exact size on each write, which is quadratic for
+large files (`unkernel-oci-images-js-python.md`, section 8). Use the fixed version in the appendix of
+`docs/research/unkernel-evaluation-procedure.md`.
 
 ```js
 // A FilesApi served to an unkernel guest as its `Fs` (9p over vsock). FilesApi writes whole

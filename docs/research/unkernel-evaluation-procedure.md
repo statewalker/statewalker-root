@@ -234,7 +234,8 @@ Full tables are in the notes. In short:
    3 to 6 times the memory, and slower starts. Wasmer cannot run on workerd at all.
 6. **workerd is the blocker.** It stalls without a reproducible cause, and production limits (128
    MB per isolate, CPU per request) are untested. Three workarounds were needed:
-   `import.meta.url`, fetch cache modes, and `location`.
+   the web entry pre-bundled with `import.meta.url` defined, `fetch` without cache modes, and our
+   own disk adapter where unkernel's `distro` URL path reads `location`.
 7. **Upstream maturity.** unkernel is weeks old with one author, its emulator is unaudited (as
    tabc's design notes say), and its kernel is GPL-2.0, though its SDK is MIT.
 
