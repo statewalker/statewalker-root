@@ -36,6 +36,12 @@
       "computedHash": "b78689833404148c769077355e12dbe5ad996a158a1e21e58ddf169e439d9d8c",
       "installMode": "copy"
     },
+    "followup": {
+      "source": "statewalker/statewalker-root",
+      "sourceType": "local",
+      "skillPath": ".claude/skills/followup/SKILL.md",
+      "installMode": "copy"
+    },
     "grill-me": {
       "source": "mattpocock/skills",
       "sourceType": "github",
