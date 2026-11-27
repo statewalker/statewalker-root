@@ -15,7 +15,7 @@ are placed where concurrent edits do not collide:
 | Wayfinder maps, specs, their tickets | Issues here | Not files. Claimed with assignee + claim comment |
 | Bugs and other issues about one project | Issues in that project (`docs/agents/issue-tracker.md`) | Not files. Claimed the same way |
 | Progress, decisions in flight | Comments on the ticket | Append-only |
-| Handoff notes | `docs/handoffs/YYYY-MM-DD.<note-name>.md`, one file each, linked from a ticket comment (`docs/handoffs/README.md`) | New files never conflict; a note is never edited after it merges |
+| Handoff notes | `docs/handoffs/YYYY-MM-DD.<note-name>.md`, one file each, linked from a ticket comment (`docs/handoffs/README.md`) | New files never conflict; a note is never edited after it merges. Notes of finished or cancelled work move to `docs/handoffs.archive/` |
 | Code | Pull requests in the project repositories | Never in this repository |
 | ADRs | `docs/adr/YYYY-MM-DD-<slug>.md`, one file each | New files never conflict |
 | Research | `docs/research/<slug>.md`, one file each | New files never conflict |
@@ -49,9 +49,18 @@ A session with nothing to contribute here opens no pull request; its trace is th
 
 1. New session → select **`statewalker/statewalker-root`**, plus every project the session will
    change or open pull requests in, plus the private project if it must read it
-   (statewalker-sites). Unselected public projects can be cloned with git for reading, but API
-   and pull-request calls on them are refused until the project is attached; a running session
-   can attach more.
+   (statewalker-sites). A running session can attach more, but the attach may be refused or need
+   the human's approval: select up front what the ticket names.
+
+   **A project that is not selected** (for example, one a handoff note names):
+   - **Git reads work** for public projects, anonymously through the proxy:
+     `GIT_LFS_SKIP_SMUDGE=1 git clone --depth 1 https://github.com/statewalker/<name> repos/<name>`.
+     `git ls-remote origin refs/heads/<branch>` shows whether a branch a note names still
+     exists, and `git fetch --depth 50 origin <branch>` gets it.
+   - **Nothing else works.** Pushes, pull requests and the GitHub API are refused, and so are
+     the project's public github.com pages (403). So the session can't read the project's issue
+     or pull-request state. When a ticket or a note needs that state, say it is unchecked, and
+     ask the human to attach or select the project rather than guessing from `git log`.
 2. Prompt with the ticket, for example:
    - `Work on statewalker-root#12.`
    - `/wayfinder statewalker-root#4` (work the next frontier ticket of a map)
@@ -122,7 +131,7 @@ dev-server ports.
    the merge gate filed or reused, links to every PR, what is left, and anything the next session
    must know. It is committed in this session's root PR, and a one-line comment on the ticket links
    it. Close the ticket if it is
-   resolved; otherwise comment `Released: <why>` and remove the assignee, or
+   resolved, and move its notes to `docs/handoffs.archive/` (`docs/handoffs/README.md`, **Archiving a note**); otherwise comment `Released: <why>` and remove the assignee, or
    `Waiting on human: <what>` when the next step is the human's.
 3. New work discovered → new tickets (with blocking edges), not notes in files.
 4. This repository's PR rebased, through the merge gate, and merged automatically (or left open
