@@ -9,6 +9,8 @@ Versions: unkernel `0.2.0-261126-fd204d3` (npm, the source at `pithings/unkernel
 `@statewalker/cellb` 0.15.0, wrangler with workerd `2026-11-25`, Node 24.22, Chromium 158,
 `@statewalker/webrun-files` 0.12.0 with `-mem` and `-composite`.
 
+**Decision:** unkernel is not integrated now ([unkernel-not-integrated-now](../adr/2026-11-27-unkernel-not-integrated-now.md)); the procedure and conclusion are in `docs/research/unkernel-evaluation-procedure.md`.
+
 ## Question
 
 Can [unkernel](https://github.com/pithings/unkernel) (Linux 7.3 compiled to one wasm module, with

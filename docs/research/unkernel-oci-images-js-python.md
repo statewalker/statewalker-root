@@ -8,6 +8,8 @@ in this session), **(sourced)** (code or docs, cited) or **(inference)**.
 Versions: unkernel `0.2.0-261126-fd204d3`, tabc at `fzakaria/tabc@9c38eb7`, Node 24.22, workerd
 `2026-11-25` (`wrangler dev`). One 4-vCPU, 16 GB Linux VM.
 
+**Decision:** unkernel is not integrated now ([unkernel-not-integrated-now](../adr/2026-11-27-unkernel-not-integrated-now.md)); the procedure and conclusion are in `docs/research/unkernel-evaluation-procedure.md`.
+
 ## Questions
 
 1. What does each case cost: memory (guest and host), CPU, start, I/O?
