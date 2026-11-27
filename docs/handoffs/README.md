@@ -72,3 +72,4 @@ unchanged, and its header links the original.
 - [2026-11-27.232-project-sites-one-standard](2026-11-27.232-project-sites-one-standard.md): #232, Project sites: one standard for every statewalker site
 - [2026-11-27.70-ai-harness-cellb-celld-workers](2026-11-27.70-ai-harness-cellb-celld-workers.md): #70, AI harness on CellB, CellD and Workers
 - [2026-11-27.444-followup-skill](2026-11-27.444-followup-skill.md): #444, Add /followup: resolve a set of follow-up issues across projects
+- [2026-11-27.430-webrun-devtools-per-app-biscuit-capabilities](2026-11-27.430-webrun-devtools-per-app-biscuit-capabilities.md): #430, webrun-devtools: per-app Biscuit capabilities over webrun-wire, and the extension as an HTTPeers peer
