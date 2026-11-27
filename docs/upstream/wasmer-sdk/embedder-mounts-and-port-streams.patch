@@ -1,0 +1,467 @@
+From b2739db54765899fc51e91b1c5f2761c9b451d26 Mon Sep 17 00:00:00 2001
+From: Claude <noreply@anthropic.com>
+Date: Wed, 25 Nov 2026 12:07:04 +0000
+Subject: [PATCH] feat(js): embedder filesystem mounts and port streams for
+ access-controlled sandboxes
+
+Expose what the core already has, so an application embedding the SDK can
+decide every guest filesystem and network call itself:
+
+- SandboxOptions.mounts and .storage: the core's mountHost/storageHost.
+  Each guest filesystem call under a mount reaches the embedder as one
+  request (the existing host-filesystem bridge), which can allow it,
+  answer it, or refuse it with EACCES.
+- Node SDK workers install the host-filesystem bridge, as browser workers
+  already do, so mounts work in Node too.
+- Ports.fetch(port, request) and Ports.connect(port): the core's
+  handleHttpRequest/connectTcp, to reach a guest listener without a
+  ServiceWorker or a host port.
+- Export ./host-filesystem (isHostFileSystemRequest,
+  respondToHostFileSystem) for embedders.
+
+Co-Authored-By: Claude Opus 5.5 <noreply@anthropic.com>
+Claude-Session: https://claude.ai/code/session_01K1ehjVgoupSuG2XEpvYCSt
+---
+ js/README.md                      |  48 +++++++++
+ js/package.json                   |   4 +
+ js/scripts/test-node.mjs          |   7 ++
+ js/src/index.ts                   | 124 ++++++++++++++++++++++++
+ js/src/node-worker.ts             |   4 +
+ js/tests/embedder-mounts.test.mjs | 155 ++++++++++++++++++++++++++++++
+ 6 files changed, 342 insertions(+)
+ create mode 100644 js/tests/embedder-mounts.test.mjs
+
+diff --git a/js/README.md b/js/README.md
+index 098ddac..9f73ad1 100644
+--- a/js/README.md
++++ b/js/README.md
+@@ -417,6 +417,54 @@ iframe uses the capabilities required for scripts and service
+ worker control, but an iframe sandbox is not an origin boundary when both
+ `allow-scripts` and `allow-same-origin` are enabled.
+ 
++### Talk to a guest listener without a host port
++
++`ports.fetch()` sends one HTTP request to a guest TCP listener and returns its
++response; `ports.connect()` opens a raw byte stream (WebSockets, database
++protocols). Neither needs a ServiceWorker or a host port, and the embedder sees
++every request it forwards. Both need `network: { mode: "http" }` or `"wisp"`.
++
++```js
++const sandbox = await wasmer.sandboxes.create({
++  packages: ["python/python"],
++  network: { mode: "http", peers: [] },
++});
++await sandbox.command("python", ["-m", "http.server", "8080"]).spawn();
++await sandbox.ports.wait(8080);
++const response = await sandbox.ports.fetch(8080, new Request("http://guest/"));
++
++const { readable, writable, close } = sandbox.ports.connect(8080);
++```
++
++## Embedder filesystems (experimental)
++
++`mounts` and `storage` let the application serve a guest directory itself.
++Every guest filesystem call under a mount (`stat`, `readDir`, `open`, `read`,
++`write`, …) reaches the application as one request through
++`globalThis.__wasmerHandleFileSystemRpc`, so it can authorize each operation
++against its own access policy: return the result, or an error with a code
++such as `EACCES` (the guest sees a permission error) or `ENOENT`.
++
++```js
++import { isHostFileSystemRequest, respondToHostFileSystem } from "@wasmer/sdk/host-filesystem";
++
++globalThis.__wasmerHandleFileSystemRpc = (message) => {
++  if (!isHostFileSystemRequest(message)) return false;
++  respondToHostFileSystem(message, myFiles.handle(message.mount, message.method, message.args));
++  return true;
++};
++
++const sandbox = await wasmer.sandboxes.create({
++  packages: ["python/python"],
++  mounts: [{ path: "/data", mount: 1, readOnly: true }],
++  storage: { mount: 2 }, // `/workspace`, including `sandbox.fs`
++});
++```
++
++The guest blocks while the application answers, so answer from a thread
++whose event loop is free. Node and browser SDK workers both install the
++bridge. `tests/embedder-mounts.test.mjs` shows a complete read-only policy.
++
+ ## Examples
+ 
+ Run these from the repository root after `npm run build` in `js/`:
+diff --git a/js/package.json b/js/package.json
+index 917da56..5a0fa62 100644
+--- a/js/package.json
++++ b/js/package.json
+@@ -34,6 +34,10 @@
+     "./service-worker-host": {
+       "types": "./dist/service-worker-host.d.ts",
+       "default": "./dist/service-worker-host.js"
++    },
++    "./host-filesystem": {
++      "types": "./dist/host-filesystem.d.ts",
++      "default": "./dist/host-filesystem.js"
+     }
+   },
+   "types": "./dist/index.d.ts",
+diff --git a/js/scripts/test-node.mjs b/js/scripts/test-node.mjs
+index 6e71030..e3a6783 100644
+--- a/js/scripts/test-node.mjs
++++ b/js/scripts/test-node.mjs
+@@ -73,6 +73,13 @@ const tests = [
+     processTimeoutMs: 15_000,
+     attempts: 1,
+   },
++  {
++    name: "embedder-mounts",
++    file: "tests/embedder-mounts.test.mjs",
++    testTimeoutMs: 120_000,
++    processTimeoutMs: 180_000,
++    attempts: 1,
++  },
+   {
+     name: "service-worker-lifecycle",
+     file: "tests/service-worker-lifecycle.test.mjs",
+diff --git a/js/src/index.ts b/js/src/index.ts
+index 4ca4dcb..3f30b12 100644
+--- a/js/src/index.ts
++++ b/js/src/index.ts
+@@ -145,6 +145,35 @@ export interface SandboxOptions {
+   network?: NetworkPolicy;
+   /** The command used by `sandbox.shell()` and `sandbox.sh`. */
+   shell?: CommandSelector;
++  /**
++   * Experimental: directories the embedder serves through the worker
++   * filesystem bridge (`installHostFileSystemWorkerBridge`). Every guest
++   * filesystem call under `path` becomes one request the embedder answers,
++   * so it can authorize each operation (read, write, list, delete) itself.
++   */
++  mounts?: readonly HostMount[];
++  /**
++   * Experimental: an embedder filesystem used as `/workspace`, including the
++   * SDK's own file API. `mount` is the id the embedder answers requests for.
++   */
++  storage?: { mount: number };
++}
++
++/** A directory served by the embedder over the worker filesystem bridge. */
++export interface HostMount {
++  /** Absolute guest path the directory appears at. */
++  path: string;
++  /** Embedder-chosen id, sent with every request for this directory. */
++  mount: number;
++  /** Refuse writes in the guest without asking the embedder. */
++  readOnly?: boolean;
++}
++
++/** A raw byte stream to a guest TCP listener (see `Ports.connect`). */
++export interface PortConnection {
++  readonly readable: ReadableStream<Uint8Array>;
++  readonly writable: WritableStream<Uint8Array>;
++  close(): void;
+ }
+ 
+ export interface Packages {
+@@ -565,6 +594,20 @@ export class Wasmer {
+     for (const [key, value] of Object.entries(options.env ?? {})) {
+       builder.env(key, value);
+     }
++    for (const mount of options.mounts ?? []) {
++      validateGuestPath("mounts[].path", mount.path);
++      rethrowSync(() =>
++        builder.mountHost(
++          mount.path,
++          validateInteger("mounts[].mount", mount.mount, 0, 0xffff_ffff),
++          mount.readOnly === true,
++        )
++      );
++    }
++    if (options.storage !== undefined) {
++      const id = validateInteger("storage.mount", options.storage.mount, 0, 0xffff_ffff);
++      rethrowSync(() => builder.storageHost(id));
++    }
+     let networkBridge: { close(): void } | undefined;
+     if (network.mode === "wisp") {
+       if (typeof window === "undefined") {
+@@ -880,6 +923,80 @@ export class Ports {
+     this.#core = core;
+   }
+ 
++  /**
++   * Send one HTTP request to a guest TCP listener and return its response,
++   * without a ServiceWorker or a host port. The embedder sees and can
++   * authorize every request it forwards.
++   *
++   * Needs browser ingress networking, as `serve()` does; fails with
++   * `CAPABILITY_UNAVAILABLE` otherwise.
++   */
++  async fetch(port: number, request: Request): Promise<Response> {
++    const validPort = validateInteger("port", port, 1, 65_535);
++    const url = new URL(request.url);
++    const body = new Uint8Array(await request.arrayBuffer());
++    const headers = [...request.headers.entries()];
++    const response = await rethrow(
++      this.#core.handleHttpRequest(
++        validPort,
++        request.method,
++        url.pathname + url.search,
++        headers,
++        body,
++      ),
++    );
++    const status = response.status;
++    const noBody = request.method === "HEAD" || status === 204 ||
++      status === 304 || (status >= 100 && status < 200);
++    return new Response(noBody ? null : Uint8Array.from(response.body), {
++      status,
++      statusText: response.statusText,
++      headers: response.headers,
++    });
++  }
++
++  /**
++   * Open a raw byte stream to a guest TCP listener (WebSockets, database
++   * protocols), without a host port.
++   *
++   * Needs browser ingress networking; fails with `CAPABILITY_UNAVAILABLE`
++   * otherwise.
++   */
++  connect(port: number): PortConnection {
++    const validPort = validateInteger("port", port, 1, 65_535);
++    const connection = rethrowSync(() => this.#core.connectTcp(validPort));
++    let closed = false;
++    const close = () => {
++      if (closed) return;
++      closed = true;
++      try {
++        connection.close();
++      } catch {
++        // Already closed by the guest.
++      }
++    };
++    const readable = new ReadableStream<Uint8Array>({
++      async pull(controller) {
++        const chunk = await rethrow(connection.read());
++        if (!chunk || chunk.length === 0) controller.close();
++        else controller.enqueue(Uint8Array.from(chunk));
++      },
++      cancel: close,
++    }, { highWaterMark: 0 });
++    const writable = new WritableStream<Uint8Array>({
++      async write(chunk) {
++        for (let offset = 0; offset < chunk.length; offset += 65_536) {
++          await rethrow(connection.write(chunk.subarray(offset, offset + 65_536)));
++        }
++      },
++      close() {
++        rethrowSync(() => connection.shutdownWrite());
++      },
++      abort: close,
++    });
++    return { readable, writable, close };
++  }
++
+   /**
+    * Wait until a guest TCP listener accepts connections on `port`.
+    *
+@@ -1697,6 +1814,13 @@ function validateTerminalOptions(
+   };
+ }
+ 
++function validateGuestPath(name: string, value: string): string {
++  if (typeof value !== "string" || !value.startsWith("/")) {
++    throw new WasmerError(`\`${name}\` must be an absolute guest path`, "INVALID_ARGUMENT");
++  }
++  return value;
++}
++
+ function validateInteger(
+   name: string,
+   value: number,
+diff --git a/js/src/node-worker.ts b/js/src/node-worker.ts
+index 8ce2ad2..55bd35e 100644
+--- a/js/src/node-worker.ts
++++ b/js/src/node-worker.ts
+@@ -15,6 +15,7 @@ import {
+ import { GuestMemoryBudget } from "./guest-memory-budget.js";
+ import { installGuestMemoryCounters } from "./guest-memory-diagnostics.js";
+ import { obtainGarbageCollector } from "./node-garbage-collector.js";
++import { installHostFileSystemWorkerBridge } from "./host-filesystem.js";
+ 
+ if (!parentPort) throw new Error("Wasmer SDK worker has no parent port");
+ const port: NonNullable<typeof parentPort> = parentPort;
+@@ -38,6 +39,9 @@ Object.defineProperty(globalThis, "postMessage", {
+   configurable: true,
+   value: (message: unknown) => port.postMessage(message),
+ });
++// Native mounts (`SandboxOptions.mounts`) call the embedder through the same
++// synchronous bridge browser workers install.
++installHostFileSystemWorkerBridge();
+ 
+ let worker:
+   | {
+diff --git a/js/tests/embedder-mounts.test.mjs b/js/tests/embedder-mounts.test.mjs
+new file mode 100644
+index 0000000..88215dd
+--- /dev/null
++++ b/js/tests/embedder-mounts.test.mjs
+@@ -0,0 +1,155 @@
++import assert from "node:assert/strict";
++import { fileURLToPath } from "node:url";
++import test from "node:test";
++
++import { Wasmer } from "../dist/node.js";
++import { isHostFileSystemRequest, respondToHostFileSystem } from "../dist/host-filesystem.js";
++
++const runtimeCache =
++  process.env.WASMER_TEST_CACHE ??
++  fileURLToPath(new URL("../../.wasmer", import.meta.url));
++
++// The embedder answers every guest filesystem call under a mount, so it can
++// apply its own access policy to each operation. This one serves a read-only
++// directory with one readable file and one file it refuses to open.
++function policyEmbedder() {
++  const time = { accessed: "0", modified: "0", created: "0" };
++  const files = new Map([["public.txt", new TextEncoder().encode("hello\n")], ["secret.txt", new Uint8Array(8)]]);
++  const calls = [];
++  const open = new Map();
++  let nextId = 1;
++  const deny = (message) => Object.assign(new Error(message), { code: "EACCES" });
++  const notFound = () => Object.assign(new Error("not found"), { code: "ENOENT" });
++  const methods = {
++    stat([path]) {
++      if (path === "" || path === ".") return { kind: "directory", size: 0, ...time };
++      const file = files.get(path);
++      if (!file) throw notFound();
++      return { kind: "file", size: file.length, ...time };
++    },
++    readDir() {
++      return [...files].map(([name, file]) => ({ name, kind: "file", size: file.length, ...time }));
++    },
++    open([path, , write, create]) {
++      if (write || create) throw deny("read-only mount");
++      if (path === "secret.txt") throw deny("not for this guest");
++      if (!files.has(path)) throw notFound();
++      const id = nextId++;
++      open.set(id, files.get(path));
++      return id;
++    },
++    read([id, offset, length]) {
++      return open.get(id).subarray(offset, offset + length);
++    },
++    close([id]) {
++      open.delete(id);
++      return null;
++    },
++  };
++  const previous = globalThis.__wasmerHandleFileSystemRpc;
++  globalThis.__wasmerHandleFileSystemRpc = (message) => {
++    if (!isHostFileSystemRequest(message)) return false;
++    calls.push({ mount: message.mount, method: message.method, path: message.args[0] });
++    try {
++      const handler = methods[message.method];
++      if (!handler) throw Object.assign(new Error(message.method), { code: "ENOTSUP" });
++      respondToHostFileSystem(message, { value: handler(message.args) });
++    } catch (error) {
++      respondToHostFileSystem(message, { error: { code: error.code, message: error.message } });
++    }
++    return true;
++  };
++  return { calls, restore: () => { globalThis.__wasmerHandleFileSystemRpc = previous; } };
++}
++
++test("mounts route each guest filesystem call to the embedder, which decides it", async () => {
++  const embedder = policyEmbedder();
++  const client = new Wasmer({ cache: { directory: runtimeCache } });
++  try {
++    const sandbox = await client.sandboxes.create({
++      packages: ["python/python@=3.13.20"],
++      mounts: [{ path: "/data", mount: 7 }],
++    });
++    const script = [
++      "import os",
++      "print(sorted(os.listdir('/data')))",
++      "print(open('/data/public.txt').read(), end='')",
++      "for attempt in (lambda: open('/data/secret.txt').read(), lambda: open('/data/new.txt', 'w')):",
++      "  try:",
++      "    attempt()",
++      "  except PermissionError:",
++      "    print('denied')",
++    ].join("\n");
++    const output = await sandbox.command("python", ["-c", script]).run();
++    assert.equal(output.text(), "['public.txt', 'secret.txt']\nhello\ndenied\ndenied\n");
++    assert.ok(embedder.calls.every((call) => call.mount === 7));
++    assert.ok(embedder.calls.some((call) => call.method === "open" && call.path === "secret.txt"));
++    await sandbox.close();
++  } finally {
++    embedder.restore();
++    await client.close();
++  }
++});
++
++test("mounts and storage reject invalid arguments", async () => {
++  const client = new Wasmer({ cache: { directory: runtimeCache } });
++  try {
++    await assert.rejects(
++      client.sandboxes.create({ mounts: [{ path: "data", mount: 1 }] }),
++      { code: "INVALID_ARGUMENT" },
++    );
++    await assert.rejects(
++      client.sandboxes.create({ mounts: [{ path: "/data", mount: -1 }] }),
++      { code: "INVALID_ARGUMENT" },
++    );
++    await assert.rejects(
++      client.sandboxes.create({ storage: { mount: 1.5 } }),
++      { code: "INVALID_ARGUMENT" },
++    );
++  } finally {
++    await client.close();
++  }
++});
++
++test("ports.fetch sends one request to a guest listener without a host port", async () => {
++  const client = new Wasmer({ cache: { directory: runtimeCache } });
++  try {
++    const sandbox = await client.sandboxes.create({
++      packages: ["python/python@=3.13.20"],
++      network: { mode: "http", peers: [] },
++      files: { "index.html": "hello from the guest\n" },
++    });
++    const server = await sandbox
++      .command("python", ["-m", "http.server", "8080", "--directory", "/workspace"])
++      .spawn();
++    try {
++      await sandbox.ports.wait(8080, { timeoutMs: 30_000 });
++      const response = await sandbox.ports.fetch(8080, new Request("http://guest/index.html"));
++      assert.equal(response.status, 200);
++      assert.equal(await response.text(), "hello from the guest\n");
++      const head = await sandbox.ports.fetch(8080, new Request("http://guest/index.html", { method: "HEAD" }));
++      assert.equal(head.status, 200);
++      assert.equal(await head.text(), "");
++    } finally {
++      await server.kill();
++      await sandbox.close();
++    }
++  } finally {
++    await client.close();
++  }
++});
++
++test("ports.fetch and ports.connect need ingress networking", async () => {
++  const client = new Wasmer({ cache: { directory: runtimeCache } });
++  try {
++    const sandbox = await client.sandboxes.create({});
++    await assert.rejects(
++      sandbox.ports.fetch(8080, new Request("http://guest/")),
++      { code: "CAPABILITY_UNAVAILABLE" },
++    );
++    assert.throws(() => sandbox.ports.connect(8080), { code: "CAPABILITY_UNAVAILABLE" });
++    await sandbox.close();
++  } finally {
++    await client.close();
++  }
++});
+-- 
+2.43.0
+
