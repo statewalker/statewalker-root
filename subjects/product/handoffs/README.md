@@ -4,4 +4,4 @@ The notes of work still in progress on this subject, one line per note, newest l
 
 ## Notes
 
-- [2026-11-27.194-first-paid-wedge](2026-11-27.194-first-paid-wedge.md): #194, Which product is the first paid wedge? (recorded from its session; Q11–Q15 wait on the human)
+None.

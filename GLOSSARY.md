@@ -111,7 +111,7 @@ _Avoid_: contribution (fine in prose), plug-in.
 _Avoid_: kernel (one of its packages today), framework.
 
 **Application**: what a user runs: a brand, a chosen set of fragments and a default layout, on the
-platform. Sandclaw is meant to be one.
+platform. Each SandClaw application is one.
 _Avoid_: app (the repository term above: a private package), product, distribution.
 
 **Host**: a place where server halves run: the browser (CellB), a server (CellD or workerd), or
@@ -218,3 +218,33 @@ _Avoid_: run, task.
 
 **Script**: a program a fragment ships for a host to run as an operating-system process, as a job.
 _Avoid_: task.
+
+## Product
+
+**StateWalker**: the open technology blocks of the ecosystem (CellB, the platform, the AI harness,
+VCS, HTTPeers, files, data, search, sites), published MIT under `github.com/statewalker`.
+_Avoid_: StateWalker for the applications or the commercial offer (that is SandClaw).
+
+**SandClaw**: the open-source applications assembled on the platform from StateWalker's blocks,
+under `github.com/sandclaw-ai`, and the brand that sells managed services and on-premise packages.
+_Avoid_: Sandclaw (spelling), product (say the application's name or the offer).
+
+**Managed service**: a pre-configured, domain-specific service that SandClaw runs for a customer,
+such as storage, a git server, an HTTPeers relay or hub, model access, telemetry or identity.
+_Avoid_: hosted service (Host already names where server halves run), SaaS.
+
+**On-premise package**: the same set of managed services, configured to install on the customer's
+own machines.
+_Avoid_: self-hosted edition, distribution.
+
+**Showcase site**: a thematic site that presents blocks, applications or prototypes to developers
+and measures their interest; there are three, one for each.
+_Avoid_: landing page, project site (a block's documentation site, above).
+
+**Prototype**: a browser-only application shown on a showcase site to test developers' interest,
+before any promotion.
+_Avoid_: demo (a deployed app a project site links to, above), POC.
+
+**Promotion**: the decision, made on measured interest, to develop a prototype or block in the open
+and package it as a SandClaw offer.
+_Avoid_: graduation, launch.

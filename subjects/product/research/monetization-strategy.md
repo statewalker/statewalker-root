@@ -1,5 +1,11 @@
 # How can the StateWalker projects make money, and what is the shortest path?
 
+> **Status, 2026-11-27:** the inventory, comparables and channels below still stand. The
+> recommendation of one paid workspace product (sections 4 and 6) was replaced by
+> [ADR blocks-sandclaw-and-managed-services](../../../docs/adr/2026-11-27-blocks-sandclaw-and-managed-services.md):
+> open SandClaw applications, revenue from managed services and on-premise packages, and
+> showcase sites that measure which prototypes to promote.
+
 Research for the map [Monetization: StateWalker's first paid product](https://github.com/statewalker/statewalker-root/issues/193), 2026-11-21. Sources: the README of every
 project in `repos.json` (shallow clones of `main`, 2026-11-21), this repository's ADRs, research
 notes and open issues, and the public web pages listed under **Sources**. Statements marked

@@ -17,7 +17,7 @@ For the state of each subject, run `node tools/status.mjs` ([`docs/process/subje
 | `vcs` | [`subjects/vcs/`](subjects/vcs/README.md) | webrun-vcs | A git-compatible VCS in TypeScript, with parity against native git |
 | `p2p` | [`subjects/p2p/`](subjects/p2p/README.md) | webrun-wire, httpeers, webrun-devtools | Byte channels and RPC, the HTTPeers mesh, Biscuit capabilities, the devtools extension |
 | `sites` | [`subjects/sites/`](subjects/sites/README.md) | statewalker-knowledge, webrun-sites, statewalker-sites | Notebooks built to static sites, the site kit, every project site |
-| `product` | [`subjects/product/`](subjects/product/README.md) | sandclaw | SandClaw's branded applications and the first paid offer |
+| `product` | [`subjects/product/`](subjects/product/README.md) | sandclaw | SandClaw's open-source applications, the showcase sites, and the paid offer: managed services and on-premise packages |
 | `data` | [`subjects/data/`](subjects/data/README.md) | webrun-files, statewalker-db, statewalker-search, webrun-sync | FilesApi, database drivers, indexers and sync |
 
 ## Relationships
@@ -37,8 +37,10 @@ The arrows follow the published dependencies: lower layers first (`docs/projects
   harness runs inside the platform as `system.agents`.
 - **sites ← every subject.** Each project's site content lives in the project. The site kit
   (statewalker-knowledge) and the one build (statewalker-sites) belong to `sites`.
-- **product ← platform, ai-harness, p2p.** SandClaw assembles branded applications from the
-  technology blocks.
+- **product ← every subject.** SandClaw assembles open-source applications from the published
+  blocks, and sells managed services and on-premise packages around them; showcase sites measure
+  which blocks and prototypes developers want
+  ([ADR](docs/adr/2026-11-27-blocks-sandclaw-and-managed-services.md)).
 - **process ↔ every subject.** The rules in `docs/process/` apply everywhere.
 
 ## Where terms and decisions go

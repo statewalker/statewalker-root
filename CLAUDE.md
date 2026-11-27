@@ -76,7 +76,7 @@ statewalker-knowledge and webrun-vcs, so cellb.dev must come after them. Invento
 | L3 | statewalker-ai | The AI harness: environment, access, definitions, sessions, Flue adapter, hosting, OpenAI/UHP projections (spec statewalker-root#111) |
 | L4 | statewalker-kernel | Headless workbench kernel: backbone, platform, workspace, explorer, shell |
 | L6 | statewalker-shell-react | Workbench React views (shell, explorer, settings, mime viewers, shadcn) |
-| L7 | sandclaw | Chat and wiki apps; wiki.core, file-mounts.core, file-panels.core |
+| L7 | sandclaw | Chat and wiki apps; wiki.core, file-mounts.core, file-panels.core (moving to `sandclaw-ai`, below) |
 | app | statewalker-sandbox | Experimental apps and private prototypes; being dissolved (`docs/refactoring/`) |
 | app | statewalker-shell-theia | Browser-only Eclipse Theia shell over a FilesApi |
 | app | statewalker-sites | Private: documentation sites and blog (Cloudflare Workers) |
@@ -86,6 +86,22 @@ statewalker-knowledge and webrun-vcs, so cellb.dev must come after them. Invento
 Archived, do not change: `statewalker-content`, `statewalker-ai-legacy`, `umbrella` (its
 repository-management tools now live in this repository's `tools/`). The private project
 (statewalker-sites) must be selected for a cloud session even to read it.
+
+## StateWalker and SandClaw
+
+Two layers, decided in ADR [blocks-sandclaw-and-managed-services](docs/adr/2026-11-27-blocks-sandclaw-and-managed-services.md):
+
+- **StateWalker** (`github.com/statewalker`, the projects above): the open technology blocks,
+  published MIT. Nothing commercial goes into a `statewalker` repository: no billing, accounts or
+  operations configuration for managed services.
+- **SandClaw** (`github.com/sandclaw-ai`): the open-source applications assembled on the platform
+  from published `@statewalker/*` packages, and the brand that sells **managed services** and
+  **on-premise packages** (`GLOSSARY.md`, "Product"). `sandclaw` and httpeers' PeerShare apps move
+  there when their ticket is worked; until then the table above still lists `sandclaw`.
+- **What gets built** is decided by developers' measured interest in the prototypes on the
+  showcase sites (**promotion**), not by completeness. The work is planned on the map
+  [statewalker-root#193](https://github.com/statewalker/statewalker-root/issues/193) (subject
+  `product`), and the platform and harness plans order their work by what it needs.
 
 `repos.json` here is the source of truth for which projects exist. `tools/` manages them from one
 machine, plain Node with no dependencies (`tools/README.md`): `repos.mjs` (clone, pull, status,
