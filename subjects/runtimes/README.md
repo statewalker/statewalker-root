@@ -23,6 +23,7 @@ The output lists, for this subject:
 
 - There is no map yet. The open questions are root issues with no plan: #189, #277 and #278. Their next step is triage (`/triage`), or a map (`/wayfinder`) once they form one destination.
 - CellB's own bugs and features live in cellb.dev's tracker.
+- **Kitesurf on CellB.** [Kitesurf](https://github.com/cloudflare/kitesurf), Cloudflare's browser-engine Worker, runs unchanged on CellB 0.12.0 or later. It runs in Node and in a browser tab, and prints PDFs with CDP `Page.printToPDF`. The app is `statewalker-sandbox/apps/kitesurf-cellb` (its README has the run steps). What's left: #460 (where the app goes when the sandbox is dissolved) and cellb.dev#262 (Firefox and Safari). The finished work is in the archived note [2026-11-27.kitesurf-on-cellb](handoffs.archive/2026-11-27.kitesurf-on-cellb.md).
 
 ## Projects
 
