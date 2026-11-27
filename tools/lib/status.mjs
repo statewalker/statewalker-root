@@ -92,14 +92,34 @@ export function classify(issue, comments, now = new Date().toISOString()) {
   return { ...base, kind: "other" };
 }
 
-/** Parse a handoff index: lines `- [name](file): <ref>, <title>`. */
+/** The human's open items in a handoff note: the top-level items under a heading that says
+ * "waiting on (the) human", and bullets that start with a bold "Waiting on human". */
+export function humanItems(text) {
+  const items = [];
+  const lines = text.split("\n");
+  let level = 0;
+  for (const line of lines) {
+    const h = /^(#+)\s+(.*)$/.exec(line);
+    if (h) {
+      level = /waiting on (the )?human/i.test(h[2]) ? h[1].length : level && h[1].length <= level ? 0 : level;
+      continue;
+    }
+    const top = /^(?:-|\d+\.)\s+(.*)$/.exec(line);
+    const bold = /^\s*-\s+\*\*Waiting on (the )?human:?\*\*:?\s*(.*)$/i.exec(line);
+    if (bold) items.push(bold[2]);
+    else if (level && top) items.push(top[1]);
+  }
+  return items.map((t) => t.replace(/\s+/g, " ").trim()).filter(Boolean).map((t) => (t.length > 180 ? `${t.slice(0, 177)}…` : t));
+}
+
+/** Parse a handoff index: lines `- [name](file): <ref>, <title>`. The ref's first #n is the root ticket. */
 export function parseHandoffIndex(text, folder) {
   const notes = [];
   for (const line of text.split("\n")) {
     const m = /^- \[([^\]]+)\]\(([^)]+)\):\s*([^,]+?),\s*(.*)$/.exec(line);
     if (!m) continue;
     const ref = m[3].trim();
-    const root = /^#(\d+)$/.exec(ref);
+    const root = /^#(\d+)\b/.exec(ref);
     notes.push({ name: m[1], path: `${folder}/${m[2]}`, ref, rootTicket: root ? Number(root[1]) : null, title: m[4].trim() });
   }
   return notes;
@@ -116,7 +136,7 @@ const link = (i) => `[#${i.number}](${i.html_url ?? `https://github.com/statewal
 const day = (iso) => (iso ? iso.slice(0, 10) : "");
 
 /** Build the report model for the chosen subjects. */
-export function buildStatus({ subjects, issues, comments, parents = [], handoffs, projects = {}, only, now, blockers = new Map() }) {
+export function buildStatus({ subjects, issues, comments, parents = [], handoffs, projects = {}, only, now, blockers = new Map(), planOrder = new Map(), noteText = new Map() }) {
   const byNumber = new Map([...parents, ...issues].map((i) => [i.number, i]));
   const ids = only?.length ? only : [...Object.keys(subjects), "unsorted"];
   const out = Object.fromEntries(ids.map((id) => [id, { id, title: subjects[id]?.title ?? "Unsorted (no subject: label)", plans: [], unknown: [], frontier: [], human: [], taken: [], stale: [], blocked: [], triage: [], other: [], notes: [], projects: [] }]));
@@ -134,8 +154,11 @@ export function buildStatus({ subjects, issues, comments, parents = [], handoffs
   }
   for (const [id, notes] of Object.entries(handoffs)) {
     if (!out[id]) continue;
-    out[id].notes = currentNotes(notes).map((n) => ({ ...n, closed: n.rootTicket != null && !openNumbers.has(n.rootTicket) }));
+    out[id].notes = currentNotes(notes).map((n) => ({ ...n, closed: n.rootTicket != null && !openNumbers.has(n.rootTicket), waits: humanItems(noteText.get(n.path) ?? "") }));
   }
+  // The frontier in map order: by the plan's sub-issue order, then oldest first.
+  const rank = (c) => planOrder.get(c.issue.number) ?? [Infinity, c.issue.number];
+  for (const s of Object.values(out)) s.frontier.sort((a, b) => rank(a)[0] - rank(b)[0] || rank(a)[1] - rank(b)[1] || a.issue.number - b.issue.number);
   for (const id of Object.keys(out)) {
     for (const p of subjects[id]?.projects ?? []) if (projects[p]) out[id].projects.push({ name: p, ...projects[p] });
   }
@@ -146,7 +169,7 @@ function line(c) {
   const i = c.issue;
   const labels = labelsOf(i).filter((l) => !l.startsWith("repo:") && !l.startsWith("subject:")).join(", ");
   const extra = [];
-  if (c.status) extra.push(`${c.status.word} ${day(c.status.at)}${c.stale ? " (stale)" : ""}`);
+  if (c.status) extra.push(`${c.status.word} ${day(c.status.at)}${c.stale ? (/claude\.ai\/code\/session_|\bclaude\/|\bccr-/.test(c.status.body) ? " (stale)" : " (stale, local or human-guided claim: comment `Waiting on human: confirm the claim is stale`, don't release)") : ""}`);
   const deps = i.issue_dependencies_summary;
   if (deps?.blocked_by) extra.push(c.blockers?.length ? `blocked by ${c.blockers.map((n) => `#${n}`).join(", ")}` : `blocked by ${deps.blocked_by}`);
   const sub = i.sub_issues_summary;
@@ -160,7 +183,8 @@ export function renderStatus(model, { generatedAt }) {
   L.push("| Subject | Plans | Frontier (agent can start) | Waiting on the human | Taken | Stale claims | Blocked | To triage | Live notes |", "|---|---|---|---|---|---|---|---|---|");
   for (const s of model) {
     const human = new Set(s.human.map((c) => c.issue.number)).size;
-    L.push(`| ${s.id} | ${s.plans.length} | ${s.frontier.length} | ${human} | ${s.taken.length} | ${s.stale.length} | ${s.blocked.length} | ${s.triage.length} | ${s.notes.length} |`);
+    const noteWaits = s.notes.reduce((n, x) => n + x.waits.length, 0);
+    L.push(`| ${s.id} | ${s.plans.length} | ${s.frontier.length} | ${human}${noteWaits ? ` + ${noteWaits} in notes` : ""} | ${s.taken.length} | ${s.stale.length} | ${s.blocked.length} | ${s.triage.length} | ${s.notes.length} |`);
   }
   for (const s of model) {
     const empty = !s.unknown.length && !s.stale.length && !s.plans.length && !s.frontier.length && !s.human.length && !s.taken.length && !s.blocked.length && !s.triage.length && !s.notes.length;
@@ -180,8 +204,17 @@ export function renderStatus(model, { generatedAt }) {
     section("To triage", s.triage, "needs-triage, needs-info or no triage label: `/triage`");
     if (s.notes.length) {
       L.push("**Live handoff notes** (current note per ticket: read before continuing)", "");
-      for (const n of s.notes) L.push(`- [${n.name}](${n.path}): ${n.ref}, ${n.title}${n.closed ? " — **ticket closed**: if the note still lists open items, continue from it (and file them as issues); if not, archive it (docs/process/handoffs.md)" : ""}`);
+      for (const n of s.notes) L.push(`- [${n.name}](${n.path}): ${n.ref}, ${n.title}${n.closed ? " — **ticket closed**: if the note still lists open items, file them as issues and point the index line at the new ticket; if not, archive it (docs/process/handoffs.md)" : ""}`);
       L.push("");
+      const waits = s.notes.filter((n) => n.waits.length);
+      if (waits.length) {
+        L.push("**Waiting on the human, recorded only in handoff notes** (move each to its ticket as a `Waiting on human:` line, or file it as an issue)", "");
+        for (const n of waits) {
+          L.push(`- ${n.ref} ([${n.name}](${n.path})):`);
+          for (const w of n.waits) L.push(`  - ${w}`);
+        }
+        L.push("");
+      }
     }
     const projects = s.projects;
     if (projects.length) {

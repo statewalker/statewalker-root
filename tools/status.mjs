@@ -15,7 +15,7 @@ import fs from "node:fs";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
 import { fixtureSource, liveSource } from "./lib/github.mjs";
-import { buildStatus, classify, parseHandoffIndex, renderStatus, numberFromUrl } from "./lib/status.mjs";
+import { buildStatus, classify, isPlan, parseHandoffIndex, renderStatus, numberFromUrl } from "./lib/status.mjs";
 
 const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "..");
 const REPO = "repos/statewalker/statewalker-root";
@@ -73,13 +73,28 @@ for (const i of issues) {
   }
 }
 
-// Handoff indexes.
+// Handoff indexes, and the text of each live note.
 const handoffs = {};
+const noteText = new Map();
 for (const [id, s] of Object.entries(subjects)) {
   const folder = `${s.folder}/handoffs`;
   const file = path.join(ROOT, folder, "README.md");
-  if (fs.existsSync(file)) handoffs[id] = parseHandoffIndex(fs.readFileSync(file, "utf8"), folder);
+  if (!fs.existsSync(file)) continue;
+  handoffs[id] = parseHandoffIndex(fs.readFileSync(file, "utf8"), folder);
+  for (const n of handoffs[id]) {
+    const p = path.join(ROOT, n.path);
+    if (fs.existsSync(p)) noteText.set(n.path, fs.readFileSync(p, "utf8"));
+  }
 }
+
+// Map order: each open plan's sub-issues, in the order the plan lists them.
+const planOrder = new Map();
+issues.filter(isPlan).forEach((plan, pi) => {
+  if (!plan.sub_issues_summary?.total) return;
+  try {
+    source.list(`${REPO}/issues/${plan.number}/sub_issues`).forEach((c, ci) => planOrder.set(c.number, [pi, ci]));
+  } catch {}
+});
 
 // Projects: open pull requests and open bugs, where this session can read them.
 const projects = {};
@@ -112,7 +127,7 @@ if (Number.isNaN(nowDate.getTime())) {
   process.exit(2);
 }
 const now = nowDate.toISOString();
-const model = buildStatus({ subjects, issues, comments, parents, handoffs, projects, only, now, blockers });
+const model = buildStatus({ subjects, issues, comments, parents, handoffs, projects, only, now, blockers, planOrder, noteText });
 if (flag("--json")) {
   console.log(JSON.stringify(model.map((s) => ({ ...s, ...Object.fromEntries(["plans", "unknown", "frontier", "human", "taken", "stale", "blocked", "triage", "other"].map((k) => [k, s[k].map((c) => ({ number: c.issue.number, title: c.issue.title, status: c.status?.word ?? null }))])) })), null, 2));
 } else {

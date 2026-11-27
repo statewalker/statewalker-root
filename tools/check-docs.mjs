@@ -101,6 +101,13 @@ for (const s of Object.values(subjects)) {
     const files = fs.readdirSync(dir).filter((f) => f.endsWith(".md") && f !== "README.md");
     for (const f of files) if (!listed.has(f)) problems.push(`${s.folder}/${kind}/${f}: missing from its README.md index`);
     for (const f of listed) if (!files.includes(f)) problems.push(`${s.folder}/${kind}/README.md: lists ${f}, which is not in the folder`);
+    if (kind === "handoffs") {
+      for (const f of files) {
+        if (f.slice(0, 10) < "2026-11-28") continue;
+        const head = fs.readFileSync(path.join(dir, f), "utf8").split("\n").slice(0, 15).join("\n");
+        for (const k of ["Subject", "Plan", "Tickets"]) if (!head.includes(`- **${k}:**`)) problems.push(`${s.folder}/${kind}/${f}: missing the "- **${k}:**" reference line (docs/process/handoffs.md)`);
+      }
+    }
     const parsed = parseHandoffIndex(index, "").length;
     if (parsed !== listed.size) problems.push(`${s.folder}/${kind}/README.md: ${listed.size - parsed} line(s) not in the form "- [name](file): <#n | project#n | no ticket>, <title>"`);
   }

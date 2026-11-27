@@ -8,7 +8,7 @@ import fs from "node:fs";
 import os from "node:os";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
-import { buildStatus, classify, currentNotes, latestStatus, parseHandoffIndex, subjectsOf } from "../lib/status.mjs";
+import { buildStatus, classify, currentNotes, humanItems, latestStatus, parseHandoffIndex, subjectsOf } from "../lib/status.mjs";
 
 const HERE = path.dirname(fileURLToPath(import.meta.url));
 const TOOL = path.join(HERE, "..", "status.mjs");
@@ -99,6 +99,23 @@ test("stale claims: claimed and quiet for over 48 hours", () => {
   assert.equal(classify(issue(215, ["ready-for-agent"]), later, "2026-11-27T10:00:00Z").kind, "taken", "a progress comment keeps the claim alive");
 });
 
+test("regression: human waits recorded only in a note are found (#232, #70)", () => {
+  const note = ["# Handoff", "## What is left", "- ticket the fog", "## Waiting on the human", "- The fog proposal above.", "  - a sub-point", "1. **Fork** wasmer-sdk", "## Skills", "- grilling", "## Left", "- **Waiting on human:** whether to file two upstream issues"].join("\n");
+  assert.deepEqual(humanItems(note), ["The fog proposal above.", "**Fork** wasmer-sdk", "whether to file two upstream issues"]);
+});
+
+test("index: a ref naming the open ticket that continues a closed plan", () => {
+  const [n] = parseHandoffIndex("- [a](a.md): #456 (continues plan #282), Choose the batch", "f");
+  assert.equal(n.rootTicket, 456);
+});
+
+test("frontier in map order", () => {
+  const issues = [issue(273, ["ready-for-agent", "subject:platform"]), issue(265, ["ready-for-agent", "subject:platform"]), issue(269, ["ready-for-agent", "subject:platform"])];
+  const planOrder = new Map([[265, [0, 21]], [269, [0, 25]], [273, [0, 29]]]);
+  const model = buildStatus({ subjects, issues, comments: new Map(), handoffs: {}, planOrder });
+  assert.deepEqual(model.find((s) => s.id === "platform").frontier.map((c) => c.issue.number), [265, 269, 273]);
+});
+
 test("handoff index: the last line per ticket is the current note; 'no ticket' notes stay separate", () => {
   const text = [
     "# Handoff notes",
@@ -148,7 +165,7 @@ test("status.mjs: renders every subject from recorded responses", () => {
   assert.equal(r.status, 0, r.stderr);
   const out = r.stdout;
   assert.match(out, /Generated 2026-11-27 10:00 UTC/);
-  assert.match(out, /\| platform \| 1 \| 1 \| 0 \| 1 \| 0 \| 0 \| 0 \|/, "platform: the spec, #260 on the frontier, #266 taken (26 hours quiet: not stale)");
+  assert.match(out, /\| platform \| 1 \| 1 \| 0( \+ \d+ in notes)? \| 1 \| 0 \| 0 \| 0 \|/, "platform: the spec, #260 on the frontier, #266 taken (26 hours quiet: not stale)");
   assert.match(out, /## platform[\s\S]*Next for an agent[\s\S]*#260/);
   assert.match(out, /#266[^\n]*claimed 2026-11-26/);
   assert.match(out, /## runtimes[\s\S]*Waiting on the human[\s\S]*#98/);

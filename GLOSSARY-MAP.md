@@ -28,7 +28,8 @@ The arrows follow the published dependencies: lower layers first (`docs/projects
   harness, VCS, sites and sync.
 - **p2p → platform, ai-harness, product.** webrun-wire carries RPC between fragments, hosts and
   agents. HTTPeers meshes connect peers. Biscuit capabilities grant access, and move to
-  `webrun-capabilities`, which also hosts the harness's light container.
+  `webrun-capabilities`, a new project of the `p2p` subject (#98). It also hosts the harness's
+  light container, which `ai-harness` depends on.
 - **runtimes → platform, ai-harness, sites.** CellB runs fragments' server halves, agent sessions
   and notebook pages in Node and in a browser tab.
 - **vcs → platform, ai-harness.** webrun-vcs is a store for workspaces and app images.

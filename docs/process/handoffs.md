@@ -55,7 +55,9 @@ mislead.
    - **Replaces:** <the note it replaces, as a link> (omit if none)
    ```
 
-   For the `process` subject the README link is `../process/README.md`.
+   For the `process` subject the README link is `../process/README.md`. `check-docs` requires
+   these lines in every note dated 2026-11-28 or later. Earlier notes predate them, and their
+   index line names their ticket.
 3. **Content: only what a new session needs to continue the work on its own.** Leave out
    anything already recorded in the code, a commit, a project's docs, an ADR, research or the
    ticket and its comments: link it instead. A note holds:
@@ -69,7 +71,11 @@ mislead.
    Shorter is better: a reader with the ticket and the repository at hand should find nothing
    twice. Never include secrets.
 4. **Commit it** in the session's root pull request, with its index line appended to the live
-   index (`- [<file name without .md>](<file>): #<n>, <ticket title>`), newest last. Then comment
+   index (`- [<file name without .md>](<file>): #<n>, <ticket title>`), newest last.
+   - The index line names the **open** ticket the note serves. When a plan closes while its work
+     continues in a new ticket, point the line at the new ticket, for example
+     `#456 (continues plan #282), …`. Changing an index line's ticket is allowed; the note stays
+     unchanged. Then comment
    on the ticket with one line linking the note on `main`.
 5. **Never edit a note after it merges.** Write a new one instead. The one exception is in step 3
    of "How to archive a note".

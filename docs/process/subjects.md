@@ -47,8 +47,9 @@ Choose in this order (`docs/process/prevention.md`, "Picking your own work"):
 1. **Escalated bugs** in the projects (`escalated` label), oldest first. When the report can't
    read a project, its bugs are unchecked: say so, and ask the human to attach the project before
    starting on that subject.
-2. **The frontier** of the subject the human named, or of the subject with the most plans in
-   flight. Take the first free ticket of a plan, in map order.
+2. **The frontier** of the subject the human named. The report lists each plan's free tickets in
+   map order (the order of the plan's sub-issues): take the first. With no subject named, take
+   the oldest free ticket across all subjects, or show the human the frontier and ask.
 3. **Tickets to triage**, when the frontier is empty.
 4. **Waiting on the human:** never work these. List them for the human at the end of the session,
    and at its start when they asked for the state.
@@ -84,8 +85,9 @@ existing subject. One root pull request:
 4. **`subjects/<id>/handoffs/README.md`** and **`subjects/<id>/handoffs.archive/README.md`**,
    each with a heading, a pointer to `docs/process/handoffs.md` and an empty `## Notes` list.
 5. **`GLOSSARY-MAP.md`**: a row in the table (`` | `<id>` | ... | ``) and its relationships.
-6. **The label:** put `subject:<id>` on the subject's plans and standalone root issues. Their
-   tickets inherit the parent's subject. GitHub creates the label on first use.
+6. **The label:** create `subject:<id>` (`docs/agents/issue-tracker.md`, "Labels in use", has
+   the call) and put it on the subject's plans and standalone root issues. Their tickets inherit
+   the parent's subject.
 7. Run `node tools/check-docs.mjs` and `node tools/status.mjs <id>`.
 
 ## 5. Add a project
@@ -96,7 +98,9 @@ existing subject. One root pull request:
 3. **`subjects/subjects.json`**: add the name to exactly one subject's `projects`.
 4. **`CLAUDE.md`'s project table** and **`docs/projects.md`**: add its layer and what it holds.
    The layer comes from its published `@statewalker/*` dependencies.
-5. **The subject's `README.md`**: add a row to its Projects table.
+5. **The subject's `README.md`**: add a row to its Projects table. Also add the project to its
+   subject's row in **`GLOSSARY-MAP.md`**, whose Projects column `check-docs` compares with
+   `subjects.json`.
 6. **Bring it to the conventions:** `node tools/adopt.mjs <dir>` sets up the shared CI,
    Dependabot, changesets and lockfile updates.
    - The human adds the npm trusted publisher for the project's first package and publishes its
@@ -114,7 +118,8 @@ research answer) changes the root only in these cases:
 
 | What happened | What changes in the root |
 |---|---|
-| A ticket moved, a feature merged, a grilling answer was given | Nothing beyond a `Progress:` comment on the ticket (and a handoff note only when the issues can't hold what is left). `status.mjs` reads the rest |
+| A ticket moved or a feature merged | A `Progress:` comment, or the closing comment (no closing keywords), on the ticket |
+| A grilling or research ticket was resolved | Its resolution comment, the ticket closed, and a context line in the map's "Decisions so far" (`docs/agents/issue-tracker.md`, "Wayfinding operations"); a research note too, below |
 | A project was renamed, added or archived | `repos.json`, `subjects.json`, `CLAUDE.md`'s table, `docs/projects.md`, `GLOSSARY-MAP.md`, the subject README (§5) |
 | A plan opened, closed or changed direction | The subject README's dated "Entry points" |
 | A hard-to-reverse decision was made | An ADR in `subjects/<s>/adr/`, with its line in the README |
@@ -139,4 +144,5 @@ Placement and upkeep:
   `status.mjs` lists issues without a subject under **unsorted**, where they wait for a label.
 - **Moving a file between subjects:** use `git mv`, then repoint every relative link to it.
   `node tools/check-docs.mjs` fails on any link you miss. Inside a merged handoff note, only link
-  targets may change.
+  targets may change. Once the move merges, comment the note's new path on its ticket: a
+  `blob/main/…` link to the old path stops resolving.

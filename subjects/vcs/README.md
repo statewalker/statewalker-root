@@ -22,7 +22,7 @@ The output lists, for this subject:
 ## Entry points (2026-11-27)
 
 - Plan [statewalker-root#282](https://github.com/statewalker/statewalker-root/issues/282) is closed. The work continues in follow-up batches, under the human's standing rules (portability, MessagePorts, real git compatibility), which its latest handoff note quotes.
-- [statewalker-root#456](https://github.com/statewalker/statewalker-root/issues/456): the human chooses the next batch. Until then nothing in this subject is on the frontier. The filed follow-ups are webrun-vcs#486, #487 and #491.
+- [statewalker-root#456](https://github.com/statewalker/statewalker-root/issues/456): the human chooses the next batch. The filed follow-ups are webrun-vcs#486, #487 and #491.
 - [`roadmap.md`](roadmap.md) holds the plan's waves. The open design questions are #217 and #414.
 
 ## Projects

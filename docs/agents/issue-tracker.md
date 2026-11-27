@@ -134,7 +134,8 @@ cloud session waiting on a scheduled wake. Before taking a stale ticket, check a
    or "guided by the human".
 
 If all three hold, comment `Released: stale claim of <date> (<session>): <what you checked>`, then
-claim as usual. Otherwise don't release: comment `Waiting on human: confirm the claim of <date> is
+claim as usual. **The human may release any claim at any time**, stale or not, by commenting
+`Released: …` or by asking a session to post it. The session then records what it checked. Otherwise don't release: comment `Waiting on human: confirm the claim of <date> is
 stale` and pick another ticket. Before continuing a released ticket, read its comments and its
 current handoff note: the interrupted session's state is there, by the checkpoint rule below.
 
@@ -218,10 +219,16 @@ caused it leads to it.
   or decision concerns.
 - `subject:<id>` for the subject a root issue belongs to (`GLOSSARY-MAP.md`; ids in
   `subjects/subjects.json`).
-  - **Required** on every map, spec and standalone root issue, set when it is created.
-  - A map's or spec's tickets (sub-issues) inherit their parent's subject and need no label.
-  - Wayfinder tickets may carry it, beside `repo:` labels.
-  - `node tools/status.mjs` lists open issues with no derivable subject under **unsorted**.
+  - **A root issue's subject**, in order:
+    1. its `subject:` label;
+    2. else its parent's subject, for the sub-issue of a map or spec;
+    3. else `process`, when it is labelled `area:root`;
+    4. else the subjects of its `repo:` labels, which can be several.
+
+    `tools/status.mjs` applies exactly these rules and lists issues with none under **unsorted**.
+  - **Set `subject:` when creating** a map, a spec, or a standalone issue not labelled `area:root`.
+    Sub-issues need none.
+  - A missing `subject:<id>` label is created like any other (below).
 - `review-followup` (with `bug`) for high findings the merge gate filed instead of fixing (issues
   from the earlier review loop may carry `enhancement`). These
   issues are filed **in the repository of the pull request** rather than here
