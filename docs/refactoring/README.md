@@ -48,6 +48,7 @@ Problems referenced as P1–P10 are listed in `docs/projects.md`.
 | `apps/httpeers-stack`, `httpeers-protos`, `httpeers-lib-protos`, `httpeers-shell-protos` | `httpeers/protos/` (or delete what `httpeers/apps` and `deploy/` cover) | P4 |
 | `apps/peershare-protos`, `peershare-ui-protos` | Next to the peershare apps (decision 0.3) | |
 | ~~`apps/flue-capfs-do`, `apps/flue-workbench`~~ | Done ([#146](https://github.com/statewalker/statewalker-root/issues/146)): `statewalker-ai` covers what they proved (the harness packages, its private `apps/workbench`, [#84](https://github.com/statewalker/statewalker-root/issues/84)); deleted from the sandbox in [statewalker-sandbox#170](https://github.com/statewalker/statewalker-sandbox/pull/170) | |
+| ~~`apps/jobs-manager`~~ | Done ([#411](https://github.com/statewalker/statewalker-root/issues/411)): it became `packages/host-jobs.node` in statewalker-kernel ([statewalker-kernel#83](https://github.com/statewalker/statewalker-kernel/pull/83)), the processor behind the `host-jobs` binding of CellB Node hosts; its REST, SSE, MCP and CLI surfaces were replaced by commands and their exposures; deleted from the sandbox in [statewalker-sandbox#176](https://github.com/statewalker/statewalker-sandbox/pull/176) | |
 | `apps/notes-demo` | `webrun-sites/examples/` | |
 | `apps/vcs-protos` | `webrun-vcs/protos/` | |
 | `apps/openai-proxy.app` | `statewalker-ai/apps/` | |
