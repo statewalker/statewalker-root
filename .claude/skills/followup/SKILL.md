@@ -47,7 +47,9 @@ For each repository:
 2. List its deferred bugs.
 3. Note its release mechanics from its own `PUBLISHING.md` or `ci.yml`: the version pull request, the publish job, how a first publish works.
 
-Lanes get one branch name per repository (the session branch). After each merge they restart it from `origin/main`. Where the guardrail refuses a force-push, they merge the previous pull request's squashed head instead; that adds nothing to the next diff.
+Lanes get one branch name per repository: the session branch. A lane restarts that branch from `origin/main` only after its previous pull request has **merged**. The restarted branch may then be pushed with `--force-with-lease`; where that push is refused, the lane merges the previous pull request's squashed head instead, which adds nothing to the next diff.
+
+A pull request left open blocks the branch. That happens on `Waiting on human`, or when a critical finding is still open after three passes. The lane then stops for that repository and hands back. Ask the human for another branch name before starting the rest of that lane; never restart the branch over an open pull request.
 
 ### 3. Start the lanes
 
@@ -92,7 +94,7 @@ Write a handoff note for the root ticket, following `docs/handoffs/README.md`, a
 Then:
 
 - comment one line on the root ticket linking the note;
-- label the ticket `ready-for-human` if the list is not empty;
+- if the list is not empty, label the ticket `ready-for-human`. A Wayfinder ticket takes no triage label: comment `Waiting on human: …` on it instead;
 - report the same to the human, leading with what is blocked on them.
 
 ## Along the way

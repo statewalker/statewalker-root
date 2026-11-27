@@ -23,13 +23,15 @@ You resolve the issues of **one repository**, strictly one after another.
 
 1. **Claim it.** Read the issue and its comments, assign the human's login, and comment `Claimed by <session URL> (branch <session branch>)`.
 2. **List the deferred bugs** before the repository's first change. Fix one in the same pull request only if it is in code you touch anyway and the fix is cheap.
-3. **Restart the branch from fresh main:**
+3. **Restart the branch from fresh main**, but only once the previous pull request on this branch has merged:
 
    ```
    git fetch origin main && git checkout -B <session branch> origin/main
    ```
 
-   If a later push of the restarted branch is refused, merge the previous pull request's squashed head instead.
+   Push it with `--force-with-lease`. If that push is refused, merge the previous pull request's squashed head instead.
+
+   If the previous pull request is still open, stop and hand back instead of restarting. An open pull request owns the branch.
 4. **Fix it test-first.** A bug fix carries a regression test that fails before the fix and passes after it. Before pushing, run the repository's own build, typecheck, lint, format and tests, for the touched packages at least.
 5. **Add a changeset** for every published package you change: a patch for a fix, a minor for new API.
 6. **Commit, push, and open one pull request** for this issue. Use the commit trailers and pull-request footer from the session's attribution rules. The body describes the change, references the issue as `#<n>` (never with a closing keyword), and includes a test plan.
@@ -44,10 +46,12 @@ You resolve the issues of **one repository**, strictly one after another.
 
 **When an issue needs a decision only the human can make** (an API with real trade-offs nobody chose, a breaking change):
 
-1. Do the cheap, uncontroversial part.
+1. Do the cheap, uncontroversial part, if any, and merge it through the gate.
 2. Comment `Waiting on human: <the decision, the options, your recommendation>`.
 3. Add `ready-for-human`.
-4. Move on to the next issue.
+4. Then:
+   - if nothing is left open on the branch, move on to the next issue;
+   - if a pull request stays open, stop and hand back.
 
 **When a bug does not reproduce:** show what you ran, then hand back.
 
