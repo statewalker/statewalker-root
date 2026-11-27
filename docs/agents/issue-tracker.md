@@ -111,7 +111,8 @@ that needs the human comments `Waiting on human: …` (and, on non-Wayfinder tic
 `ready-for-human`). The human hands a ticket back by commenting `Resumed: …` and, where present,
 swapping `ready-for-human` for `ready-for-agent`. Tickets assigned to a human without a claim
 comment are theirs, not available. Keep the labels in step with the status: a ticket whose
-latest status is `Waiting on human` carries `ready-for-human`, not `ready-for-agent`.
+latest status is `Waiting on human` carries `ready-for-human`, not `ready-for-agent` (not on
+Wayfinder tickets, which take no triage labels).
 
 ### Stale claims
 
@@ -119,13 +120,23 @@ A claim is **stale** when nothing was added to the ticket for **48 hours** after
 any kind. A session that worked on the ticket would have left progress comments (below), so a
 quiet claim means a session that was interrupted. `tools/status.mjs` lists stale claims apart.
 
-- A session may take a stale ticket. In the cloud, `get_session` on the claim's session URL must
-  not show that session working. The session comments `Released: stale claim of <date>
-  (<session>)`, then claims as usual.
-- Before continuing, read the ticket's comments and its current handoff note. The interrupted
-  session's state is there, by the checkpoint rule below.
-- A claim by a local branch name can't be checked: release it after 48 hours all the same, and say
-  so in the `Released:` line.
+A quiet ticket is not proof that the work stopped. Older claims predate the checkpoint rule, and
+work can go on away from the ticket: commits on a branch, a pull request in its merge gate, or a
+cloud session waiting on a scheduled wake. Before taking a stale ticket, check all of these:
+
+1. **The session:** for a cloud claim, `get_session` on the claim's session URL shows it neither
+   working nor waiting on a scheduled wake (its triggers, `list_triggers`), and its last event is
+   older than 48 hours.
+2. **The work:** the pull requests and branches the ticket or its note names have no commit,
+   comment or check run in the last 48 hours. Where you can't read them (an unattached project),
+   treat them as live.
+3. **The claimant:** the claim names a session URL or a cloud session branch, not a local branch
+   or "guided by the human".
+
+If all three hold, comment `Released: stale claim of <date> (<session>): <what you checked>`, then
+claim as usual. Otherwise don't release: comment `Waiting on human: confirm the claim of <date> is
+stale` and pick another ticket. Before continuing a released ticket, read its comments and its
+current handoff note: the interrupted session's state is there, by the checkpoint rule below.
 
 ### Checkpoints: keep the state recoverable
 
@@ -144,7 +155,7 @@ be able to rebuild where the work stands from GitHub and the root alone. So, whi
 - **Before a long step** (a CI wait, a release, a subagent fan-out), comment what is running and
   how to check it, for example the run, the branch or the child session.
 - **When the next step is the human's**, comment `Waiting on human: <exactly what>` at once, and
-  set `ready-for-human`. Don't leave it only in a note.
+  set `ready-for-human` (not on Wayfinder tickets). Don't leave it only in a note.
 - **File what is left as issues**, with blocking edges, rather than as lists in a comment or a
   note.
 - **Write a handoff note only for what issues can't hold.** That means standing rules, a

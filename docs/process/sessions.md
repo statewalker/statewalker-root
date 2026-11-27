@@ -127,9 +127,12 @@ dev-server ports.
 1. Project PRs opened, each referencing the ticket (`#<n>` for a ticket in the same project,
    `statewalker/statewalker-root#<n>` for one in root), and taken through the merge gate in
    `merging.md` before merging (lowest layer first).
-2. **Handoff note** in the ticket's subject, `subjects/<s>/handoffs/YYYY-MM-DD.<note-name>.md`
-   (`docs/handoffs/` for the process; rules in `docs/process/handoffs.md`; not the `/handoff`
-   skill's `$TMPDIR` file). It holds only what the next session needs to continue: what is left,
+2. **The ticket's state, checkpointed:** a last `Progress:` comment, `Waiting on human:` where the
+   human is needed, and what is left filed as issues (`docs/agents/issue-tracker.md`,
+   "Checkpoints"). **A handoff note only if the issues can't hold what is left**
+   (`docs/process/handoffs.md`, "When to write a note"), in the ticket's subject,
+   `subjects/<s>/handoffs/YYYY-MM-DD.<note-name>.md` (`docs/handoffs/` for the process; not the
+   `/handoff` skill's `$TMPDIR` file). It holds only what the next session needs to continue: what is left,
    what is running, what waits on the human, and the decisions and rules not recorded elsewhere. It
    links every PR and follow-up issue rather than retelling them. It is committed in this session's
    root PR, and a one-line comment on the ticket links it. Close the ticket if it is resolved, and

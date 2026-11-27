@@ -85,6 +85,12 @@ test("regression: 'Waiting on human:' after a sentence counts; a bullet 'Release
   assert.equal(latestStatus([comment("Claimed by s"), comment("### Done\n- Released 0.5 of the kernel")]).word, "claimed");
 });
 
+test("regression: 'Resumed.' and 'Released.' as the human writes them are status lines (#228, #132)", () => {
+  assert.equal(latestStatus([comment("Waiting on human: pick"), comment("Resumed. The human chose option B.")]).word, "resumed");
+  assert.equal(latestStatus([comment("Claimed by s"), comment("Released. Every acceptance criterion is met.")]).word, "released");
+  assert.equal(latestStatus([comment("Waiting on human: x"), comment("Resumed by the human in the session")]).word, "resumed");
+});
+
 test("stale claims: claimed and quiet for over 48 hours", () => {
   const c = [comment("Claimed by https://claude.ai/code/session_old", "2026-11-23T10:00:00Z")];
   assert.equal(classify(issue(215, ["ready-for-agent"]), c, "2026-11-27T10:00:00Z").kind, "stale");

@@ -105,7 +105,13 @@ for (const i of issues) {
   } catch {}
 }
 
-const now = value("--now") ? new Date(value("--now").replace(" UTC", "Z").replace(" ", "T")).toISOString() : new Date().toISOString();
+const nowArg = value("--now");
+const nowDate = nowArg ? new Date(nowArg.replace(" UTC", "Z").replace(" ", "T")) : new Date();
+if (Number.isNaN(nowDate.getTime())) {
+  console.error(`--now ${nowArg}: not a date (use 2026-11-27T10:00:00Z or "2026-11-27 10:00 UTC")`);
+  process.exit(2);
+}
+const now = nowDate.toISOString();
 const model = buildStatus({ subjects, issues, comments, parents, handoffs, projects, only, now, blockers });
 if (flag("--json")) {
   console.log(JSON.stringify(model.map((s) => ({ ...s, ...Object.fromEntries(["plans", "unknown", "frontier", "human", "taken", "stale", "blocked", "triage", "other"].map((k) => [k, s[k].map((c) => ({ number: c.issue.number, title: c.issue.title, status: c.status?.word ?? null }))])) })), null, 2));

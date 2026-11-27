@@ -22,7 +22,7 @@ The output lists, for this subject:
 ## Entry points (2026-11-27)
 
 - [statewalker-root#430](https://github.com/statewalker/statewalker-root/issues/430), per-app Biscuit capabilities: the research is done. The redesign waits on the human's answers to §9 of [the analysis](research/webrun-devtools-capabilities.md), and then becomes a spec.
-- [#98](https://github.com/statewalker/statewalker-root/issues/98) moves webrun-biscuit into its own project, `webrun-capabilities` (L0). The new project joins this subject: it holds capabilities. Its light container package serves `ai-harness`, whose tickets #417 to #432 wait on it.
+- [#98](https://github.com/statewalker/statewalker-root/issues/98) moves webrun-biscuit into its own project, `webrun-capabilities` (L0). The new project joins this subject: it holds capabilities. Its light container package serves `ai-harness`: #417 waits on it, and most of #418 to #432 wait through #417.
 
 ## Projects
 

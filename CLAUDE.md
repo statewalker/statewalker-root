@@ -81,7 +81,7 @@ statewalker-knowledge and webrun-vcs, so cellb.dev must come after them. Invento
 | app | statewalker-shell-theia | Browser-only Eclipse Theia shell over a FilesApi |
 | app | statewalker-sites | Private: documentation sites and blog (Cloudflare Workers) |
 | app | webrun-devtools | Chrome extension for browser automation; publishes `@statewalker/webrun-devtools` |
-| infra | statewalker-ci | Shared CI workflows and release-planning scripts (also reachable as `statewalker/.github`) |
+| infra | statewalker-ci | Shared CI workflows and release-planning scripts (`statewalker/.github` resolves to the same repository) |
 
 Archived, do not change: `statewalker-content`, `statewalker-ai-legacy`, `umbrella` (its
 repository-management tools now live in this repository's `tools/`). The private project

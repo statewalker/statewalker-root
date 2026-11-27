@@ -27,7 +27,7 @@ prints a summary table, then one section per subject:
 | **Next for an agent** | free tickets with no open blocker: `ready-for-agent`, or `wayfinder:research` / `prototype` / `task` | claim one and start (`docs/agents/issue-tracker.md`, "Claiming a ticket") |
 | **Waiting on the human** | `ready-for-human`, a latest `Waiting on human:` comment, a ticket assigned with no claim, or an unblocked `wayfinder:grilling` (even while a session holds it: the grilling needs the human's answers) | the human answers, decides, or comments `Resumed:` |
 | **Taken** | the latest status line is `Claimed …`, with activity in the last 48 hours | leave it |
-| **Stale claims** | claimed, then no comment for over 48 hours: an interrupted session | release it with `Released: stale claim …`, read its comments and note, and take it (`docs/agents/issue-tracker.md`, "Stale claims") |
+| **Stale claims** | claimed, then no comment for over 48 hours: an interrupted session | check that the session, its branch and its pull request are idle too. Only then release it with `Released: stale claim …` and take it; otherwise ask the human (`docs/agents/issue-tracker.md`, "Stale claims") |
 | **Blocked** | an open blocking issue | work the blocker first |
 | **To triage** | `needs-triage`, `needs-info`, or no triage label | `/triage` gives it acceptance criteria and a label |
 | **Live handoff notes** | the current note per ticket in the subject's `handoffs/` | read it before continuing that ticket. "Ticket closed" means archive it if the work is finished |

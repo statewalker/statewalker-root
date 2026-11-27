@@ -16,8 +16,8 @@
 const STATUS_WORDS = [
   ["claimed", /^\s*Claimed(\s+by\b|[.:])/i],
   ["waiting", /(^\s*|[.!?]\s+)Waiting on human:/i],
-  ["released", /^\s*Released:/i],
-  ["resumed", /^\s*Resumed:/i],
+  ["released", /^\s*Released([.:,]|\s+by\b)/i],
+  ["resumed", /^\s*Resumed([.:,]|\s+by\b)/i],
 ];
 
 export const STALE_HOURS = 48;
@@ -175,7 +175,7 @@ export function renderStatus(model, { generatedAt }) {
     section("Next for an agent", s.frontier, "free, unblocked: claim one and start");
     section("Waiting on the human", [...new Map(s.human.map((c) => [c.issue.number, c])).values()], "answer, decide or hand back with `Resumed:`");
     section("Taken", s.taken, "claimed by a session, active in the last 48 hours: leave it");
-    section("Stale claims", s.stale, "claimed, then quiet for over 48 hours: release with `Released: stale claim …` and take it (docs/agents/issue-tracker.md)");
+    section("Stale claims", s.stale, "claimed, then quiet on the ticket for over 48 hours: check the session, its branch and pull request are idle too before releasing (docs/agents/issue-tracker.md, \"Stale claims\")");
     section("Blocked", s.blocked);
     section("To triage", s.triage, "needs-triage, needs-info or no triage label: `/triage`");
     if (s.notes.length) {
