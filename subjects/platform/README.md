@@ -59,6 +59,7 @@ One cited note per question, `research/<slug>.md`, linked from the ticket that a
 - [fragment-do-rpc](research/fragment-do-rpc.md): Can a fragment's capabilities be a named Durable Object called over RPC by other fragments?
 - [openapi-mcp-tool-mapping](research/openapi-mcp-tool-mapping.md): How are OpenAPI tool definitions generated and projected to MCP and Flue tools?
 - [unified-do-platform](research/unified-do-platform.md): What already exists for a unified fragment platform on CellB, CellD and Workers?
+- [apps-to-port](research/apps-to-port.md): Which applications are candidates to port or adapt to the platform (HeyPuter/everything, extend-hq/ui, the storytold Craft apps)?
 
 ## Other knowledge
 
