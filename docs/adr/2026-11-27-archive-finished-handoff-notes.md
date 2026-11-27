@@ -14,7 +14,9 @@ the work to continue had to check every ticket to tell the two kinds apart.
 
 1. **Notes of finished or cancelled work move to `docs/handoffs.archive/`.** So do notes that a
    newer note replaces, unless a live note still points to them as still applying.
-   `docs/handoffs/` then lists only live work.
+   `docs/handoffs/` then lists only live work. A closed ticket isn't enough on its own. A note
+   with open items that no open issue tracks (something running, a step waiting on the human,
+   work left) stays live until those items are done or filed.
 2. **The folder sits beside `docs/handoffs/`**, not inside it. Archived notes keep their relative
    links (`../adr/`, `../research/`) without an edit. Moving a note isn't editing it. The
    write-once rule stands.

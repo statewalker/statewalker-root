@@ -35,6 +35,9 @@ A note moves to `docs/handoffs.archive/` when either of these is true:
   duplicate), or, for a note with no ticket, its "Left" section is done or the human dropped it.
   Small leftovers that no one will act on don't keep a note live. A leftover that matters becomes an
   issue first, and the note can then be archived.
+  **A closed ticket isn't enough on its own.** A note that still has open items no open issue tracks
+  stays live: something running, a step waiting on the human, or a "Left" or next-work section.
+  An example is a plan ticket closed while its follow-up batches continue.
 - **A newer note on the same work replaces it, and no live note links to it.** If the newer note
   says that rules or steps in the older one still apply, the older note stays here until the newer
   one is archived.
