@@ -256,6 +256,9 @@ isolates with `limits.cpuMs` are the place for untrusted code there, as for the 
 
 ## Follow-up
 
+- `docs/research/unkernel-oci-images-js-python.md`: official Docker images (Python, Node, Bun, Deno)
+  run from their layers through a FilesApi, per-case resources, `pip`/`npm` with native packages,
+  snapshots, and the comparison with Wasmer and QuickJS.
 - statewalker/cellb.dev#256: the unkernel engine for cellb-containers, with these findings as
   acceptance criteria (the workerd stall first).
 
