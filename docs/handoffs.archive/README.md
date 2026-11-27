@@ -2,8 +2,9 @@
 
 Handoff notes for finished or cancelled work, moved here unchanged from
 [`docs/handoffs/`](../handoffs/README.md). The rule for when a note moves, and how, is in that README
-under **Archiving a note**. A note here is history: don't resume work from it without checking its
-ticket.
+under **Archiving a note**. A note here is either finished, or replaced by a newer note. Don't
+resume work from it without checking its ticket. A replaced note can still hold rules that its
+live successor in `docs/handoffs/` says still apply: follow them when the successor links here.
 
 Each line below is the note's index line from `docs/handoffs/README.md`, in the order the notes were
 written. The notes up to 2026-11-27 were handoff comments on their tickets, copied unchanged.
