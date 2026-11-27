@@ -24,7 +24,7 @@ A fragment's client half depends on the platform's client API. Fragments must th
    - `packages-react/`: views, catalog components, the A2UI renderer, the shell.
    - `fragments/`: the core fragments.
    - `apps/`: the demo applications, each with its own fragments and launch configurations for each host.
-3. **Sandclaw is an application** in its own project above the platform. Its `wiki.core`, `file-mounts.core` and `file-panels.core` become fragments. The consolidation branch's useful code moves to statewalker-platform, and the branch is dropped.
+3. **Sandclaw is an application** in its own project above the platform (amended 2026-11-27: SandClaw's applications live in `github.com/sandclaw-ai`, [ADR blocks-sandclaw-and-managed-services](../../../docs/adr/2026-11-27-blocks-sandclaw-and-managed-services.md)). Its `wiki.core`, `file-mounts.core` and `file-panels.core` become fragments. The consolidation branch's useful code moves to statewalker-platform, and the branch is dropped.
 4. **One repository per high-level fragment**, named `statewalker-fragment-<name>`:
    - it publishes `@statewalker/fragment-<name>` (further packages `@statewalker/fragment-<name>.<aspect>`);
    - its fragment id is `org.statewalker.fragment-<name>`;

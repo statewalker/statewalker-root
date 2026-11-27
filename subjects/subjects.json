@@ -46,7 +46,7 @@
     "product": {
       "title": "Product",
       "folder": "subjects/product",
-      "summary": "SandClaw, the branded applications built on the platform, and the first paid offer.",
+      "summary": "SandClaw's open-source applications, the showcase sites, and the paid offer: managed services and on-premise packages.",
       "projects": ["sandclaw"]
     },
     "data": {

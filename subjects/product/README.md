@@ -1,6 +1,6 @@
 # Product
 
-SandClaw, the branded applications built on the platform, and the first paid offer.
+SandClaw's open-source applications, the showcase sites, and the paid offer: managed services and on-premise packages.
 
 Subject id `product`. Root issues carry the label `subject:product`. The ecosystem's map of subjects is [`GLOSSARY-MAP.md`](../../GLOSSARY-MAP.md).
 
@@ -21,7 +21,7 @@ The output lists, for this subject:
 
 ## Entry points (2026-11-27)
 
-- Map [statewalker-root#193](https://github.com/statewalker/statewalker-root/issues/193), StateWalker's first paid product (`/wayfinder statewalker-root#193`). Its tickets are #194 to #201, and #194's grilling waits on the human (Q11 to Q15).
+- Map [statewalker-root#193](https://github.com/statewalker/statewalker-root/issues/193), the showcase sites, promotion criteria and the first offer of managed services and on-premise packages (`/wayfinder statewalker-root#193`). Its first ticket, #194, set the model: ADR [blocks-sandclaw-and-managed-services](../../docs/adr/2026-11-27-blocks-sandclaw-and-managed-services.md).
 
 ## Projects
 
@@ -33,7 +33,11 @@ Each project keeps its own `CLAUDE.md`, `GLOSSARY.md`, `docs/adr/` and issue tra
 
 ## Decisions
 
-None yet. Write the first one as `adr/YYYY-MM-DD-<slug>.md` and list it here (`docs/agents/domain.md`).
+Cross-subject, in `docs/adr/`:
+
+- [2026-11-27 blocks-sandclaw-and-managed-services](../../docs/adr/2026-11-27-blocks-sandclaw-and-managed-services.md): StateWalker holds the MIT blocks, SandClaw (`sandclaw-ai`) the open-source applications; revenue from managed services and on-premise packages; showcase sites and measured interest decide promotion.
+
+This subject's own decisions go to `adr/YYYY-MM-DD-<slug>.md`, listed here (`docs/agents/domain.md`).
 
 ## Research
 
