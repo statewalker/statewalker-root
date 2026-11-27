@@ -3,10 +3,15 @@
 //   1. Every relative link in a Markdown file outside .claude/skills/ points at a file that exists.
 //   2. skills-lock.json lists exactly the folders in .claude/skills/.
 //   3. repos.json parses and every entry is a statewalker GitHub URL.
+//   4. subjects/subjects.json: every project of repos.json is in exactly one subject; every subject
+//      has its folder, README.md and handoff indexes, and a GLOSSARY-MAP.md row listing the same projects.
+//   5. Every handoff note is listed in its folder's index, every index line names a note there, and
+//      every line has the form tools/status.mjs parses.
 // Exits 1 and lists every problem when any check fails.
 import fs from "node:fs";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
+import { parseHandoffIndex } from "./lib/status.mjs";
 
 const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "..");
 const SKIP = new Set([".git", "node_modules", "repos", "ws", "notes"]);
@@ -61,6 +66,51 @@ for (const s of installed) if (!locked.includes(s)) problems.push(`.claude/skill
 const repos = JSON.parse(fs.readFileSync(path.join(ROOT, "repos.json"), "utf8"));
 for (const [name, url] of Object.entries(repos)) {
   if (url !== `https://github.com/statewalker/${name}.git`) problems.push(`repos.json: ${name} -> ${url}`);
+}
+
+const { subjects } = JSON.parse(fs.readFileSync(path.join(ROOT, "subjects", "subjects.json"), "utf8"));
+const owner = new Map();
+for (const [id, s] of Object.entries(subjects)) {
+  for (const p of s.projects) {
+    if (!(p in repos)) problems.push(`subjects.json: ${id} lists ${p}, which is not in repos.json`);
+    if (owner.has(p)) problems.push(`subjects.json: ${p} is in both ${owner.get(p)} and ${id}`);
+    owner.set(p, id);
+  }
+  const need = id === "process" ? ["docs/process/README.md"] : [`${s.folder}/README.md`];
+  need.push(`${s.folder}/handoffs/README.md`, `${s.folder}/handoffs.archive/README.md`);
+  for (const f of need) if (!fs.existsSync(path.join(ROOT, f))) problems.push(`subjects.json: ${id} needs ${f}`);
+}
+for (const p of Object.keys(repos)) if (!owner.has(p)) problems.push(`subjects.json: project ${p} has no subject`);
+const map = fs.readFileSync(path.join(ROOT, "GLOSSARY-MAP.md"), "utf8");
+for (const [id, s] of Object.entries(subjects)) {
+  const row = map.split("\n").find((l) => l.startsWith(`| \`${id}\` |`));
+  if (!row) {
+    problems.push(`GLOSSARY-MAP.md: no row for subject ${id}`);
+    continue;
+  }
+  const listed = (row.split("|")[3] ?? "").split(",").map((x) => x.trim()).filter(Boolean).sort();
+  if (listed.join() !== [...s.projects].sort().join()) problems.push(`GLOSSARY-MAP.md: ${id}'s projects (${listed.join(", ")}) differ from subjects.json (${s.projects.join(", ")})`);
+}
+
+for (const s of Object.values(subjects)) {
+  for (const kind of ["handoffs", "handoffs.archive"]) {
+    const dir = path.join(ROOT, s.folder, kind);
+    if (!fs.existsSync(dir)) continue;
+    const index = fs.readFileSync(path.join(dir, "README.md"), "utf8");
+    const listed = new Set([...index.matchAll(/^- \[[^\]]+\]\(([^)]+)\)/gm)].map((m) => m[1]));
+    const files = fs.readdirSync(dir).filter((f) => f.endsWith(".md") && f !== "README.md");
+    for (const f of files) if (!listed.has(f)) problems.push(`${s.folder}/${kind}/${f}: missing from its README.md index`);
+    for (const f of listed) if (!files.includes(f)) problems.push(`${s.folder}/${kind}/README.md: lists ${f}, which is not in the folder`);
+    if (kind === "handoffs") {
+      for (const f of files) {
+        if (f.slice(0, 10) < "2026-11-28") continue;
+        const head = fs.readFileSync(path.join(dir, f), "utf8").split("\n").slice(0, 15).join("\n");
+        for (const k of ["Subject", "Plan", "Tickets"]) if (!head.includes(`- **${k}:**`)) problems.push(`${s.folder}/${kind}/${f}: missing the "- **${k}:**" reference line (docs/process/handoffs.md)`);
+      }
+    }
+    const parsed = parseHandoffIndex(index, "").length;
+    if (parsed !== listed.size) problems.push(`${s.folder}/${kind}/README.md: ${listed.size - parsed} line(s) not in the form "- [name](file): <#n | project#n | no ticket>, <title>"`);
+  }
 }
 
 if (problems.length) {

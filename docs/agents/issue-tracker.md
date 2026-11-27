@@ -75,7 +75,7 @@ repositories selected for the session or attached to it; others answer 403.
   where `<blocker-db-id>` is the numeric database id
   (`gh api repos/statewalker/statewalker-root/issues/<n> --jq .id`), not the `#number`. Use this in
   cloud sessions too. Only if the call fails, write `Blocked by: #<n>, #<n>` on the first line of
-  the child body and say so in the handoff comment. A ticket is unblocked when every blocker is
+  the child body and say so in the handoff note. A ticket is unblocked when every blocker is
   closed.
 - **Count open blockers**: `gh api repos/statewalker/statewalker-root/issues/<n> --jq .issue_dependencies_summary.blocked_by`
   (0 means startable).
@@ -87,8 +87,9 @@ repositories selected for the session or attached to it; others answer 403.
 ## Claiming a ticket
 
 Every session acts as the same GitHub account, so an assignee alone cannot tell sessions apart.
-A ticket's availability is read from its **status comments**, each starting with one of these
-words:
+A ticket's availability is read from its **status lines**. A status line is a line of a comment
+that starts with one of these words, or a `Waiting on human:` after a sentence in a longer
+comment. Write each on its own line, so both people and `tools/status.mjs` read it the same way:
 
 | Status comment | Written by | Ticket is |
 |---|---|---|
@@ -97,9 +98,9 @@ words:
 | `Waiting on human: <what is needed>` | a session that needs the human (a decision, a package's first publish, the merge gate stopped on a critical finding) | **not available** to sessions |
 | `Resumed: <what changed>` | **the human only**, once the wait is over | free |
 
-1. Read the ticket's comments. The latest status comment decides: available only if there is
-   none, or it is `Released` or `Resumed`; a ticket labelled `ready-for-human` is not available
-   either. Otherwise pick another.
+1. Read the ticket's comments. The latest status line decides: available only if there is none,
+   or it is `Released` or `Resumed`, or the claim is stale (below). A ticket labelled
+   `ready-for-human` is not available either. Otherwise pick another.
 2. Claim with two writes, the session's first: assign the ticket and comment
    `Claimed by <session URL or branch name>`. With `gh`: `--add-assignee @me`. With
    `mcp__github__issue_write`: `assignees` needs a real login (get it with `mcp__github__get_me`;
@@ -109,7 +110,61 @@ A session that stops without finishing comments `Released: <why>` and removes th
 that needs the human comments `Waiting on human: …` (and, on non-Wayfinder tickets, adds
 `ready-for-human`). The human hands a ticket back by commenting `Resumed: …` and, where present,
 swapping `ready-for-human` for `ready-for-agent`. Tickets assigned to a human without a claim
-comment are theirs, not available.
+comment are theirs, not available. Keep the labels in step with the status: a ticket whose
+latest status is `Waiting on human` carries `ready-for-human`, not `ready-for-agent` (not on
+Wayfinder tickets, which take no triage labels).
+
+### Stale claims
+
+A claim is **stale** when nothing was added to the ticket for **48 hours** after it: no comment of
+any kind. A session that worked on the ticket would have left progress comments (below), so a
+quiet claim means a session that was interrupted. `tools/status.mjs` lists stale claims apart.
+
+A quiet ticket is not proof that the work stopped. Older claims predate the checkpoint rule, and
+work can go on away from the ticket: commits on a branch, a pull request in its merge gate, or a
+cloud session waiting on a scheduled wake. Before taking a stale ticket, check all of these:
+
+1. **The session:** for a cloud claim, `get_session` on the claim's session URL shows it neither
+   working nor waiting on a scheduled wake (its triggers, `list_triggers`), and its last event is
+   older than 48 hours.
+2. **The work:** the pull requests and branches the ticket or its note names have no commit,
+   comment or check run in the last 48 hours. Where you can't read them (an unattached project),
+   treat them as live.
+3. **The claimant:** the claim names a session URL or a cloud session branch, not a local branch
+   or "guided by the human".
+
+If all three hold, comment `Released: stale claim of <date> (<session>): <what you checked>`, then
+claim as usual. Otherwise don't release: comment `Waiting on human: confirm the claim of <date> is
+stale` and pick another ticket.
+
+**The human may release any claim at any time**, stale or not, by commenting `Released: …`, or by
+asking a session to post it. A session posting it for the human quotes the human's request. Before continuing a released ticket, read its comments and its
+current handoff note: the interrupted session's state is there, by the checkpoint rule below.
+
+### Checkpoints: keep the state recoverable
+
+A session can stop at any moment (a container reclaimed, a limit, a crash). The next session must
+be able to rebuild where the work stands from GitHub and the root alone. So, while working:
+
+- **Comment on the ticket at each milestone**, as `Progress: <what changed>`, with links:
+  - a pull request opened or merged;
+  - a release published;
+  - a decision taken in a grilling;
+  - a child session started or finished;
+  - a blocker found.
+
+  One or two lines, linking the pull request, issue or commit. Never retell what the link already
+  says. A progress comment also keeps the claim from going stale.
+- **Before a long step** (a CI wait, a release, a subagent fan-out), comment what is running and
+  how to check it, for example the run, the branch or the child session.
+- **When the next step is the human's**, comment `Waiting on human: <exactly what>` at once, and
+  set `ready-for-human` (not on Wayfinder tickets). Don't leave it only in a note.
+- **File what is left as issues**, with blocking edges, rather than as lists in a comment or a
+  note.
+- **Write a handoff note only for what issues can't hold.** That means standing rules, a
+  multi-ticket plan in flight, or running state across several repositories. When the ticket and
+  its comments are enough to continue, write no note (`docs/process/handoffs.md`, "When to write
+  a note").
 
 ## Pull requests as a triage surface
 
@@ -154,7 +209,7 @@ Used by `/wayfinder`. The **map** is a single issue with **child** issues as tic
 
 Project issues are part of the plan too. When triaging, also sweep each project in `repos.json`:
 `gh api 'repos/statewalker/<repo>/issues?state=open&labels=needs-triage'`. Every review follow-up is
-also linked from the gate's pass record and from the ticket's handoff comment, so the ticket that
+also linked from the gate's pass record and from the ticket's handoff note, so the ticket that
 caused it leads to it.
 
 ## Labels in use
@@ -164,6 +219,18 @@ caused it leads to it.
   `wayfinder:task`.
 - `area:root` for work on this repository itself; `repo:<name>` for each project a ticket's code
   or decision concerns.
+- `subject:<id>` for the subject a root issue belongs to (`GLOSSARY-MAP.md`; ids in
+  `subjects/subjects.json`).
+  - **A root issue's subject**, in order:
+    1. its `subject:` label;
+    2. else its parent's subject, for the sub-issue of a map or spec;
+    3. else `process`, when it is labelled `area:root`;
+    4. else the subjects of its `repo:` labels, which can be several.
+
+    `tools/status.mjs` applies exactly these rules and lists issues with none under **unsorted**.
+  - **Set `subject:` when creating** a map, a spec, or a standalone issue not labelled `area:root`.
+    Sub-issues need none.
+  - A missing `subject:<id>` label is created like any other (below).
 - `review-followup` (with `bug`) for high findings the merge gate filed instead of fixing (issues
   from the earlier review loop may carry `enhancement`). These
   issues are filed **in the repository of the pull request** rather than here

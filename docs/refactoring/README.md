@@ -29,8 +29,8 @@ Problems referenced as P1–P10 are listed in `docs/projects.md`.
    peershare); alternative: peershare moves to `httpeers/apps`.
 - **0.4** **Fate of statewalker-sandbox** after phase 2: archive, or keep as `labs` with one folder per
    experiment, an owner and a review date, and no inbound dependencies.
-- **0.5** **Docs location**: library doc sites next to their code (cellb.dev pattern) or all in
-   statewalker-sites.
+- **0.5** ~~**Docs location**~~ Decided (`subjects/sites/adr/2026-11-25-site-kit-and-site-placement.md`): site
+   content in each project's `site/`, one site build and deploy in statewalker-sites.
 
 ## Phase 1 — hygiene (small, independent; parallel)
 
@@ -48,6 +48,7 @@ Problems referenced as P1–P10 are listed in `docs/projects.md`.
 | `apps/httpeers-stack`, `httpeers-protos`, `httpeers-lib-protos`, `httpeers-shell-protos` | `httpeers/protos/` (or delete what `httpeers/apps` and `deploy/` cover) | P4 |
 | `apps/peershare-protos`, `peershare-ui-protos` | Next to the peershare apps (decision 0.3) | |
 | ~~`apps/flue-capfs-do`, `apps/flue-workbench`~~ | Done ([#146](https://github.com/statewalker/statewalker-root/issues/146)): `statewalker-ai` covers what they proved (the harness packages, its private `apps/workbench`, [#84](https://github.com/statewalker/statewalker-root/issues/84)); deleted from the sandbox in [statewalker-sandbox#170](https://github.com/statewalker/statewalker-sandbox/pull/170) | |
+| ~~`apps/jobs-manager`~~ | Done ([#411](https://github.com/statewalker/statewalker-root/issues/411)): it became `packages/host-jobs.node` in statewalker-kernel ([statewalker-kernel#83](https://github.com/statewalker/statewalker-kernel/pull/83)), the processor behind the `host-jobs` binding of CellB Node hosts; its REST, SSE, MCP and CLI surfaces were replaced by commands and their exposures; deleted from the sandbox in [statewalker-sandbox#176](https://github.com/statewalker/statewalker-sandbox/pull/176) | |
 | `apps/notes-demo` | `webrun-sites/examples/` | |
 | `apps/vcs-protos` | `webrun-vcs/protos/` | |
 | `apps/openai-proxy.app` | `statewalker-ai/apps/` | |
@@ -68,7 +69,7 @@ commit message), make it build and test in the destination, then delete from the
 | Step | Change | Fixes |
 |---|---|---|
 | 3.1 | Move `apps/chat-mini.chat`, `apps/chat-mini.chat-react` to `packages/` | P5 |
-| 3.2 | ~~Publish `app-shell` from statewalker-shell-react~~ Superseded: shell-react merges into statewalker-platform ([platform-project-and-fragment-repositories](../adr/2026-11-19-platform-project-and-fragment-repositories.md)) | P6 |
+| 3.2 | ~~Publish `app-shell` from statewalker-shell-react~~ Superseded: shell-react merges into statewalker-platform ([platform-project-and-fragment-repositories](../../subjects/platform/adr/2026-11-19-platform-project-and-fragment-repositories.md)) | P6 |
 | 3.3 | ~~Move `file-mounts.core`, `file-panels.core` down to statewalker-kernel~~ Superseded: they become fragments (same ADR); the overlap with `webrun-files-composite` still needs merging | P6 |
 | 3.4 | peershare per decision 0.3; rename the project if decided | P5 |
 
@@ -84,10 +85,13 @@ commit message), make it build and test in the destination, then delete from the
 | cellb.dev | already `examples/`; platform fixtures stay with their package |
 | all | CI runs every `examples/*` `test` (or `build`) script as a smoke test |
 
-## Phase 5 — docs location (blocked by 0.5)
+## Phase 5 — docs location (decided by 0.5)
 
-If decided in-repo: `statewalker-sites/packages/site-fsm` → `statewalker-fsm/site`,
-`site-webrun` → `webrun-sites/site`; statewalker-sites keeps the main site, the blog and site-dots.
+Per `subjects/sites/adr/2026-11-25-site-kit-and-site-placement.md`: `site-fsm`'s pages move to
+`statewalker-fsm/site` as content; statewalker-sites keeps the build of every site, the hub and the
+blog. The fate of `site-webrun` and `site-dots` and the rollout order are open on the map
+[statewalker-root#232](https://github.com/statewalker/statewalker-root/issues/232); its spec's
+tickets do the moves.
 
 ## Every project at a glance
 

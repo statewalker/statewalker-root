@@ -5,6 +5,12 @@ How work moves from an idea to published packages. The skills named here live in
 human typing the command; a session started with only a ticket reads the skill's `SKILL.md` and
 follows it (`CLAUDE.md`, "Skills only a human can start").
 
+## 0. Know where things stand
+
+`node tools/status.mjs` prints every subject's plans, the tickets an agent can start, what waits on
+the human, and the live handoff notes. [`subjects.md`](subjects.md) explains the report, the order
+for picking work, how to continue a ticket, and how to add a subject or a project.
+
 ## 1. Pick the route by size
 
 | The work is… | Route |
@@ -12,6 +18,7 @@ follows it (`CLAUDE.md`, "Skills only a human can start").
 | Too big or foggy for one session, or spans several projects | `/wayfinder` → map issue here; one decision ticket per session until the way is clear, then a spec |
 | A clear feature | `/grill-with-docs` → `/to-spec` → `/to-tickets` → `/implement` (one ticket) or `/implement-spec` (whole spec, parallel subagents; claims every ticket, `CLAUDE.md` overrides) |
 | A bug or regression | `/diagnosing-bugs`, with `/tdd` for the regression test |
+| A set of follow-up issues across projects (filed by research, a spec or a review) | `/followup`: one lane per repository, the merge gate run by the session, bottom-up releases |
 | A design question | `/prototype` (throwaway) or a `wayfinder:prototype` ticket |
 | Code-health survey | A health review of one project: weekly from the routine ([weekly-routine.md](weekly-routine.md)), or on demand ([health-review.md](health-review.md)); `/improve-codebase-architecture` for a survey alone |
 | After a session | `/retro`: findings become `area:root` tickets |
@@ -22,7 +29,8 @@ new behaviour carry tests, and a session lists a project's deferred bugs before 
 
 Every route ends in issues: maps, specs and their tickets on this repository, a bug or other issue
 about one project alone in that project's tracker (`docs/agents/issue-tracker.md`). Specs, tickets
-and Wayfinder tickets carry `repo:<name>` labels naming the projects they concern.
+and Wayfinder tickets carry `repo:<name>` labels naming the projects they concern. Maps, specs and
+standalone root issues also carry a `subject:<id>` label, and their tickets inherit it.
 
 ## 2. Parallel work
 

@@ -52,11 +52,15 @@ found it while working).
 
 ## Project sites
 
-**Project site**: a project's public documentation website, built from the project's own `site/`
-folder: its goal, how to use it, its architecture and APIs, examples and demos.
+**Project site**: a project's public documentation website, built from the content in the project's
+own `site/` folder: its goal, how to use it, its architecture and APIs, examples and demos.
 **Hub site**: statewalker.com, the site that links every project site.
 _Avoid_: docs site (ambiguous with a project's `docs/` folder); hub alone (an httpeers hub is the
 Node daemon of `@statewalker/httpeers-hub`).
+
+**Site kit**: the shared packages every project site is checked and built with: the notebook
+pipeline, the theme and components, the checks and the API reference generator.
+_Avoid_: site template, scaffold (nothing is copied into a site).
 
 **Notebook page**: a Markdown source of a project site, with cells, from which one page is built.
 _Avoid_: notebook alone when the page is meant (a Notebook Kit document is also a notebook).
@@ -187,5 +191,30 @@ representation behind bus calls, agent tools, HTTP endpoints and MCP.
 _Avoid_: action, endpoint, tool (each is one exposure of a command).
 
 **Exposure**: one way a command is offered beyond the internal bus: to agents as a tool, over HTTP,
-or through MCP; each is chosen per command.
+through MCP, or to the task queue; each is chosen per command.
 _Avoid_: export, publish.
+
+**Handler**: the code that answers a command when it is called.
+_Avoid_: listener (the substrate's word), processor (that serves tasks).
+
+**Task**: a durable message asking for work, published under a subject; the sender does not wait,
+and may ask for a reply. A command call is not a task: its caller waits for the result.
+_Avoid_: job, message, request.
+
+**Subscription**: a named, durable interest in the tasks published under matching subjects; each
+matching task is delivered to it at least once.
+_Avoid_: listener, consumer, queue.
+
+**Lease**: a time-limited, renewable hold on one task by one subscription's processor; it expires
+if not renewed, and the task is delivered again.
+_Avoid_: lock, claim (the act of taking one).
+
+**Processor**: the work that serves a subscription's tasks, one lease at a time, with cancellation
+and progress; a command's handler can be one.
+_Avoid_: executor (in the AI harness, where session code runs), worker, handler.
+
+**Job**: one attempt to process a task under a lease, with its durable progress log.
+_Avoid_: run, task.
+
+**Script**: a program a fragment ships for a host to run as an operating-system process, as a job.
+_Avoid_: task.

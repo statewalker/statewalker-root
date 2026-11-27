@@ -5,11 +5,25 @@ repository holds no product code: it holds the plan (GitHub issues), the knowled
 process docs, research), the shared agent skills (`.claude/skills/`), and the map of the projects
 below. Code changes are committed in the project's own repository, never here.
 
+The work is organized by **subject** ([`GLOSSARY-MAP.md`](GLOSSARY-MAP.md)):
+- **`docs/`** is how we work: process, agents, cross-subject ADRs. It is also the home of the
+  `process` subject.
+- **`subjects/<s>/`** is what each subject builds: README, `adr/`, `research/`, `roadmap.md`,
+  `handoffs/`.
+- **Projects:** every project belongs to one subject (`subjects/subjects.json`).
+- **State:** where each subject stands and what comes next is never in a file. Run
+  `node tools/status.mjs` (`docs/process/subjects.md`).
+
 ## Start of every session
 
+0. **Get the state:** `node tools/status.mjs <subject…>` for the subjects the request touches, or
+   with no arguments when the human asks where things stand. Then read those subjects' `README.md`
+   and the current handoff note of the ticket you will work (`docs/process/subjects.md`, §1 and §3).
 1. Read the ticket you were given and **claim it** (assign it and comment the claim,
-   `docs/agents/issue-tracker.md`) before any other write. No ticket? Ask the human (they can type
-   `/ask-matt` to route the request).
+   `docs/agents/issue-tracker.md`) before any other write. No ticket? Show the human the state of
+   the subject they mean and the frontier, and ask which ticket to take (they can type `/ask-matt`
+   to route the request). To add a subject or a project, follow `docs/process/subjects.md` §4 and
+   §5.
 2. Read `docs/process/README.md` for the workflow that fits the ticket, and
    `docs/process/sessions.md` for how this session works and contributes to this repository.
 3. Get the projects the ticket touches, from `repos.json`:
@@ -43,7 +57,7 @@ All under `github.com/statewalker/<name>`. Layers are computed from published `@
 dependencies; a project's published packages depend only on lower layers, so changes land and
 release bottom-up. Private packages may reach sideways: cellb.dev's depend on
 statewalker-knowledge and webrun-vcs, so cellb.dev must come after them. Inventory, apps and known problems:
-`docs/projects.md`.
+`docs/projects.md`. Each project's subject: `subjects/subjects.json` (source of truth; `GLOSSARY-MAP.md` is its readable twin).
 
 | Layer | Project | What it holds |
 |---|---|---|
@@ -67,7 +81,7 @@ statewalker-knowledge and webrun-vcs, so cellb.dev must come after them. Invento
 | app | statewalker-shell-theia | Browser-only Eclipse Theia shell over a FilesApi |
 | app | statewalker-sites | Private: documentation sites and blog (Cloudflare Workers) |
 | app | webrun-devtools | Chrome extension for browser automation; publishes `@statewalker/webrun-devtools` |
-| infra | .github | Shared CI workflows and release-planning scripts |
+| infra | statewalker-ci | Shared CI workflows and release-planning scripts (`statewalker/.github` resolves to the same repository) |
 
 Archived, do not change: `statewalker-content`, `statewalker-ai-legacy`, `umbrella` (its
 repository-management tools now live in this repository's `tools/`). The private project
@@ -107,8 +121,23 @@ unpublished, what is behind npm, dependency order).
 - **Git guardrails.** `.claude/settings.json` runs a hook that refuses force-pushing `main`,
   `git reset --hard` and deleting branches. Never work around it; the human runs such commands
   themselves.
-- **Do not create files that track state.** Tickets, maps, specs, progress and handoffs are
-  GitHub issues and issue comments, not files.
+- **Do not create files that track state.** Tickets, maps, specs and progress are GitHub issues
+  and issue comments, not files: `tools/status.mjs` reads them. Handoffs are dated, write-once
+  notes in the subject's `handoffs/` (`subjects/<s>/handoffs/`, or `docs/handoffs/` for the process;
+  rules in `docs/process/handoffs.md`), linked from a one-line comment on the ticket. Notes of
+  finished work, or replaced ones, move unchanged to the sibling `handoffs.archive/`.
+- **Checkpoint as you go.** Any session can be interrupted. At each milestone (pull request
+  opened or merged, release, decision, child session, blocker), comment `Progress: …` on the
+  ticket with links. Comment `Waiting on human: …` the moment the human is needed. File what is
+  left as issues. A new session must be able to rebuild the state from GitHub and the root alone.
+  Write a handoff note only for what issues can't hold (`docs/agents/issue-tracker.md`,
+  "Checkpoints"; `docs/process/handoffs.md`).
+- **The root records only what continuation needs.** When a subject advances, update its root
+  files only where a new session needs it to continue on its own: dated entry points, ADRs,
+  research, a handoff note. Never repeat what the code, a project's docs or a ticket already holds
+  (`docs/process/subjects.md` §6).
+- **Every root issue has a subject:** a `subject:<s>` label on plans and standalone issues; a
+  map's or spec's tickets inherit it (`docs/agents/issue-tracker.md`).
 
 ## Agent skills
 
@@ -129,12 +158,13 @@ The five default labels (`needs-triage`, `needs-info`, `ready-for-agent`, `ready
 
 ### Domain docs
 
-Single-context here: `GLOSSARY.md` and `docs/adr/` at the root hold ecosystem-wide terms and
-decisions; each project keeps its own. See `docs/agents/domain.md`.
+Multi-context by subject. `GLOSSARY-MAP.md` lists the subjects. `GLOSSARY.md` and `docs/adr/`
+hold the terms and decisions that span subjects, and the process ones. `subjects/<s>/adr/` holds a
+subject's own decisions, and each project keeps its own. See `docs/agents/domain.md`.
 
 ### Skills only a human can start
 
-`ask-matt`, `grill-me`, `grill-with-docs`, `handoff`, `implement`, `implement-spec`,
+`ask-matt`, `followup`, `grill-me`, `grill-with-docs`, `handoff`, `implement`, `implement-spec`,
 `improve-codebase-architecture`, `retro`, `setup-matt-pocock-skills`, `to-questionnaire`, `to-spec`,
 `to-tickets`, `triage`, `wait-what` and `wayfinder` are marked `disable-model-invocation`: the human
 types them (`/wayfinder statewalker-root#4`). In a session started with only a ticket, when the
@@ -148,10 +178,11 @@ type the command instead.
   the numbering in `domain-modeling`'s `ADR-FORMAT.md` (parallel sessions would collide on the next
   number). The same applies inside projects that adopt this convention.
 - **Wayfinder tickets may carry `repo:<name>` labels** besides their `wayfinder:` label, to say
-  which projects a decision concerns; this overrides `wayfinder`'s "only `wayfinder:` labels".
+  which projects a decision concerns, and a map carries its `subject:<id>` label; this overrides
+  `wayfinder`'s "only `wayfinder:` labels".
   Triage labels stay off Wayfinder tickets.
-- **Wayfinder research lands as `docs/research/<slug>.md`** in the session's root pull request,
-  not on a throwaway `research/*` branch. The charting session may resolve its own research
+- **Wayfinder research lands as `subjects/<s>/research/<slug>.md`** (`docs/research/` for the
+  process or several subjects), in the session's root pull request, not on a throwaway `research/*` branch. The charting session may resolve its own research
   tickets (through subagents), the one exception to one ticket per session.
 - **Wayfinder tickets never take triage labels.** Where this repository's docs say to label a
   ticket `ready-for-human`, a Wayfinder ticket gets only the `Waiting on human: …` status comment
@@ -169,8 +200,11 @@ type the command instead.
   instructed otherwise".
 - **Triage's `.out-of-scope/<concept>.md` files** live at this repository's root
   (`.out-of-scope/`).
-- **A handoff is a comment on the ticket**, not the `/handoff` skill's file: that file lands in
-  `$TMPDIR`, which a cloud container loses.
+- **A handoff is a note in its subject's `handoffs/`**, `YYYY-MM-DD.<note-name>.md`, not the
+  `/handoff` skill's `$TMPDIR` file, which a cloud container loses. It is written once and committed
+  in the session's root pull request, with its line in that folder's `README.md`. Then a one-line
+  comment on the ticket links it. Closing a ticket, or replacing its note, archives the old notes
+  in the same pull request (`docs/process/handoffs.md`).
 - **Reviews follow `docs/process/merging.md`**, which overrides `/code-review`'s "do not rerank"
   and its sub-agent fan-out, and the review steps of `/implement` and `/implement-spec` ("fix all
   issues", "mark ready for review"): they pass the merge gate and merge as it says.
