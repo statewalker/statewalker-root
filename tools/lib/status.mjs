@@ -5,17 +5,22 @@
 //   subject     a subject:<id> label; else the parent issue's subject; else area:root -> process;
 //               else the subjects of its repo:<name> labels (subjects/subjects.json); else unsorted
 //   plan        an open wayfinder:map, or a title starting "Spec:"
-//   status      the latest status comment decides: Claimed (by …) -> taken, Waiting on human -> human,
+//   status      the latest status line decides (a line of a comment starting Claimed / Released: /
+//               Waiting on human: / Resumed:): Claimed -> taken, Waiting on human -> human,
 //               Released / Resumed -> free; ready-for-human -> human; assigned with no claim -> human
+//   stale       taken, but nothing was added to the ticket for STALE_HOURS after the claim's last
+//               activity: a session may release it (docs/agents/issue-tracker.md, "Stale claims")
 //   frontier    free, no open blocker, and ready-for-agent or an agent-run wayfinder type
 //               (research, prototype, task)
 
 const STATUS_WORDS = [
-  ["claimed", /^\s*Claimed\b/i],
-  ["waiting", /^\s*Waiting on human\b/i],
-  ["released", /^\s*Released\b/i],
-  ["resumed", /^\s*Resumed\b/i],
+  ["claimed", /^\s*Claimed(\s+by\b|[.:])/i],
+  ["waiting", /(^\s*|[.!?]\s+)Waiting on human:/i],
+  ["released", /^\s*Released:/i],
+  ["resumed", /^\s*Resumed:/i],
 ];
+
+export const STALE_HOURS = 48;
 
 export const labelsOf = (issue) => (issue.labels ?? []).map((l) => (typeof l === "string" ? l : l.name));
 export const numberFromUrl = (url) => (url ? Number(String(url).split("/").pop()) : null);
@@ -43,19 +48,27 @@ export function subjectsOf(issue, { subjects, byNumber, seen = new Set() }) {
   return viaRepo.length ? viaRepo : ["unsorted"];
 }
 
-/** The latest status comment: { word, at, body } or null. Comments are oldest first. */
+/** The latest status line: { word, at, body } or null. Comments are oldest first; within a comment the last status line wins. */
 export function latestStatus(comments = []) {
   for (let i = comments.length - 1; i >= 0; i--) {
-    const body = comments[i].body ?? "";
-    for (const [word, re] of STATUS_WORDS) if (re.test(body)) return { word, at: comments[i].created_at, body: body.trim().split("\n")[0] };
+    const lines = (comments[i].body ?? "").split("\n").map((l) => l.replace(/^[\s>*_-]+/, ""));
+    for (let j = lines.length - 1; j >= 0; j--) {
+      for (const [word, re] of STATUS_WORDS) if (re.test(lines[j])) return { word, at: comments[i].created_at, body: lines[j].trim() };
+    }
   }
   return null;
+}
+
+/** Hours since the ticket's last comment (any comment counts as activity), at `now`. */
+export function hoursQuiet(comments = [], now) {
+  const last = comments.at(-1)?.created_at;
+  return last ? (Date.parse(now) - Date.parse(last)) / 3.6e6 : Infinity;
 }
 
 export const isPlan = (issue) => labelsOf(issue).includes("wayfinder:map") || /^Spec:/i.test(issue.title ?? "");
 
 /** One of: plan, unknown, taken, human, blocked, frontier, triage, other. `comments` null = unreadable. */
-export function classify(issue, comments) {
+export function classify(issue, comments, now = new Date().toISOString()) {
   if (comments === null) return { issue, status: null, blocked: false, kind: "unknown" };
   const labels = labelsOf(issue);
   const status = latestStatus(comments);
@@ -66,10 +79,11 @@ export function classify(issue, comments) {
     (!status && (issue.assignees ?? []).length > 0 && !isPlan(issue)) ||
     (labels.includes("wayfinder:grilling") && !blocked);
   const base = { issue, status, blocked };
+  base.stale = status?.word === "claimed" && hoursQuiet(comments, now) > STALE_HOURS;
   if (isPlan(issue)) return { ...base, kind: "plan", human: status?.word === "waiting" || labels.includes("ready-for-human") };
   // A grilling needs the human's answers even while a session holds it.
   if (labels.includes("wayfinder:grilling") && !blocked) return { ...base, kind: "human" };
-  if (status?.word === "claimed") return { ...base, kind: "taken" };
+  if (status?.word === "claimed") return { ...base, kind: base.stale ? "stale" : "taken" };
   if (human) return { ...base, kind: "human" };
   if (blocked) return { ...base, kind: "blocked" };
   const agentReady = labels.includes("ready-for-agent") || ["wayfinder:research", "wayfinder:prototype", "wayfinder:task"].some((l) => labels.includes(l));
@@ -102,13 +116,14 @@ const link = (i) => `[#${i.number}](${i.html_url ?? `https://github.com/statewal
 const day = (iso) => (iso ? iso.slice(0, 10) : "");
 
 /** Build the report model for the chosen subjects. */
-export function buildStatus({ subjects, issues, comments, parents = [], handoffs, projects = {}, only }) {
+export function buildStatus({ subjects, issues, comments, parents = [], handoffs, projects = {}, only, now, blockers = new Map() }) {
   const byNumber = new Map([...parents, ...issues].map((i) => [i.number, i]));
   const ids = only?.length ? only : [...Object.keys(subjects), "unsorted"];
-  const out = Object.fromEntries(ids.map((id) => [id, { id, title: subjects[id]?.title ?? "Unsorted (no subject: label)", plans: [], unknown: [], frontier: [], human: [], taken: [], blocked: [], triage: [], other: [], notes: [], projects: [] }]));
+  const out = Object.fromEntries(ids.map((id) => [id, { id, title: subjects[id]?.title ?? "Unsorted (no subject: label)", plans: [], unknown: [], frontier: [], human: [], taken: [], stale: [], blocked: [], triage: [], other: [], notes: [], projects: [] }]));
   const openNumbers = new Set(issues.map((i) => i.number));
   for (const issue of issues) {
-    const c = classify(issue, comments.has(issue.number) ? comments.get(issue.number) : undefined);
+    const c = classify(issue, comments.has(issue.number) ? comments.get(issue.number) : undefined, now);
+    c.blockers = blockers.get(issue.number) ?? [];
     for (const id of subjectsOf(issue, { subjects, byNumber })) {
       const s = out[id];
       if (!s) continue;
@@ -131,24 +146,24 @@ function line(c) {
   const i = c.issue;
   const labels = labelsOf(i).filter((l) => !l.startsWith("repo:") && !l.startsWith("subject:")).join(", ");
   const extra = [];
-  if (c.status) extra.push(`${c.status.word} ${day(c.status.at)}`);
+  if (c.status) extra.push(`${c.status.word} ${day(c.status.at)}${c.stale ? " (stale)" : ""}`);
   const deps = i.issue_dependencies_summary;
-  if (deps?.blocked_by) extra.push(`blocked by ${deps.blocked_by}`);
+  if (deps?.blocked_by) extra.push(c.blockers?.length ? `blocked by ${c.blockers.map((n) => `#${n}`).join(", ")}` : `blocked by ${deps.blocked_by}`);
   const sub = i.sub_issues_summary;
-  if (sub?.total) extra.push(sub.completed === sub.total ? `all ${sub.total} tickets done: close the plan, or add the next tickets` : `${sub.completed}/${sub.total} tickets done`);
+  if (sub?.total) extra.push(sub.completed === sub.total ? `all ${sub.total} tickets done: its handoff note says what is next; with nothing left, close it` : `${sub.completed}/${sub.total} tickets done`);
   return `- ${link(i)} ${i.title}${labels ? ` _(${labels})_` : ""}${extra.length ? ` — ${extra.join("; ")}` : ""}`;
 }
 
 /** Render the model as Markdown. */
 export function renderStatus(model, { generatedAt }) {
   const L = [`# Status of the subjects`, "", `Generated ${generatedAt} by \`node tools/status.mjs\` from GitHub and the handoff indexes. Not a file to commit.`, ""];
-  L.push("| Subject | Plans | Frontier (agent can start) | Waiting on the human | Taken | Blocked | To triage | Live notes |", "|---|---|---|---|---|---|---|---|");
+  L.push("| Subject | Plans | Frontier (agent can start) | Waiting on the human | Taken | Stale claims | Blocked | To triage | Live notes |", "|---|---|---|---|---|---|---|---|---|");
   for (const s of model) {
     const human = new Set(s.human.map((c) => c.issue.number)).size;
-    L.push(`| ${s.id} | ${s.plans.length} | ${s.frontier.length} | ${human} | ${s.taken.length} | ${s.blocked.length} | ${s.triage.length} | ${s.notes.length} |`);
+    L.push(`| ${s.id} | ${s.plans.length} | ${s.frontier.length} | ${human} | ${s.taken.length} | ${s.stale.length} | ${s.blocked.length} | ${s.triage.length} | ${s.notes.length} |`);
   }
   for (const s of model) {
-    const empty = !s.unknown.length && !s.plans.length && !s.frontier.length && !s.human.length && !s.taken.length && !s.blocked.length && !s.triage.length && !s.notes.length;
+    const empty = !s.unknown.length && !s.stale.length && !s.plans.length && !s.frontier.length && !s.human.length && !s.taken.length && !s.blocked.length && !s.triage.length && !s.notes.length;
     if (s.id === "unsorted" && empty) continue;
     L.push("", `## ${s.id}: ${s.title}`, "");
     const section = (name, items, hint) => {
@@ -159,12 +174,13 @@ export function renderStatus(model, { generatedAt }) {
     section("Status unknown", s.unknown, "its comments could not be read: check the ticket by hand before claiming it; run again");
     section("Next for an agent", s.frontier, "free, unblocked: claim one and start");
     section("Waiting on the human", [...new Map(s.human.map((c) => [c.issue.number, c])).values()], "answer, decide or hand back with `Resumed:`");
-    section("Taken", s.taken, "claimed by a session; an old claim may be a stalled session");
+    section("Taken", s.taken, "claimed by a session, active in the last 48 hours: leave it");
+    section("Stale claims", s.stale, "claimed, then quiet for over 48 hours: release with `Released: stale claim …` and take it (docs/agents/issue-tracker.md)");
     section("Blocked", s.blocked);
     section("To triage", s.triage, "needs-triage, needs-info or no triage label: `/triage`");
     if (s.notes.length) {
       L.push("**Live handoff notes** (current note per ticket: read before continuing)", "");
-      for (const n of s.notes) L.push(`- [${n.name}](${n.path}): ${n.ref}, ${n.title}${n.closed ? " — **ticket closed**: archive the note if its work is finished (docs/process/handoffs.md)" : ""}`);
+      for (const n of s.notes) L.push(`- [${n.name}](${n.path}): ${n.ref}, ${n.title}${n.closed ? " — **ticket closed**: if the note still lists open items, continue from it (and file them as issues); if not, archive it (docs/process/handoffs.md)" : ""}`);
       L.push("");
     }
     const projects = s.projects;

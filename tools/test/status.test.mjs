@@ -47,7 +47,7 @@ test("status: the latest status comment decides", () => {
 test("classify: plans, taken, human, blocked, frontier and triage", () => {
   assert.equal(classify(issue(1, ["wayfinder:map"]), []).kind, "plan");
   assert.equal(classify({ ...issue(2, []), title: "Spec: a thing" }, []).kind, "plan");
-  assert.equal(classify(issue(3, ["ready-for-agent"]), [comment("Claimed by s")]).kind, "taken");
+  assert.equal(classify(issue(3, ["ready-for-agent"]), [comment("Claimed by s")], "2026-11-21T00:00:00Z").kind, "taken");
   assert.equal(classify(issue(4, ["ready-for-agent"]), [comment("Waiting on human: decide")]).kind, "human");
   assert.equal(classify(issue(5, ["ready-for-human"]), []).kind, "human");
   assert.equal(classify(issue(6, ["ready-for-agent"], { assignees: [{ login: "a" }] }), []).kind, "human", "assigned with no claim is the human's");
@@ -63,7 +63,7 @@ test("regression: a claimed, unblocked grilling still waits on the human (#194)"
 });
 
 test("regression: a bare 'Claimed.' comment counts as a claim (#164)", () => {
-  assert.equal(classify(issue(164, ["ready-for-agent"], { assignees: [{ login: "a" }] }), [comment("Claimed. Building in ws/164")]).kind, "taken");
+  assert.equal(classify(issue(164, ["ready-for-agent"], { assignees: [{ login: "a" }] }), [comment("Claimed. Building in ws/164")], "2026-11-21T00:00:00Z").kind, "taken");
 });
 
 test("regression: unreadable comments are 'unknown', never the frontier", () => {
@@ -72,6 +72,25 @@ test("regression: unreadable comments are 'unknown', never the frontier", () => 
   const platform = model.find((s) => s.id === "platform");
   assert.equal(platform.frontier.length, 0);
   assert.equal(platform.unknown.length, 1);
+});
+
+test("regression: a status line inside a longer comment counts (#69's handoff comment)", () => {
+  const c = [comment("Claimed by s", "2026-11-15T10:00:00Z"), comment("Handoff note: docs/handoffs/x.md\n\nWaiting on human: the npm trusted publisher", "2026-11-27T09:00:00Z")];
+  assert.equal(latestStatus(c).word, "waiting");
+  assert.equal(classify(issue(69, ["area:root"], { assignees: [{ login: "a" }] }), c, "2026-11-27T10:00:00Z").kind, "human");
+});
+
+test("regression: 'Waiting on human:' after a sentence counts; a bullet 'Released 0.5' does not", () => {
+  assert.equal(latestStatus([comment("Handoff note: [x](y). Waiting on human: the publisher.")]).word, "waiting");
+  assert.equal(latestStatus([comment("Claimed by s"), comment("### Done\n- Released 0.5 of the kernel")]).word, "claimed");
+});
+
+test("stale claims: claimed and quiet for over 48 hours", () => {
+  const c = [comment("Claimed by https://claude.ai/code/session_old", "2026-11-23T10:00:00Z")];
+  assert.equal(classify(issue(215, ["ready-for-agent"]), c, "2026-11-27T10:00:00Z").kind, "stale");
+  assert.equal(classify(issue(215, ["ready-for-agent"]), c, "2026-11-24T10:00:00Z").kind, "taken");
+  const later = [...c, comment("Progress: step 2 merged", "2026-11-26T20:00:00Z")];
+  assert.equal(classify(issue(215, ["ready-for-agent"]), later, "2026-11-27T10:00:00Z").kind, "taken", "a progress comment keeps the claim alive");
 });
 
 test("handoff index: the last line per ticket is the current note; 'no ticket' notes stay separate", () => {
@@ -123,7 +142,7 @@ test("status.mjs: renders every subject from recorded responses", () => {
   assert.equal(r.status, 0, r.stderr);
   const out = r.stdout;
   assert.match(out, /Generated 2026-11-27 10:00 UTC/);
-  assert.match(out, /\| platform \| 1 \| 1 \| 0 \| 1 \| 0 \| 0 \|/, "platform: the spec, #260 on the frontier, #266 taken");
+  assert.match(out, /\| platform \| 1 \| 1 \| 0 \| 1 \| 0 \| 0 \| 0 \|/, "platform: the spec, #260 on the frontier, #266 taken (26 hours quiet: not stale)");
   assert.match(out, /## platform[\s\S]*Next for an agent[\s\S]*#260/);
   assert.match(out, /#266[^\n]*claimed 2026-11-26/);
   assert.match(out, /## runtimes[\s\S]*Waiting on the human[\s\S]*#98/);

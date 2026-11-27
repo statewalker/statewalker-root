@@ -87,8 +87,9 @@ repositories selected for the session or attached to it; others answer 403.
 ## Claiming a ticket
 
 Every session acts as the same GitHub account, so an assignee alone cannot tell sessions apart.
-A ticket's availability is read from its **status comments**, each starting with one of these
-words:
+A ticket's availability is read from its **status lines**. A status line is a line of a comment
+that starts with one of these words, or a `Waiting on human:` after a sentence in a longer
+comment. Write each on its own line, so both people and `tools/status.mjs` read it the same way:
 
 | Status comment | Written by | Ticket is |
 |---|---|---|
@@ -97,9 +98,9 @@ words:
 | `Waiting on human: <what is needed>` | a session that needs the human (a decision, a package's first publish, the merge gate stopped on a critical finding) | **not available** to sessions |
 | `Resumed: <what changed>` | **the human only**, once the wait is over | free |
 
-1. Read the ticket's comments. The latest status comment decides: available only if there is
-   none, or it is `Released` or `Resumed`; a ticket labelled `ready-for-human` is not available
-   either. Otherwise pick another.
+1. Read the ticket's comments. The latest status line decides: available only if there is none,
+   or it is `Released` or `Resumed`, or the claim is stale (below). A ticket labelled
+   `ready-for-human` is not available either. Otherwise pick another.
 2. Claim with two writes, the session's first: assign the ticket and comment
    `Claimed by <session URL or branch name>`. With `gh`: `--add-assignee @me`. With
    `mcp__github__issue_write`: `assignees` needs a real login (get it with `mcp__github__get_me`;
@@ -109,7 +110,47 @@ A session that stops without finishing comments `Released: <why>` and removes th
 that needs the human comments `Waiting on human: …` (and, on non-Wayfinder tickets, adds
 `ready-for-human`). The human hands a ticket back by commenting `Resumed: …` and, where present,
 swapping `ready-for-human` for `ready-for-agent`. Tickets assigned to a human without a claim
-comment are theirs, not available.
+comment are theirs, not available. Keep the labels in step with the status: a ticket whose
+latest status is `Waiting on human` carries `ready-for-human`, not `ready-for-agent`.
+
+### Stale claims
+
+A claim is **stale** when nothing was added to the ticket for **48 hours** after it: no comment of
+any kind. A session that worked on the ticket would have left progress comments (below), so a
+quiet claim means a session that was interrupted. `tools/status.mjs` lists stale claims apart.
+
+- A session may take a stale ticket. In the cloud, `get_session` on the claim's session URL must
+  not show that session working. The session comments `Released: stale claim of <date>
+  (<session>)`, then claims as usual.
+- Before continuing, read the ticket's comments and its current handoff note. The interrupted
+  session's state is there, by the checkpoint rule below.
+- A claim by a local branch name can't be checked: release it after 48 hours all the same, and say
+  so in the `Released:` line.
+
+### Checkpoints: keep the state recoverable
+
+A session can stop at any moment (a container reclaimed, a limit, a crash). The next session must
+be able to rebuild where the work stands from GitHub and the root alone. So, while working:
+
+- **Comment on the ticket at each milestone**, as `Progress: <what changed>`, with links:
+  - a pull request opened or merged;
+  - a release published;
+  - a decision taken in a grilling;
+  - a child session started or finished;
+  - a blocker found.
+
+  One or two lines, linking the pull request, issue or commit. Never retell what the link already
+  says. A progress comment also keeps the claim from going stale.
+- **Before a long step** (a CI wait, a release, a subagent fan-out), comment what is running and
+  how to check it, for example the run, the branch or the child session.
+- **When the next step is the human's**, comment `Waiting on human: <exactly what>` at once, and
+  set `ready-for-human`. Don't leave it only in a note.
+- **File what is left as issues**, with blocking edges, rather than as lists in a comment or a
+  note.
+- **Write a handoff note only for what issues can't hold.** That means standing rules, a
+  multi-ticket plan in flight, or running state across several repositories. When the ticket and
+  its comments are enough to continue, write no note (`docs/process/handoffs.md`, "When to write
+  a note").
 
 ## Pull requests as a triage surface
 

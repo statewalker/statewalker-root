@@ -26,7 +26,8 @@ prints a summary table, then one section per subject:
 | **Status unknown** | tickets whose comments could not be read (the command also warns on stderr) | check them by hand before claiming; run again |
 | **Next for an agent** | free tickets with no open blocker: `ready-for-agent`, or `wayfinder:research` / `prototype` / `task` | claim one and start (`docs/agents/issue-tracker.md`, "Claiming a ticket") |
 | **Waiting on the human** | `ready-for-human`, a latest `Waiting on human:` comment, a ticket assigned with no claim, or an unblocked `wayfinder:grilling` (even while a session holds it: the grilling needs the human's answers) | the human answers, decides, or comments `Resumed:` |
-| **Taken** | the latest status comment is `Claimed by …` | leave it; a claim many days old may be a stalled session, which the human can release |
+| **Taken** | the latest status line is `Claimed …`, with activity in the last 48 hours | leave it |
+| **Stale claims** | claimed, then no comment for over 48 hours: an interrupted session | release it with `Released: stale claim …`, read its comments and note, and take it (`docs/agents/issue-tracker.md`, "Stale claims") |
 | **Blocked** | an open blocking issue | work the blocker first |
 | **To triage** | `needs-triage`, `needs-info`, or no triage label | `/triage` gives it acceptance criteria and a label |
 | **Live handoff notes** | the current note per ticket in the subject's `handoffs/` | read it before continuing that ticket. "Ticket closed" means archive it if the work is finished |
@@ -43,7 +44,9 @@ project the report marks unreadable, say its state is unchecked rather than gues
 
 Choose in this order (`docs/process/prevention.md`, "Picking your own work"):
 
-1. **Escalated bugs** in the projects (`escalated` label), oldest first.
+1. **Escalated bugs** in the projects (`escalated` label), oldest first. When the report can't
+   read a project, its bugs are unchecked: say so, and ask the human to attach the project before
+   starting on that subject.
 2. **The frontier** of the subject the human named, or of the subject with the most plans in
    flight. Take the first free ticket of a plan, in map order.
 3. **Tickets to triage**, when the frontier is empty.
@@ -53,13 +56,17 @@ Choose in this order (`docs/process/prevention.md`, "Picking your own work"):
 ## 3. Continue a piece of work
 
 1. Find its ticket in the report, or in the subject's `README.md` under "Entry points".
-2. Read the ticket and its comments, and claim it (`docs/agents/issue-tracker.md`).
+2. Read the ticket and its comments, and claim it (`docs/agents/issue-tracker.md`). A stale claim
+   is released first ("Stale claims" there).
 3. Read the ticket's current handoff note: the last line for the ticket in
    `subjects/<s>/handoffs/README.md`, or in `docs/handoffs/README.md` for `process`. Follow its
    "Replaces" link when it says earlier rules still apply.
 4. Read the subject's ADRs and the research the ticket links.
-5. Work it through the route in `docs/process/README.md`. At the end:
-   - write a handoff note in the same subject (`docs/process/handoffs.md`);
+5. Work it through the route in `docs/process/README.md`. **While working, checkpoint** at each
+   milestone with a `Progress:` comment on the ticket, so an interruption loses nothing
+   (`docs/agents/issue-tracker.md`, "Checkpoints"). At the end:
+   - write a handoff note in the same subject, only if the issues can't hold what is left
+     (`docs/process/handoffs.md`, "When to write a note");
    - archive the notes it replaces;
    - when the ticket closes, archive the ticket's notes.
 
@@ -73,12 +80,13 @@ existing subject. One root pull request:
    exactly one subject.
 2. **`subjects/<id>/README.md`**: copy the shape of an existing subject's README, with the
    sections Where it stands, Entry points (dated), Projects, Decisions, Research and Handoffs.
-3. **`subjects/<id>/handoffs/README.md`** and **`subjects/<id>/handoffs.archive/README.md`**,
+3. **`subjects/README.md`**: a row in its table.
+4. **`subjects/<id>/handoffs/README.md`** and **`subjects/<id>/handoffs.archive/README.md`**,
    each with a heading, a pointer to `docs/process/handoffs.md` and an empty `## Notes` list.
-4. **`GLOSSARY-MAP.md`**: a row in the table (`` | `<id>` | ... | ``) and its relationships.
-5. **The label:** put `subject:<id>` on the subject's plans and standalone root issues. Their
+5. **`GLOSSARY-MAP.md`**: a row in the table (`` | `<id>` | ... | ``) and its relationships.
+6. **The label:** put `subject:<id>` on the subject's plans and standalone root issues. Their
    tickets inherit the parent's subject. GitHub creates the label on first use.
-6. Run `node tools/check-docs.mjs` and `node tools/status.mjs <id>`.
+7. Run `node tools/check-docs.mjs` and `node tools/status.mjs <id>`.
 
 ## 5. Add a project
 
@@ -106,7 +114,8 @@ research answer) changes the root only in these cases:
 
 | What happened | What changes in the root |
 |---|---|
-| A ticket moved, a feature merged, a grilling answer was given | Nothing beyond the ticket and its comments, plus a handoff note when work is left. `status.mjs` reads the rest |
+| A ticket moved, a feature merged, a grilling answer was given | Nothing beyond a `Progress:` comment on the ticket (and a handoff note only when the issues can't hold what is left). `status.mjs` reads the rest |
+| A project was renamed, added or archived | `repos.json`, `subjects.json`, `CLAUDE.md`'s table, `docs/projects.md`, `GLOSSARY-MAP.md`, the subject README (§5) |
 | A plan opened, closed or changed direction | The subject README's dated "Entry points" |
 | A hard-to-reverse decision was made | An ADR in `subjects/<s>/adr/`, with its line in the README |
 | A root ticket's question was answered by research | A note in `subjects/<s>/research/`, with its line in the README |

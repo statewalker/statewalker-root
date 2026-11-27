@@ -20,6 +20,23 @@ Each subject keeps its own notes beside its other knowledge (`GLOSSARY-MAP.md`):
 - **The current note:** the last line for a ticket in the live index.
 - **The cross-subject view:** `node tools/status.mjs` shows every subject's live notes together.
 
+## When to write a note
+
+**First, checkpoint in the issues** (`docs/agents/issue-tracker.md`, "Checkpoints"): progress
+comments, a `Waiting on human:` line, follow-up issues. Then write a note only if a new session
+still couldn't continue from the issues alone. That happens when there are:
+
+- standing rules the human gave for a line of work, such as the VCS portability rules;
+- a plan in flight across several tickets or repositories: the order, the waves, the release
+  sequence;
+- running state that no single ticket shows: child sessions, unmerged branches with no pull
+  request, a scheduled check;
+- decisions taken that haven't landed in an ADR or a ticket yet.
+
+If none applies, write no note: the ticket's comments are the handoff. Update the note at the same
+milestones as the progress comments, by writing a replacing note, when its content would otherwise
+mislead.
+
 ## Writing a note
 
 1. **Name:** `YYYY-MM-DD.<note-name>.md`, with today's date in UTC, then a dot.
@@ -28,8 +45,17 @@ Each subject keeps its own notes beside its other knowledge (`GLOSSARY-MAP.md`):
    - A note written on a day when its ticket already has a note ends in its UTC time, `-HHMM`. The
      day's first note keeps its plain name, so no merged note is ever renamed.
    - Example: `2026-11-27.282-plan-webrun-vcs-parity-gaps-git-0710.md`.
-2. **Start the file** with `# Handoff: <ticket title> (#<n>)` and the ticket's link. If it replaces
-   an earlier note, name that note on a `- **Replaces:**` line.
+2. **Start the file** with `# Handoff: <ticket title> (#<n>)`, then these reference lines, so a
+   session can trace the note to the live plan:
+
+   ```md
+   - **Subject:** `<id>` ([README](../README.md))
+   - **Plan:** <the map or spec it belongs to, as a link, or "none">
+   - **Tickets:** <the ticket it hands off, and the other open tickets it leaves work on>
+   - **Replaces:** <the note it replaces, as a link> (omit if none)
+   ```
+
+   For the `process` subject the README link is `../process/README.md`.
 3. **Content: only what a new session needs to continue the work on its own.** Leave out
    anything already recorded in the code, a commit, a project's docs, an ADR, research or the
    ticket and its comments: link it instead. A note holds:
@@ -76,8 +102,8 @@ A note moves to its subject's `handoffs.archive/` only when one of these is true
 3. Find every link to the old path (`grep -rn "<note>" --include=*.md .`) and point it at the
    archived path, including links in live notes. Changing only a link's target path is the one
    change allowed in a merged note. `node tools/check-docs.mjs` fails on any link you miss.
-4. Commit in the session's root pull request. You don't need a ticket comment: the ticket's link
-   to the note on `main` still resolves through the history, and the archive keeps the same name.
+4. Commit in the session's root pull request. Once it merges, comment the note's new path on its
+   ticket: a `blob/main/...` link to the old path stops resolving.
 
 ### Who archives
 

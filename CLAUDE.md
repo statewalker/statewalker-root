@@ -81,7 +81,7 @@ statewalker-knowledge and webrun-vcs, so cellb.dev must come after them. Invento
 | app | statewalker-shell-theia | Browser-only Eclipse Theia shell over a FilesApi |
 | app | statewalker-sites | Private: documentation sites and blog (Cloudflare Workers) |
 | app | webrun-devtools | Chrome extension for browser automation; publishes `@statewalker/webrun-devtools` |
-| infra | .github | Shared CI workflows and release-planning scripts |
+| infra | statewalker-ci | Shared CI workflows and release-planning scripts (also reachable as `statewalker/.github`) |
 
 Archived, do not change: `statewalker-content`, `statewalker-ai-legacy`, `umbrella` (its
 repository-management tools now live in this repository's `tools/`). The private project
@@ -126,6 +126,12 @@ unpublished, what is behind npm, dependency order).
   notes in the subject's `handoffs/` (`subjects/<s>/handoffs/`, or `docs/handoffs/` for the process;
   rules in `docs/process/handoffs.md`), linked from a one-line comment on the ticket. Notes of
   finished work, or replaced ones, move unchanged to the sibling `handoffs.archive/`.
+- **Checkpoint as you go.** Any session can be interrupted. At each milestone (pull request
+  opened or merged, release, decision, child session, blocker), comment `Progress: …` on the
+  ticket with links. Comment `Waiting on human: …` the moment the human is needed. File what is
+  left as issues. A new session must be able to rebuild the state from GitHub and the root alone.
+  Write a handoff note only for what issues can't hold (`docs/agents/issue-tracker.md`,
+  "Checkpoints"; `docs/process/handoffs.md`).
 - **The root records only what continuation needs.** When a subject advances, update its root
   files only where a new session needs it to continue on its own: dated entry points, ADRs,
   research, a handoff note. Never repeat what the code, a project's docs or a ticket already holds

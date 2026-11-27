@@ -63,7 +63,7 @@ const comments = new Map();
 for (const i of issues) {
   if (!i.comments) continue;
   const probe = classify(i, []);
-  const matters = probe.kind === "frontier" || probe.kind === "plan" || (i.assignees ?? []).length > 0 || probe.kind === "triage" || probe.kind === "blocked";
+  const matters = probe.kind === "human" || probe.kind === "frontier" || probe.kind === "plan" || (i.assignees ?? []).length > 0 || probe.kind === "triage" || probe.kind === "blocked";
   if (!matters) continue;
   try {
     comments.set(i.number, source.list(`${REPO}/issues/${i.number}/comments`));
@@ -96,9 +96,19 @@ if (!flag("--no-projects")) {
   }
 }
 
-const model = buildStatus({ subjects, issues, comments, parents, handoffs, projects, only });
+// Blockers by number, for the blocked tickets.
+const blockers = new Map();
+for (const i of issues) {
+  if (!(i.issue_dependencies_summary?.blocked_by > 0)) continue;
+  try {
+    blockers.set(i.number, source.list(`${REPO}/issues/${i.number}/dependencies/blocked_by`).filter((b) => b.state === "open").map((b) => b.number));
+  } catch {}
+}
+
+const now = value("--now") ? new Date(value("--now").replace(" UTC", "Z").replace(" ", "T")).toISOString() : new Date().toISOString();
+const model = buildStatus({ subjects, issues, comments, parents, handoffs, projects, only, now, blockers });
 if (flag("--json")) {
-  console.log(JSON.stringify(model.map((s) => ({ ...s, ...Object.fromEntries(["plans", "unknown", "frontier", "human", "taken", "blocked", "triage", "other"].map((k) => [k, s[k].map((c) => ({ number: c.issue.number, title: c.issue.title, status: c.status?.word ?? null }))])) })), null, 2));
+  console.log(JSON.stringify(model.map((s) => ({ ...s, ...Object.fromEntries(["plans", "unknown", "frontier", "human", "taken", "stale", "blocked", "triage", "other"].map((k) => [k, s[k].map((c) => ({ number: c.issue.number, title: c.issue.title, status: c.status?.word ?? null }))])) })), null, 2));
 } else {
   console.log(renderStatus(model, { generatedAt: value("--now") ?? new Date().toISOString().slice(0, 16).replace("T", " ") + " UTC" }));
 }

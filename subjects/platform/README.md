@@ -21,7 +21,7 @@ The output lists, for this subject:
 
 ## Entry points (2026-11-27)
 
-- Spec [statewalker-root#215](https://github.com/statewalker/statewalker-root/issues/215), the empty fragment platform, is built ticket by ticket (`/implement-spec`). Its open tickets are #244 to #274.
+- Spec [statewalker-root#215](https://github.com/statewalker/statewalker-root/issues/215), the empty fragment platform, is built ticket by ticket (`/implement-spec`). Its open tickets are #164 and #244 to #274.
 - [`roadmap.md`](roadmap.md) orders the tasks and jobs work. The [handoff index](handoffs/README.md) holds the latest session state.
 
 ## Projects
