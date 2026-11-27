@@ -110,7 +110,7 @@ unpublished, what is behind npm, dependency order).
 - **Do not create files that track state.** Tickets, maps, specs and progress are GitHub issues
   and issue comments, not files. Handoffs are dated, write-once notes in `docs/handoffs/`
   (`YYYY-MM-DD.<note-name>.md`, `docs/handoffs/README.md`), linked from a one-line comment on the
-  ticket.
+  ticket. Notes of finished or cancelled work move, unchanged, to `docs/handoffs.archive/`.
 
 ## Agent skills
 
@@ -174,7 +174,9 @@ type the command instead.
 - **A handoff is a note in `docs/handoffs/`**, `YYYY-MM-DD.<note-name>.md`, not the `/handoff`
   skill's `$TMPDIR` file, which a cloud container loses. It is written once and committed in the
   session's root pull request, with its line in `docs/handoffs/README.md`. Then a one-line comment
-  on the ticket links it (`docs/adr/2026-11-27-handoff-notes-as-files.md`).
+  on the ticket links it (`docs/adr/2026-11-27-handoff-notes-as-files.md`). Closing a ticket, or
+  replacing its note, archives the old notes in the same pull request
+  (`docs/adr/2026-11-27-archive-finished-handoff-notes.md`).
 - **Reviews follow `docs/process/merging.md`**, which overrides `/code-review`'s "do not rerank"
   and its sub-agent fan-out, and the review steps of `/implement` and `/implement-spec` ("fix all
   issues", "mark ready for review"): they pass the merge gate and merge as it says.
