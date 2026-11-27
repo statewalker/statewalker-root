@@ -74,3 +74,4 @@ unchanged, and its header links the original.
 - [2026-11-27.444-followup-skill](2026-11-27.444-followup-skill.md): #444, Add /followup: resolve a set of follow-up issues across projects
 - [2026-11-27.430-webrun-devtools-per-app-biscuit-capabilities](2026-11-27.430-webrun-devtools-per-app-biscuit-capabilities.md): #430, webrun-devtools: per-app Biscuit capabilities over webrun-wire, and the extension as an HTTPeers peer
 - [2026-11-27.282-plan-webrun-vcs-parity-gaps-git-0835](2026-11-27.282-plan-webrun-vcs-parity-gaps-git-0835.md): #282, Plan: webrun-vcs parity gaps from the git/JGit coverage tables (116 tickets, 6 waves)
+- [2026-11-27.kitesurf-on-cellb](2026-11-27.kitesurf-on-cellb.md): no ticket, Kitesurf on CellB (Node and a browser tab), PDF via Page.printToPDF
