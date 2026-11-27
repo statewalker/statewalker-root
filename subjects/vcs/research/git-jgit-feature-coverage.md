@@ -59,7 +59,7 @@ Rows are not weighted. A Full row for the whole of `git merge` counts the same a
 | Hooks | 26 | 0 | 0 | 28 |
 | Subsystems (config, attributes, ignore, environment, pathspec, revisions, sparse, safety, signing, maintenance) | 76 | 6 | 3 | 90 |
 
-**Almost every porcelain command and option group is compared with native git.** That includes submodules, signing, bundles, archive, history search and diff presentation, which were whole missing areas at the first survey (the six issues below).
+**Almost every porcelain command and option group is compared with native git.** That includes submodules, signing, bundles, archive, history search and diff presentation (the issues below).
 - **Formats:** loose objects, packs and their `.idx`/`.rev`/`.mtimes`, every index version and extension, commit-graph, bitmaps with pseudo-merges, multi-pack-index, cruft packs, alternates, promisor packs, SHA-256 and `compatObjectFormat`, reftable.
 - **Transfer and server side:** protocol v0/v2 with `sideband-all`, `packfile-uris`, `bundle-uri`, `promisor-remote` and `object-info`; smart and dumb HTTP both ways for fetch; push certificates; `receive.fsckObjects`, receive limits, auto gc and namespaces.
 - **Hooks:** 26 of git's 28, the other two N/A.
@@ -84,13 +84,13 @@ The first survey filed its largest gaps in webrun-vcs:
 - **Host-side protocols:** the credential helper's text protocol, `git credential` and the store/cache helpers (credentials are a host callback), the `filter.<driver>.process` protocol, `ext::`, WebDAV push over dumb HTTP, `GIT_SSH*` (ssh is a host-supplied command).
 - **Out of a library's reach:** the foreign-SCM bridges (`svn`, `p4`, `cvs*`, `archimport`, `quiltimport`) and `send-email`/`imap-send`.
 
-**Divergences kept on purpose.** webrun-vcs's `CLAUDE.md` records them; among them:
+**Divergences kept on purpose.** webrun-vcs's `CLAUDE.md` and doc comments record them; among them:
 - `stash push -u` with a case-variant path;
 - `multi-pack-index expire` refuses where git would delete the only copies of objects;
 - `sparse-checkout clean` doesn't follow symlinked directories;
 - partial-clone tip checks are stricter than git's;
 - namespaced serving is stricter than git for symrefs leaving the namespace;
-- a served repository's `receive.fsck.skipList` is read only inside its own git directory.
+- a served repository's `receive.fsck.skipList` is read only inside its own git directory (`confineFiles` in `local-transport.ts`).
 
 ## Applying git's and JGit's tests
 
