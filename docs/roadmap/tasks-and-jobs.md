@@ -56,9 +56,12 @@ statewalker-ai and statewalker-kernel move to its new versions.
 | 5 | T8 system.tasks: forward publishes to a fragment's home | [#410](https://github.com/statewalker/statewalker-root/issues/410) | statewalker-kernel, cellb.dev | T7, [#263](https://github.com/statewalker/statewalker-root/issues/263) (Move) |
 | 5 | T9 host-jobs.node: fragment scripts as jobs on Node hosts | [#411](https://github.com/statewalker/statewalker-root/issues/411) | statewalker-kernel, then statewalker-sandbox | T2, T7 |
 
-Waves 1 to 3 can start now: they need nothing from the server-half tracer. Waves 4 and 5 wait for
-the spec's server-half work. Wave 2's T4 is independent of the platform and can run as soon as T1
-is on npm.
+Waves 1 to 3 need nothing from the server-half tracer, and waves 4 and 5 build on the spec's
+server-half work. Wave 2's T4 is independent of the platform and can run as soon as T1 is on npm.
+
+Every ticket in the table above is closed. Where the work stands, and what is left (the
+follow-ups the merge gates filed, and the human's steps), is in the
+[latest handoff on #215](https://github.com/statewalker/statewalker-root/issues/215#issuecomment-7212103396).
 
 **Human steps on the way:**
 
