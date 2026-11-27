@@ -75,7 +75,7 @@ repositories selected for the session or attached to it; others answer 403.
   where `<blocker-db-id>` is the numeric database id
   (`gh api repos/statewalker/statewalker-root/issues/<n> --jq .id`), not the `#number`. Use this in
   cloud sessions too. Only if the call fails, write `Blocked by: #<n>, #<n>` on the first line of
-  the child body and say so in the handoff comment. A ticket is unblocked when every blocker is
+  the child body and say so in the handoff note. A ticket is unblocked when every blocker is
   closed.
 - **Count open blockers**: `gh api repos/statewalker/statewalker-root/issues/<n> --jq .issue_dependencies_summary.blocked_by`
   (0 means startable).
@@ -154,7 +154,7 @@ Used by `/wayfinder`. The **map** is a single issue with **child** issues as tic
 
 Project issues are part of the plan too. When triaging, also sweep each project in `repos.json`:
 `gh api 'repos/statewalker/<repo>/issues?state=open&labels=needs-triage'`. Every review follow-up is
-also linked from the gate's pass record and from the ticket's handoff comment, so the ticket that
+also linked from the gate's pass record and from the ticket's handoff note, so the ticket that
 caused it leads to it.
 
 ## Labels in use

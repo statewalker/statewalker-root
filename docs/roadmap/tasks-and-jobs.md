@@ -61,7 +61,7 @@ server-half work. Wave 2's T4 is independent of the platform and can run as soon
 
 Every ticket in the table above is closed. Where the work stands, and what is left (the
 follow-ups the merge gates filed, and the human's steps), is in the
-[latest handoff on #215](https://github.com/statewalker/statewalker-root/issues/215#issuecomment-7212103396).
+[handoff note of 2026-11-27 07:03 on #215](../handoffs/2026-11-27.215-spec-empty-fragment-platform-kernel-core-0703.md).
 
 **Human steps on the way:**
 

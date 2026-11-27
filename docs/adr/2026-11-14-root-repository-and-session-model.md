@@ -6,6 +6,8 @@ Decision 3's merge clause (the review loop) is amended by
 [two-tier-review](2026-11-14-two-tier-review.md): pull requests pass the merge gate instead.
 Decision 6's tracker clause is amended by [issues-placed-by-subject](2026-11-14-issues-placed-by-subject.md):
 an issue about one project goes to that project's tracker.
+Decision 2's handoffs clause is amended by [handoff-notes-as-files](2026-11-27-handoff-notes-as-files.md):
+handoffs are dated notes in `docs/handoffs/`.
 
 ## Context
 
