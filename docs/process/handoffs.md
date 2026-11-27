@@ -14,8 +14,9 @@ Each subject keeps its own notes beside its other knowledge (`GLOSSARY-MAP.md`):
 | `process` (the root's own work) | `docs/handoffs/` | `docs/handoffs.archive/` |
 | any other subject `<s>` | `subjects/<s>/handoffs/` | `subjects/<s>/handoffs.archive/` |
 
-- **A note belongs to its ticket's subject:** the ticket's `subject:` label, or for a ticket in a
-  project's tracker, that project's subject in `subjects/subjects.json`.
+- **A note belongs to its ticket's subject.** For a root ticket, that is the subject
+  `docs/agents/issue-tracker.md` derives ("Labels in use", `subject:`). For a ticket in a
+  project's tracker, it is that project's subject in `subjects/subjects.json`.
 - **Each folder's `README.md` is its index:** one line per note, newest last.
 - **The current note:** the last line for a ticket in the live index.
 - **The cross-subject view:** `node tools/status.mjs` shows every subject's live notes together.
@@ -71,12 +72,13 @@ mislead.
    Shorter is better: a reader with the ticket and the repository at hand should find nothing
    twice. Never include secrets.
 4. **Commit it** in the session's root pull request, with its index line appended to the live
-   index (`- [<file name without .md>](<file>): #<n>, <ticket title>`), newest last.
+   index (`- [<file name without .md>](<file>): #<n>, <ticket title>`), newest last. Then comment
+   on the ticket with one line linking the note on `main`.
    - The index line names the **open** ticket the note serves. When a plan closes while its work
      continues in a new ticket, point the line at the new ticket, for example
      `#456 (continues plan #282), …`. Changing an index line's ticket is allowed; the note stays
-     unchanged. Then comment
-   on the ticket with one line linking the note on `main`.
+     unchanged. A later note for that work is indexed under the same ticket (`#456, …`), and it
+     becomes the current one.
 5. **Never edit a note after it merges.** Write a new one instead. The one exception is in step 3
    of "How to archive a note".
 

@@ -101,7 +101,27 @@ test("stale claims: claimed and quiet for over 48 hours", () => {
 
 test("regression: human waits recorded only in a note are found (#232, #70)", () => {
   const note = ["# Handoff", "## What is left", "- ticket the fog", "## Waiting on the human", "- The fog proposal above.", "  - a sub-point", "1. **Fork** wasmer-sdk", "## Skills", "- grilling", "## Left", "- **Waiting on human:** whether to file two upstream issues"].join("\n");
-  assert.deepEqual(humanItems(note), ["The fog proposal above.", "**Fork** wasmer-sdk", "whether to file two upstream issues"]);
+  assert.deepEqual(humanItems(note), ["The fog proposal above. a sub-point", "**Fork** wasmer-sdk", "whether to file two upstream issues"]);
+});
+
+test("regression: an item's continuation lines are kept", () => {
+  assert.deepEqual(humanItems("## Waiting on the human\n- **#245:**\n  - repoint the publishers;\n  - archive shell-react\n- next"), ["**#245:** repoint the publishers; archive shell-react", "next"]);
+});
+
+test("regression: a retargeted note and a newer note for the same ticket: only the newer is current", () => {
+  const notes = parseHandoffIndex("- [a](a.md): #456 (continues plan #282), Batch\n- [b](b.md): #456, Batch", "f");
+  assert.deepEqual(currentNotes(notes).map((n) => n.name), ["b"]);
+});
+
+test("regression: a note's waits already on its waiting ticket are not reported again", () => {
+  const model = buildStatus({
+    subjects,
+    issues: [issue(456, ["ready-for-human", "subject:platform"])],
+    comments: new Map(),
+    handoffs: { platform: [{ name: "n", path: "n.md", ref: "#456", rootTicket: 456, title: "t" }] },
+    noteText: new Map([["n.md", "## Waiting on the human\n- choose the batch"]]),
+  });
+  assert.equal(model.find((s) => s.id === "platform").notes[0].ticketWaits, true);
 });
 
 test("index: a ref naming the open ticket that continues a closed plan", () => {

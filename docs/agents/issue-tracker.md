@@ -134,9 +134,11 @@ cloud session waiting on a scheduled wake. Before taking a stale ticket, check a
    or "guided by the human".
 
 If all three hold, comment `Released: stale claim of <date> (<session>): <what you checked>`, then
-claim as usual. **The human may release any claim at any time**, stale or not, by commenting
-`Released: …` or by asking a session to post it. The session then records what it checked. Otherwise don't release: comment `Waiting on human: confirm the claim of <date> is
-stale` and pick another ticket. Before continuing a released ticket, read its comments and its
+claim as usual. Otherwise don't release: comment `Waiting on human: confirm the claim of <date> is
+stale` and pick another ticket.
+
+**The human may release any claim at any time**, stale or not, by commenting `Released: …`, or by
+asking a session to post it. A session posting it for the human quotes the human's request. Before continuing a released ticket, read its comments and its
 current handoff note: the interrupted session's state is there, by the checkpoint rule below.
 
 ### Checkpoints: keep the state recoverable
