@@ -75,3 +75,5 @@ unchanged, and its header links the original.
 - [2026-11-27.430-webrun-devtools-per-app-biscuit-capabilities](2026-11-27.430-webrun-devtools-per-app-biscuit-capabilities.md): #430, webrun-devtools: per-app Biscuit capabilities over webrun-wire, and the extension as an HTTPeers peer
 - [2026-11-27.282-plan-webrun-vcs-parity-gaps-git-0835](2026-11-27.282-plan-webrun-vcs-parity-gaps-git-0835.md): #282, Plan: webrun-vcs parity gaps from the git/JGit coverage tables (116 tickets, 6 waves)
 - [2026-11-27.kitesurf-on-cellb](2026-11-27.kitesurf-on-cellb.md): no ticket, Kitesurf on CellB (Node and a browser tab), PDF via Page.printToPDF
+- [2026-11-27.194-first-paid-wedge](2026-11-27.194-first-paid-wedge.md): #194, Which product is the first paid wedge? (recorded from its session; Q11–Q15 wait on the human)
+- [2026-11-27.69-clean-up-open-issues](2026-11-27.69-clean-up-open-issues.md): #69, Clean up the open issues across the projects (npm trusted publisher and httpeers#133 wait on the human)
