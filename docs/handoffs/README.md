@@ -8,7 +8,8 @@ Snapshots that tell the next session where a piece of work stands and how to con
 1. **Name:** `YYYY-MM-DD.<note-name>.md`, with today's date in UTC, then a dot.
    - `<note-name>` is kebab-case: `<ticket number>-<topic>` for a handoff on a ticket, or the topic
      alone.
-   - When a ticket gets more than one note on the same day, each one ends in its UTC time, `-HHMM`.
+   - A note written on a day when its ticket already has a note ends in its UTC time, `-HHMM`. The
+     day's first note keeps its plain name, so no merged note is ever renamed.
    - Example: `2026-11-27.282-plan-webrun-vcs-parity-gaps-git-0710.md`.
 2. **Start the file** with `# Handoff: <ticket title> (#<n>)` and the ticket's link. If it replaces
    an earlier note, name that note.
@@ -64,7 +65,7 @@ unchanged, and its header links the original.
 - [2026-11-25.430-webrun-devtools-per-app-biscuit-capabilities](2026-11-25.430-webrun-devtools-per-app-biscuit-capabilities.md): #430, webrun-devtools: per-app Biscuit capabilities over webrun-wire, and the extension as an HTTPeers peer
 - [2026-11-25.259-server-half-tracer-notes-fragment-served](2026-11-25.259-server-half-tracer-notes-fragment-served.md): #259, Server-half tracer: the notes fragment DO served under /fragments/{id}/ on browser, CellB Node and wrangler dev
 - [2026-11-26.430-webrun-devtools-per-app-biscuit-capabilities](2026-11-26.430-webrun-devtools-per-app-biscuit-capabilities.md): #430, webrun-devtools: per-app Biscuit capabilities over webrun-wire, and the extension as an HTTPeers peer
-- [2026-11-27.215-spec-empty-fragment-platform-kernel-core-0138](2026-11-27.215-spec-empty-fragment-platform-kernel-core-0138.md): #215, Spec: the empty fragment platform (kernel, core fragments, shell, demos)
-- [2026-11-27.282-plan-webrun-vcs-parity-gaps-git-0154](2026-11-27.282-plan-webrun-vcs-parity-gaps-git-0154.md): #282, Plan: webrun-vcs parity gaps from the git/JGit coverage tables (116 tickets, 6 waves)
+- [2026-11-27.215-spec-empty-fragment-platform-kernel-core](2026-11-27.215-spec-empty-fragment-platform-kernel-core.md): #215, Spec: the empty fragment platform (kernel, core fragments, shell, demos)
+- [2026-11-27.282-plan-webrun-vcs-parity-gaps-git](2026-11-27.282-plan-webrun-vcs-parity-gaps-git.md): #282, Plan: webrun-vcs parity gaps from the git/JGit coverage tables (116 tickets, 6 waves)
 - [2026-11-27.215-spec-empty-fragment-platform-kernel-core-0703](2026-11-27.215-spec-empty-fragment-platform-kernel-core-0703.md): #215, Spec: the empty fragment platform (kernel, core fragments, shell, demos)
 - [2026-11-27.282-plan-webrun-vcs-parity-gaps-git-0710](2026-11-27.282-plan-webrun-vcs-parity-gaps-git-0710.md): #282, Plan: webrun-vcs parity gaps from the git/JGit coverage tables (116 tickets, 6 waves)

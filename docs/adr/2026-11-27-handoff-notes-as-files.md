@@ -7,7 +7,7 @@ out of issue comments into files. Tickets, maps, specs and progress stay in issu
 ## Context
 
 A handoff tells the next session where the work stands and how to continue it. Until now each
-handoff was a comment on its ticket. There were 37 of them on 36 root issues by 2026-11-27.
+handoff was a comment on its ticket. There were 37 of them on 33 root issues by 2026-11-27.
 
 Handoffs written as comments are hard to find and read in order:
 - they sit among claim comments, gate records and status lines;
@@ -25,8 +25,9 @@ the earlier rule sent handoffs to comments.
    - `<note-name>` is kebab-case. For a handoff on a ticket it is `<ticket number>-<topic>` (e.g.
      `2026-11-27.282-plan-webrun-vcs-parity-gaps-git-0710.md`); for one on no ticket it is the topic
      alone.
-   - When a ticket gets more than one note on the same day, each of them ends in its UTC time,
-     `-HHMM`, so names sort in writing order.
+   - A note written on a day when its ticket already has a note ends in its UTC time, `-HHMM`. The
+     day's first note keeps its plain name, so no merged note is ever renamed. Writing order is the
+     index's (decision 3), not the directory listing's.
 2. **A note is written once.** It is never edited after its pull request merges. A later note
    replaces it, and names the note it replaces. New files never conflict, so parallel sessions can
    add notes as they add ADRs. A note is a snapshot, not a status file.
@@ -43,14 +44,14 @@ the earlier rule sent handoffs to comments.
    It links issues, ADRs and research rather than copying them, and it never contains secrets.
 5. **The `/handoff` skill writes the note there**, not to `$TMPDIR`; `CLAUDE.md` states this
    override.
-6. The 37 handoff comments that existed on 2026-11-27 were copied into notes unchanged, each under
-   a header that links its ticket and original comment. Docs that linked those comments now link
+6. The 37 handoff comments (on 33 issues) that existed on 2026-11-27 were copied into notes
+   unchanged, each under a header that links its ticket and original comment. Docs that linked those comments now link
    the notes.
 
 ## Consequences
 
-- Handoffs read in order in one directory, and a plan's newest note is the last one with its
-  ticket number.
+- Handoffs are in one directory, and `docs/handoffs/README.md` lists them in writing order, so a
+  ticket's newest note is its last line there.
 - Every handoff now costs a root pull request. That is acceptable, since a session already opens
   one to end (`docs/process/sessions.md`).
 - The original comments stay where they are, as history. Docs link the files.
