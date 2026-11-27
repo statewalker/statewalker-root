@@ -76,9 +76,10 @@ Versions: unkernel `0.2.0-261126-fd204d3`, tabc at `fzakaria/tabc@9c38eb7`, Node
   - Recommendation (inference): use unkernel where compatibility matters (real `npm`/`pip`
     packages, CLIs, native modules, Docker images), and keep QuickJS or WASI CPython for short,
     pure scripts on the hot path.
-- **workerd caveat, still open.** A kernel in a workerd DO stalls under many concurrent FilesApi
-  fetches (first note, section 6). Here the Python image (166 fetches) ran in a workerd DO, and
-  the Node image (770) stalled. Section 6 has the concurrency-limited retry.
+- **workerd caveat, still open.** Kernels in a workerd DO stall intermittently: the same request
+  succeeds, then hangs on the next try (section 6). alpine, Python and Bun images did run there.
+  Fetch counts, concurrency limits, kernels per isolate and the image do not explain it, and
+  plain Node never stalled with the same code. unkernel is ready for cellb, not yet for workerd.
 
 ## Findings
 
@@ -273,9 +274,27 @@ The workerd process grew from 93 to 343 MiB with one Python kernel (local worker
 128 MB limit; production does). With unlimited concurrent fetches, the Node image (770 reads cold)
 stalled as in the first note.
 
-A retry with at most 4 fetches in flight (`HttpFilesApi` `maxConcurrent: 4`) did not answer the
-Node cold run within 2 minutes either. The Bun and Deno runs were still going when this was
-written; their results will be added in a follow-up commit.
+The stall is **intermittent, and not explained by anything varied here**. Later runs in the same
+setup:
+
+- `oven/bun:1-alpine` read 465 ranges and finished in 2.1 s, so the number of fetches alone does
+  not trigger it.
+- At most 4 fetches in flight (`HttpFilesApi` `maxConcurrent: 4`) still stalled the Node image.
+- A fresh workerd process per app, one kernel in it, still stalled all three app images. So
+  several kernels in one isolate are not the cause either.
+- The same request, `bun /app/main.ts` in `app/bun-ts`, finished in 1.2 s and wrote its result,
+  then stalled on the next identical request in a new DO. alpine ran right after.
+- The identical code, image, `jit: false` and `HttpFilesApi` never stalled in plain Node
+  (`node-app-http.mjs`: 1.0 s).
+
+When it stalls, the guest stops entirely: no console output, and `kwtty` no longer answers a
+second `exec`. The DO itself stays responsive, and workerd logs nothing. The hung kernels keep
+their memory: the local workerd process reached 918 MiB.
+
+**Before unkernel is offered on workerd** (inference): reproduce this with the smallest JSPI
+program that awaits fetches (no unkernel), then with unkernel's base shell and a synthetic `Fs`,
+and report it to whichever owns it. Until then, unkernel is for cellb (Node, browsers), where it
+never stalled, and for celld only after testing there.
 
 ### 7. unkernel, Wasmer and QuickJS for JS and Python
 
