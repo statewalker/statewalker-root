@@ -69,3 +69,4 @@ unchanged, and its header links the original.
 - [2026-11-27.282-plan-webrun-vcs-parity-gaps-git](2026-11-27.282-plan-webrun-vcs-parity-gaps-git.md): #282, Plan: webrun-vcs parity gaps from the git/JGit coverage tables (116 tickets, 6 waves)
 - [2026-11-27.215-spec-empty-fragment-platform-kernel-core-0703](2026-11-27.215-spec-empty-fragment-platform-kernel-core-0703.md): #215, Spec: the empty fragment platform (kernel, core fragments, shell, demos)
 - [2026-11-27.282-plan-webrun-vcs-parity-gaps-git-0710](2026-11-27.282-plan-webrun-vcs-parity-gaps-git-0710.md): #282, Plan: webrun-vcs parity gaps from the git/JGit coverage tables (116 tickets, 6 waves)
+- [2026-11-27.232-project-sites-one-standard](2026-11-27.232-project-sites-one-standard.md): #232, Project sites: one standard for every statewalker site
