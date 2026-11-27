@@ -70,5 +70,5 @@ The refactoring plan (`docs/refactoring/README.md`) turns each of these into wor
 - **P8.** `tools/consumer-install` is copied into three projects and has already drifted.
 - **P9.** Library docs live in two places: cellb.dev and webrun-vcs keep theirs in-repo; fsm and webrun
   docs live in the private statewalker-sites. Decided: content in each project's `site/`, one build
-  in statewalker-sites (`docs/adr/2026-11-25-site-kit-and-site-placement.md`); not yet moved.
+  in statewalker-sites (`subjects/sites/adr/2026-11-25-site-kit-and-site-placement.md`); not yet moved.
 - **P10.** Resolved: umbrella's GitHub description no longer matched its README; umbrella is archived.

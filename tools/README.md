@@ -18,7 +18,8 @@ serves. Nothing here publishes: releases happen only in CI (`docs/process/README
 | `npmverify.sh <registry> <dir> <pkgdir>…` | Install the given packages from npm into an empty folder and import every exported entry |
 | `review-metrics.mjs [--repos a,b] [--json] [--create]` | The five review signals and four thresholds over the last four weeks; files the threshold tickets with `--create` (`docs/process/review-metrics.md`) |
 | `health-dispatch.mjs [--repos a,b] [--json] [--md <file>] [--create]` | The week's health-review plan: unfinished runs to resume, record tickets to create (five at most), deferred bugs to escalate (`docs/process/health-review.md`) |
-| `check-docs.mjs` | This repository's own CI: Markdown links, skills lock, `repos.json` format |
+| `status.mjs [subject…] [--no-projects] [--json]` | Where every subject stands and what comes next, live from GitHub and the handoff indexes. For each subject: plans, frontier, waiting on the human, taken, blocked, to triage, live notes, and the projects' open pull requests and bugs (`docs/process/subjects.md`) |
+| `check-docs.mjs` | This repository's own CI: Markdown links, skills lock, `repos.json` format, every project in one subject (`subjects/subjects.json`), subject folders, handoff indexes |
 
 They work on the clones in `repos/` (gitignored; `SW_REPOS` overrides). Those clones are for reading
 and as worktree sources: never edit them, work in a workspace. `packages.mjs status --deep` and

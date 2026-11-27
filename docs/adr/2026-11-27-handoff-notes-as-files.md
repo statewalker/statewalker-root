@@ -2,7 +2,10 @@
 
 **Status**: accepted, 2026-11-27, at the human's request. Amends decision 2 of
 [root-repository-and-session-model](2026-11-14-root-repository-and-session-model.md): handoffs move
-out of issue comments into files. Tickets, maps, specs and progress stay in issues.
+out of issue comments into files. Tickets, maps, specs and progress stay in issues. Where notes
+live (decision 1's folder) and their index (decision 3) are amended by
+[subjects-layout](2026-11-27-subjects-layout.md): each subject keeps its notes in its own
+`handoffs/`, with the rules in `docs/process/handoffs.md`.
 
 ## Context
 
