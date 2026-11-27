@@ -92,8 +92,9 @@ repository-management tools now live in this repository's `tools/`). The private
 Two layers, decided in ADR [blocks-sandclaw-and-managed-services](docs/adr/2026-11-27-blocks-sandclaw-and-managed-services.md):
 
 - **StateWalker** (`github.com/statewalker`, the projects above): the open technology blocks,
-  published MIT. Nothing commercial goes into a `statewalker` repository: no billing, accounts or
-  operations configuration for managed services.
+  published MIT. No code or configuration for running managed services (billing, accounts,
+  operations) goes into a `statewalker` repository; the plans, tickets and research for the offer
+  stay in this repository, under subject `product`.
 - **SandClaw** (`github.com/sandclaw-ai`): the open-source applications assembled on the platform
   from published `@statewalker/*` packages, and the brand that sells **managed services** and
   **on-premise packages** (`GLOSSARY.md`, "Product"). `sandclaw` and httpeers' PeerShare apps move
