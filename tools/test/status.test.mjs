@@ -1,0 +1,121 @@
+// status.mjs: the subject, status and frontier rules (tools/lib/status.mjs), and the command at its
+// seam with recorded GitHub responses. No network.
+// Run: node --test tools/test/*.test.mjs
+import { test } from "node:test";
+import assert from "node:assert/strict";
+import { spawnSync } from "node:child_process";
+import fs from "node:fs";
+import os from "node:os";
+import path from "node:path";
+import { fileURLToPath } from "node:url";
+import { buildStatus, classify, currentNotes, latestStatus, parseHandoffIndex, subjectsOf } from "../lib/status.mjs";
+
+const HERE = path.dirname(fileURLToPath(import.meta.url));
+const TOOL = path.join(HERE, "..", "status.mjs");
+const subjects = {
+  process: { title: "Process", folder: "docs", projects: ["statewalker-ci"] },
+  platform: { title: "Platform", folder: "subjects/platform", projects: ["statewalker-kernel"] },
+  runtimes: { title: "Runtimes", folder: "subjects/runtimes", projects: ["cellb.dev"] },
+};
+const issue = (number, labels, extra = {}) => ({ number, title: `issue ${number}`, labels: labels.map((name) => ({ name })), assignees: [], comments: 0, ...extra });
+const comment = (body, created_at = "2026-11-20T10:00:00Z") => ({ body, created_at });
+
+test("subject: an explicit label wins over repo: labels", () => {
+  const i = issue(1, ["repo:cellb.dev", "subject:platform"]);
+  assert.deepEqual(subjectsOf(i, { subjects, byNumber: new Map() }), ["platform"]);
+});
+
+test("subject: a child takes its parent's subject before its own repo: labels", () => {
+  const map = issue(10, ["wayfinder:map", "subject:platform"]);
+  const child = issue(11, ["repo:cellb.dev"], { parent_issue_url: "https://api.github.com/repos/statewalker/statewalker-root/issues/10" });
+  assert.deepEqual(subjectsOf(child, { subjects, byNumber: new Map([[10, map]]) }), ["platform"]);
+});
+
+test("subject: area:root is process; repo: labels map through subjects.json; nothing is unsorted", () => {
+  const none = new Map();
+  assert.deepEqual(subjectsOf(issue(2, ["area:root"]), { subjects, byNumber: none }), ["process"]);
+  assert.deepEqual(subjectsOf(issue(3, ["repo:cellb.dev", "repo:statewalker-kernel"]), { subjects, byNumber: none }).sort(), ["platform", "runtimes"]);
+  assert.deepEqual(subjectsOf(issue(4, ["needs-triage"]), { subjects, byNumber: none }), ["unsorted"]);
+});
+
+test("status: the latest status comment decides", () => {
+  assert.equal(latestStatus([comment("Claimed by x"), comment("Released: stopping")]).word, "released");
+  assert.equal(latestStatus([comment("Waiting on human: publish"), comment("a note")]).word, "waiting");
+  assert.equal(latestStatus([comment("hello")]), null);
+});
+
+test("classify: plans, taken, human, blocked, frontier and triage", () => {
+  assert.equal(classify(issue(1, ["wayfinder:map"]), []).kind, "plan");
+  assert.equal(classify({ ...issue(2, []), title: "Spec: a thing" }, []).kind, "plan");
+  assert.equal(classify(issue(3, ["ready-for-agent"]), [comment("Claimed by s")]).kind, "taken");
+  assert.equal(classify(issue(4, ["ready-for-agent"]), [comment("Waiting on human: decide")]).kind, "human");
+  assert.equal(classify(issue(5, ["ready-for-human"]), []).kind, "human");
+  assert.equal(classify(issue(6, ["ready-for-agent"], { assignees: [{ login: "a" }] }), []).kind, "human", "assigned with no claim is the human's");
+  assert.equal(classify(issue(7, ["ready-for-agent"], { issue_dependencies_summary: { blocked_by: 1 } }), []).kind, "blocked");
+  assert.equal(classify(issue(8, ["ready-for-agent"]), [comment("Claimed by s"), comment("Released: done for now")]).kind, "frontier");
+  assert.equal(classify(issue(9, ["wayfinder:research"]), []).kind, "frontier");
+  assert.equal(classify(issue(10, ["wayfinder:grilling"]), []).kind, "human", "grilling needs the human");
+  assert.equal(classify(issue(11, ["needs-triage"]), []).kind, "triage");
+});
+
+test("handoff index: the last line per ticket is the current note; 'no ticket' notes stay separate", () => {
+  const text = [
+    "# Handoff notes",
+    "- [2026-11-25.282-a](2026-11-25.282-a.md): #282, Plan",
+    "- [2026-11-27.282-a-0835](2026-11-27.282-a-0835.md): #282, Plan",
+    "- [2026-11-27.kite](2026-11-27.kite.md): no ticket, Kitesurf",
+    "- [2026-11-27.arch](2026-11-27.arch.md): no ticket, Architecture",
+    "- [2026-11-27.vcs-399](2026-11-27.vcs-399.md): webrun-vcs#399, SQL store",
+  ].join("\n");
+  const notes = currentNotes(parseHandoffIndex(text, "subjects/vcs/handoffs"));
+  assert.deepEqual(notes.map((n) => n.name), ["2026-11-27.282-a-0835", "2026-11-27.kite", "2026-11-27.arch", "2026-11-27.vcs-399"]);
+  assert.equal(notes[0].rootTicket, 282);
+  assert.equal(notes[0].path, "subjects/vcs/handoffs/2026-11-27.282-a-0835.md");
+  assert.equal(notes[3].rootTicket, null);
+});
+
+test("buildStatus: a live note on a closed root ticket is flagged", () => {
+  const model = buildStatus({
+    subjects,
+    issues: [issue(20, ["ready-for-agent", "subject:platform"])],
+    comments: new Map(),
+    handoffs: { platform: [{ name: "n", path: "p", ref: "#19", rootTicket: 19, title: "t" }] },
+  });
+  const platform = model.find((s) => s.id === "platform");
+  assert.equal(platform.frontier.length, 1);
+  assert.equal(platform.notes[0].closed, true);
+});
+
+test("status.mjs: renders every subject from recorded responses", () => {
+  const dir = fs.mkdtempSync(path.join(os.tmpdir(), "status-"));
+  const fixtures = path.join(dir, "fixtures.json");
+  const R = "repos/statewalker/statewalker-root";
+  fs.writeFileSync(
+    fixtures,
+    JSON.stringify({
+      [`${R}/issues?state=open`]: [
+        issue(215, ["ready-for-agent", "subject:platform"], { title: "Spec: the empty fragment platform", sub_issues_summary: { total: 4, completed: 1 } }),
+        issue(260, ["ready-for-agent", "repo:cellb.dev"], { parent_issue_url: `https://api.github.com/${R}/issues/215` }),
+        issue(266, ["ready-for-agent"], { parent_issue_url: `https://api.github.com/${R}/issues/215`, comments: 1 }),
+        issue(98, ["ready-for-human", "area:root", "subject:runtimes"]),
+        issue(5, ["needs-triage"]),
+      ],
+      [`${R}/issues/266/comments`]: [comment("Claimed by https://claude.ai/code/session_x", "2026-11-26T08:00:00Z")],
+    }),
+  );
+  const r = spawnSync("node", [TOOL, "--fixtures", fixtures, "--no-projects", "--now", "2026-11-27 10:00 UTC"], { encoding: "utf8" });
+  assert.equal(r.status, 0, r.stderr);
+  const out = r.stdout;
+  assert.match(out, /Generated 2026-11-27 10:00 UTC/);
+  assert.match(out, /\| platform \| 1 \| 1 \| 0 \| 1 \| 0 \| 0 \|/, "platform: the spec, #260 on the frontier, #266 taken");
+  assert.match(out, /## platform[\s\S]*Next for an agent[\s\S]*#260/);
+  assert.match(out, /#266[^\n]*claimed 2026-11-26/);
+  assert.match(out, /## runtimes[\s\S]*Waiting on the human[\s\S]*#98/);
+  assert.match(out, /## unsorted[\s\S]*#5/, "an issue with no subject is listed for labelling");
+});
+
+test("status.mjs: an unknown subject is refused", () => {
+  const r = spawnSync("node", [TOOL, "nope", "--no-projects"], { encoding: "utf8" });
+  assert.equal(r.status, 2);
+  assert.match(r.stderr, /unknown subject nope/);
+});

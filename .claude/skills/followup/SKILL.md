@@ -84,7 +84,7 @@ A lane's last step hands back its repository's version pull request ("version pa
 
 ### 6. Hand off
 
-Write a handoff note for the root ticket, following `docs/handoffs/README.md`, and commit it in the session's root pull request. The note holds:
+Write a handoff note for the root ticket in its subject's `handoffs/` folder, following `docs/process/handoffs.md`, and commit it in the session's root pull request. Keep it to what the next session needs to continue, and link what the pull requests and issues already say. The note holds:
 
 - a table of issue → pull request → release;
 - the gate findings that were fixed before merging;

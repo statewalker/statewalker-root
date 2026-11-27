@@ -164,6 +164,12 @@ caused it leads to it.
   `wayfinder:task`.
 - `area:root` for work on this repository itself; `repo:<name>` for each project a ticket's code
   or decision concerns.
+- `subject:<id>` for the subject a root issue belongs to (`GLOSSARY-MAP.md`; ids in
+  `subjects/subjects.json`).
+  - **Required** on every map, spec and standalone root issue, set when it is created.
+  - A map's or spec's tickets (sub-issues) inherit their parent's subject and need no label.
+  - Wayfinder tickets may carry it, beside `repo:` labels.
+  - `node tools/status.mjs` lists open issues with no derivable subject under **unsorted**.
 - `review-followup` (with `bug`) for high findings the merge gate filed instead of fixing (issues
   from the earlier review loop may carry `enhancement`). These
   issues are filed **in the repository of the pull request** rather than here

@@ -2,7 +2,9 @@
 
 **Status**: accepted, 2026-11-27, at the human's request
 ([#452](https://github.com/statewalker/statewalker-root/issues/452)). Amends
-[handoff-notes-as-files](2026-11-27-handoff-notes-as-files.md).
+[handoff-notes-as-files](2026-11-27-handoff-notes-as-files.md). The folders are amended by
+[subjects-layout](2026-11-27-subjects-layout.md): each subject's `handoffs.archive/` sits beside
+its `handoffs/`, and the steps are in `docs/process/handoffs.md`.
 
 ## Context
 

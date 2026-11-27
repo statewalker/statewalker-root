@@ -15,13 +15,14 @@ are placed where concurrent edits do not collide:
 | Wayfinder maps, specs, their tickets | Issues here | Not files. Claimed with assignee + claim comment |
 | Bugs and other issues about one project | Issues in that project (`docs/agents/issue-tracker.md`) | Not files. Claimed the same way |
 | Progress, decisions in flight | Comments on the ticket | Append-only |
-| Handoff notes | `docs/handoffs/YYYY-MM-DD.<note-name>.md`, one file each, linked from a ticket comment (`docs/handoffs/README.md`) | New files never conflict; a note is never edited after it merges. Notes of finished or cancelled work move to `docs/handoffs.archive/` |
+| Handoff notes | `subjects/<s>/handoffs/YYYY-MM-DD.<note-name>.md` (`docs/handoffs/` for the process), one file each, linked from a ticket comment (`docs/process/handoffs.md`) | New files never conflict; a note is never edited after it merges. Notes of finished or replaced work move to the sibling `handoffs.archive/` |
 | Code | Pull requests in the project repositories | Never in this repository |
-| ADRs | `docs/adr/YYYY-MM-DD-<slug>.md`, one file each | New files never conflict |
-| Research | `docs/research/<slug>.md`, one file each | New files never conflict |
+| ADRs | `subjects/<s>/adr/YYYY-MM-DD-<slug>.md` for one subject, `docs/adr/` for the process or several subjects (`GLOSSARY-MAP.md`), one file each | New files never conflict |
+| Research | `subjects/<s>/research/<slug>.md` (`docs/research/` for the process), one file each | New files never conflict |
+| Subjects and their projects | `subjects/subjects.json`, `GLOSSARY-MAP.md`, `subjects/<s>/README.md` (`docs/process/subjects.md`) | Shared files: small edits, rebase before merging |
 | Out-of-scope records (`/triage`) | `.out-of-scope/<concept>.md`, one file each | New files never conflict |
 | Glossary, `CLAUDE.md`, process docs, skills, tools | Edited in this repository's PR | Shared files: keep the edit small, rebase just before merging |
-| Indexes (`docs/adr/README.md`) | One line per entry, appended | Rebase resolves appends trivially |
+| Indexes (`docs/adr/README.md`, a subject README's Decisions and Research lists, each `handoffs/README.md`) | One line per entry, appended | Rebase resolves appends trivially |
 
 **Never** write state into files here (task lists, status tables, session logs): it is what the
 issues are for, and it is what would make every pull request conflict.
@@ -126,13 +127,21 @@ dev-server ports.
 1. Project PRs opened, each referencing the ticket (`#<n>` for a ticket in the same project,
    `statewalker/statewalker-root#<n>` for one in root), and taken through the merge gate in
    `merging.md` before merging (lowest layer first).
-2. **Handoff note** in `docs/handoffs/YYYY-MM-DD.<note-name>.md` (`docs/handoffs/README.md`; not
-   the `/handoff` skill's `$TMPDIR` file). It covers what was done, links to every follow-up issue
-   the merge gate filed or reused, links to every PR, what is left, and anything the next session
-   must know. It is committed in this session's root PR, and a one-line comment on the ticket links
-   it. Close the ticket if it is
-   resolved, and move its notes to `docs/handoffs.archive/` (`docs/handoffs/README.md`, **Archiving a note**); otherwise comment `Released: <why>` and remove the assignee, or
-   `Waiting on human: <what>` when the next step is the human's.
+2. **Handoff note** in the ticket's subject, `subjects/<s>/handoffs/YYYY-MM-DD.<note-name>.md`
+   (`docs/handoffs/` for the process; rules in `docs/process/handoffs.md`; not the `/handoff`
+   skill's `$TMPDIR` file). It holds only what the next session needs to continue: what is left,
+   what is running, what waits on the human, and the decisions and rules not recorded elsewhere. It
+   links every PR and follow-up issue rather than retelling them. It is committed in this session's
+   root PR, and a one-line comment on the ticket links it. Close the ticket if it is resolved, and
+   archive its notes (`docs/process/handoffs.md`, "Archiving a note"); otherwise comment
+   `Released: <why>` and remove the assignee, or `Waiting on human: <what>` when the next step is
+   the human's.
+   - **Update the subject's root files only where a new session needs it to continue:**
+     - the README's dated "Entry points" when a plan opens, closes or changes direction;
+     - an ADR for a decision that was hard to reverse;
+     - a research note when a root ticket asked a question.
+
+     Anything already in the code, a project's docs or a ticket stays there.
 3. New work discovered → new tickets (with blocking edges), not notes in files.
 4. This repository's PR rebased, through the merge gate, and merged automatically (or left open
    with `Waiting on human` if the gate stopped on a critical finding).

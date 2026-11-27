@@ -1,0 +1,59 @@
+{
+  "$comment": "The subjects of the ecosystem: which folder holds each one's knowledge, and which projects belong to it. Every project in repos.json is in exactly one subject (tools/check-docs.mjs checks it). Root issues carry a subject:<id> label (docs/agents/issue-tracker.md). Human-readable map: GLOSSARY-MAP.md. State is never written here: run node tools/status.mjs.",
+  "subjects": {
+    "process": {
+      "title": "Process and ecosystem",
+      "folder": "docs",
+      "summary": "How the ecosystem is developed: sessions, the merge gate, CI and releases, health reviews, the tools, the sandbox dissolution.",
+      "projects": ["statewalker-ci", "statewalker-sandbox"]
+    },
+    "platform": {
+      "title": "Fragment platform",
+      "folder": "subjects/platform",
+      "summary": "The headless kernel, core fragments, the React shell and the hosts that serve fragments (browser, CellB Node, Workers).",
+      "projects": ["statewalker-shared", "statewalker-fsm", "statewalker-kernel", "statewalker-shell-react", "statewalker-shell-theia"]
+    },
+    "ai-harness": {
+      "title": "AI harness",
+      "folder": "subjects/ai-harness",
+      "summary": "Agent sessions, definitions, access and code execution (light containers, containers) on CellB, CellD and Workers.",
+      "projects": ["statewalker-ai"]
+    },
+    "runtimes": {
+      "title": "Durable Objects runtimes",
+      "folder": "subjects/runtimes",
+      "summary": "CellB (isomorphic Durable Objects runtime, in Node and in a browser tab), CellD, and running other engines on them.",
+      "projects": ["cellb.dev"]
+    },
+    "vcs": {
+      "title": "Version control",
+      "folder": "subjects/vcs",
+      "summary": "webrun-vcs: a git-compatible VCS in TypeScript on web APIs only, with parity against native git.",
+      "projects": ["webrun-vcs"]
+    },
+    "p2p": {
+      "title": "P2P and capabilities",
+      "folder": "subjects/p2p",
+      "summary": "Byte channels and RPC (webrun-wire), the HTTPeers mesh, Biscuit capabilities, and the webrun-devtools extension.",
+      "projects": ["webrun-wire", "httpeers", "webrun-devtools"]
+    },
+    "sites": {
+      "title": "Sites and notebooks",
+      "folder": "subjects/sites",
+      "summary": "Observable notebooks built to static sites, the site kit, and every statewalker project site.",
+      "projects": ["statewalker-knowledge", "webrun-sites", "statewalker-sites"]
+    },
+    "product": {
+      "title": "Product",
+      "folder": "subjects/product",
+      "summary": "SandClaw, the branded applications built on the platform, and the first paid offer.",
+      "projects": ["sandclaw"]
+    },
+    "data": {
+      "title": "Data and storage",
+      "folder": "subjects/data",
+      "summary": "FilesApi, database drivers, indexers and sync: the storage layer the other subjects build on.",
+      "projects": ["webrun-files", "statewalker-db", "statewalker-search", "webrun-sync"]
+    }
+  }
+}

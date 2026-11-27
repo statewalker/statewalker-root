@@ -29,7 +29,7 @@ Problems referenced as P1–P10 are listed in `docs/projects.md`.
    peershare); alternative: peershare moves to `httpeers/apps`.
 - **0.4** **Fate of statewalker-sandbox** after phase 2: archive, or keep as `labs` with one folder per
    experiment, an owner and a review date, and no inbound dependencies.
-- **0.5** ~~**Docs location**~~ Decided (`docs/adr/2026-11-25-site-kit-and-site-placement.md`): site
+- **0.5** ~~**Docs location**~~ Decided (`subjects/sites/adr/2026-11-25-site-kit-and-site-placement.md`): site
    content in each project's `site/`, one site build and deploy in statewalker-sites.
 
 ## Phase 1 — hygiene (small, independent; parallel)
@@ -69,7 +69,7 @@ commit message), make it build and test in the destination, then delete from the
 | Step | Change | Fixes |
 |---|---|---|
 | 3.1 | Move `apps/chat-mini.chat`, `apps/chat-mini.chat-react` to `packages/` | P5 |
-| 3.2 | ~~Publish `app-shell` from statewalker-shell-react~~ Superseded: shell-react merges into statewalker-platform ([platform-project-and-fragment-repositories](../adr/2026-11-19-platform-project-and-fragment-repositories.md)) | P6 |
+| 3.2 | ~~Publish `app-shell` from statewalker-shell-react~~ Superseded: shell-react merges into statewalker-platform ([platform-project-and-fragment-repositories](../../subjects/platform/adr/2026-11-19-platform-project-and-fragment-repositories.md)) | P6 |
 | 3.3 | ~~Move `file-mounts.core`, `file-panels.core` down to statewalker-kernel~~ Superseded: they become fragments (same ADR); the overlap with `webrun-files-composite` still needs merging | P6 |
 | 3.4 | peershare per decision 0.3; rename the project if decided | P5 |
 
@@ -87,7 +87,7 @@ commit message), make it build and test in the destination, then delete from the
 
 ## Phase 5 — docs location (decided by 0.5)
 
-Per `docs/adr/2026-11-25-site-kit-and-site-placement.md`: `site-fsm`'s pages move to
+Per `subjects/sites/adr/2026-11-25-site-kit-and-site-placement.md`: `site-fsm`'s pages move to
 `statewalker-fsm/site` as content; statewalker-sites keeps the build of every site, the hub and the
 blog. The fate of `site-webrun` and `site-dots` and the rollout order are open on the map
 [statewalker-root#232](https://github.com/statewalker/statewalker-root/issues/232); its spec's

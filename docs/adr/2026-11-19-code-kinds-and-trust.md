@@ -40,7 +40,7 @@ Two existing documents bound the choices:
 ## Considered options
 
 - **A second, sandboxed class of fragment for untrusted authors.** Rejected:
-  - A fragment's client half is React in the shell's origin, sharing modules ([react-only-shell-with-shared-modules](2026-11-18-react-only-shell-with-shared-modules.md)). Sandboxing it would mean an iframe per fragment and a broker for every slot and command.
+  - A fragment's client half is React in the shell's origin, sharing modules ([react-only-shell-with-shared-modules](../../subjects/platform/adr/2026-11-18-react-only-shell-with-shared-modules.md)). Sandboxing it would mean an iframe per fragment and a broker for every slot and command.
   - Untrusted UI already has two safe channels: A2UI surfaces rendered from catalog components, and sandboxes.
 - **A separate permission system for sandboxes.** Rejected: it would duplicate the harness's capability model, and the user would face two kinds of grants.
 
