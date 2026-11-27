@@ -30,17 +30,18 @@ Only notes for work that is still going on live here. Notes for finished or canc
 
 ## Archiving a note
 
-A note moves to `docs/handoffs.archive/` when either of these is true:
-- **Its work is finished or cancelled.** The ticket is closed (completed, not planned or a
-  duplicate), or, for a note with no ticket, its "Left" section is done or the human dropped it.
-  Small leftovers that no one will act on don't keep a note live. A leftover that matters becomes an
-  issue first, and the note can then be archived.
-  **A closed ticket isn't enough on its own.** A note that still has open items no open issue tracks
-  stays live: something running, a step waiting on the human, or a "Left" or next-work section.
-  An example is a plan ticket closed while its follow-up batches continue.
-- **A newer note on the same work replaces it, and no live note links to it.** If the newer note
-  says that rules or steps in the older one still apply, the older note stays here until the newer
-  one is archived.
+A note moves to `docs/handoffs.archive/` only when one of these is true:
+- **Its work is finished, and its ticket is closed.** That covers completed, not planned (cancelled)
+  and duplicate closures. A note with no ticket qualifies when its "Left" section is done or the
+  human dropped it.
+  - A closed ticket alone isn't enough. A note stays live while it has open items that no open issue
+    tracks: something running, a step waiting on the human, or a "Left" or next-work section. One
+    example is a plan ticket that was closed while its follow-up batches continue.
+  - Small leftovers that no one will act on don't keep a note live. A leftover that matters becomes
+    an issue first, and then the note can be archived.
+- **A newer note on the same work replaces it.** The newer note names it under "Replaces". The
+  older note moves even when the newer one says that some of its rules or steps still apply: the
+  newer note's link to it is repointed at the archive (step 3).
 
 How to archive one:
 1. `git mv docs/handoffs/<note>.md docs/handoffs.archive/<note>.md`. The folder sits beside this
@@ -48,8 +49,9 @@ How to archive one:
    moving it doesn't count as editing it.
 2. Move its index line, unchanged, from **Notes** below to the end of
    `docs/handoffs.archive/README.md`. Archive the notes of one ticket together.
-3. Check that no live document links to the old path (`grep -rn "<note>" --include=*.md .`).
-   Point any such link at the archived path.
+3. Find every link to the old path (`grep -rn "<note>" --include=*.md .`) and point it at the
+   archived path. A live note's link, such as `](../handoffs.archive/<note>.md)`, is included.
+   Changing only a link's target path is the one change allowed in a merged note.
 4. Commit in the session's root pull request. You don't need a ticket comment: the ticket's link
    to the note on `main` still resolves through the history, and the archive keeps the same name.
 
@@ -66,10 +68,7 @@ The `/handoff` skill writes here, not to `$TMPDIR` (`CLAUDE.md`, overrides).
 Until 2026-11-27, handoffs were comments on their tickets. Each note below up to that date is such a comment, copied
 unchanged, and its header links the original.
 
-- [2026-11-26.430-webrun-devtools-per-app-biscuit-capabilities](2026-11-26.430-webrun-devtools-per-app-biscuit-capabilities.md): #430, webrun-devtools: per-app Biscuit capabilities over webrun-wire, and the extension as an HTTPeers peer
-- [2026-11-27.282-plan-webrun-vcs-parity-gaps-git](2026-11-27.282-plan-webrun-vcs-parity-gaps-git.md): #282, Plan: webrun-vcs parity gaps from the git/JGit coverage tables (116 tickets, 6 waves)
 - [2026-11-27.215-spec-empty-fragment-platform-kernel-core-0703](2026-11-27.215-spec-empty-fragment-platform-kernel-core-0703.md): #215, Spec: the empty fragment platform (kernel, core fragments, shell, demos)
-- [2026-11-27.282-plan-webrun-vcs-parity-gaps-git-0710](2026-11-27.282-plan-webrun-vcs-parity-gaps-git-0710.md): #282, Plan: webrun-vcs parity gaps from the git/JGit coverage tables (116 tickets, 6 waves)
 - [2026-11-27.232-project-sites-one-standard](2026-11-27.232-project-sites-one-standard.md): #232, Project sites: one standard for every statewalker site
 - [2026-11-27.70-ai-harness-cellb-celld-workers](2026-11-27.70-ai-harness-cellb-celld-workers.md): #70, AI harness on CellB, CellD and Workers
 - [2026-11-27.430-webrun-devtools-per-app-biscuit-capabilities](2026-11-27.430-webrun-devtools-per-app-biscuit-capabilities.md): #430, webrun-devtools: per-app Biscuit capabilities over webrun-wire, and the extension as an HTTPeers peer
