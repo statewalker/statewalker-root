@@ -1,6 +1,6 @@
 # Can unkernel be a container for cellb, celld and workerd, with FilesApi mounts?
 
-Sources read and experiments run on 2026-11-27. Every claim is marked **(verified)** (an experiment
+Research for `statewalker/statewalker-root#437`. Sources read and experiments run on 2026-11-27. Every claim is marked **(verified)** (an experiment
 in this session), **(sourced)** (unkernel's own code or docs, cited) or **(inference)** (this
 note's reasoning). Builds on `docs/research/lightweight-containers-on-do-runtimes.md` (what workerd
 allows in a DO and a Worker Loader isolate), whose findings are cited, not repeated.
@@ -15,7 +15,8 @@ Can [unkernel](https://github.com/pithings/unkernel) (Linux 7.3 compiled to one 
 unmodified aarch64 user space run by an emulator linked into the kernel) launch isolated
 applications from a Durable Object on cellb (Node and browsers), celld and workerd/Wrangler, and in
 workers? Can our capability-based FilesApi be mounted in the guest so that every file call goes
-through a filtered, guarded FilesApi, with no copy of the files when a session starts?
+through a filtered, guarded FilesApi, with no copy of the files when a session starts? And how do
+JavaScript/TypeScript (Node, Bun, Deno) and Python run in these containers?
 
 ## Short answer
 
@@ -50,6 +51,23 @@ through a filtered, guarded FilesApi, with no copy of the files when a session s
   (3) No JIT on workerd: CPU-bound guest code runs on the interpreter, about 2.5 times slower than
   Node with the JIT (verified). (4) unkernel says "Only one kernel can run per thread" (sourced:
   README, SDK limits), and every DO of one class shares an isolate on workerd (inference).
+- **Node 24, Bun 1.4, Deno 2.9 and CPython 3.13 all run in the guest, on Debian 13, in Node and in a
+  workerd DO** (verified). Each binary was the upstream aarch64 Linux build, served read-only from
+  a FilesApi mount and never copied into the guest. TypeScript ran as is: Node strips the types,
+  and Bun and Deno run `.ts` themselves. On Alpine, CPython runs, but the musl Bun needs
+  `libstdc++`, which would come from `apk` (verified). In the workerd DO, the root image also came
+  through a FilesApi, as a read-only disk. Section 6 has the numbers.
+- **Getting the runtimes.** The images carry unkernel's shim (`/usr/lib/kw/bin/{node,npm,npx,bun,bunx,uv,uvx}`).
+  On first use it downloads Node from nodejs.org (the unofficial-builds musl build on Alpine), Bun
+  from the npm registry, and uv from astral.sh (sourced: `guest/base/rootfs/usr/lib/kw/shim`).
+  Python comes from `apk add python3`, `apt-get install python3` or `uv python install`. All of
+  these need the guest's network. On workerd, and wherever the guest must stay offline, mount the
+  runtimes from a FilesApi (an R2 bucket, a prepared volume) instead (verified).
+- **Long-lived kernels stall on workerd under many concurrent FilesApi fetches** (verified,
+  cause open). One DO stopped answering after 79 to about 1,500 ranged fetches, depending on the
+  run. The same commands, with the same FilesApi over HTTP, finished in plain Node (3,922 files in
+  13.6 s). With the fetches serialised, one kernel got past 3,294 requests without stalling, so
+  concurrent subrequests are the likely cause, but this is not proven. See section 6.
 - **Recommendation (inference).** Add unkernel as a third engine behind cellb-containers'
   `ContainerEngine` port, next to Wasmer and Lifo. It is the only one of the three that runs
   unmodified Linux binaries (Alpine and Debian packages) behind a wasm sandbox. Unlike Wasmer it
@@ -159,10 +177,72 @@ Afterwards the host saw `a.txt` = `guest\nmore\n`, no `a.bin`, `data.csv` still 
 celld; Cloudflare production (128 MB, the CPU limit, cold-start compile of an 11 MB module); a
 Worker Loader isolate holding the kernel, with the FilesApi left in the DO behind an RPC stub
 (the earlier note shows WL isolates take `{wasm}` modules and `globalOutbound: null`; whether 9p
-calls survive an RPC hop per request is open); Alpine or Debian on workerd; snapshots
-(`vm.snapshot({ commit })`) as DO hibernation; several kernels in one workerd isolate under load;
-network (`net` takes any `{ connect, lookup }`, so `cloudflare:sockets` or a guarded fetch could
-back it).
+calls survive an RPC hop per request is open); snapshots (`vm.snapshot({ commit })`) as DO
+hibernation; several kernels in one workerd isolate under load; network (`net` takes any
+`{ connect, lookup }`, so `cloudflare:sockets` or a guarded fetch could back it); `npm install`
+or `pip install` in the guest (this sandbox's network policy blocks the guest's package mirrors);
+the shim's downloads.
+
+### 6. JavaScript, TypeScript and Python in the guest (verified)
+
+**Where the binaries came from.** This sandbox's network reaches the npm registry and PyPI but
+not the Alpine or Debian mirrors, so the runtimes were the upstream aarch64 Linux builds that npm
+publishes: `node-linux-arm64@24.22.3` (nodejs.org's glibc build), `@oven/bun-linux-aarch64@1.4.5`
+and its `-musl` twin (the packages unkernel's own shim downloads), `@deno/linux-arm64-glibc@2.9.6`,
+and CPython 3.13.18 from python-build-standalone. The Python came through
+`@rowstile/cli-linux-arm64[-musl]`, a third-party beta package with part of the stdlib removed:
+good enough for a probe, not a source to depend on. They were unpacked on the host (530 MB) and
+mounted read-only at `/opt/rt` through `NodeFilesApi` (Node) or a FilesApi over HTTP range requests
+(workerd, standing in for R2). The adapter reported mode 0755 (`fileMode`), since a FilesApi
+stores no modes. The scripts and their output files went through a second, writable
+`MemFilesApi` at `/work`.
+
+**What ran.** A `hello.ts` (a typed `const`, `process.version`, `fib(25)`) under each JavaScript
+runtime, and a `hello.py` (`fib(22)`, a JSON file written to `/work`) under CPython. All passed,
+and the host read the JSON file back from its `MemFilesApi`. Times are the whole `exec`; reads are
+what the guest pulled from the runtimes' FilesApi:
+
+| Run (Debian 13, guest 256 MiB) | Node host, JIT | Node host, no JIT | workerd DO (no JIT) |
+|---|---|---|---|
+| `node hello.ts`, cold / warm | 1.98 s (27.6 MB) / 1.44 s | 2.87 s | 3.31 s (43.2 MB) / 2.29 s |
+| `bun hello.ts`, cold / warm | 1.02 s (22.0 MB) / 0.11 s | 1.77 s | 1.30 s (26.4 MB) / 0.18 s |
+| `deno run hello.ts`, cold / warm | 1.65 s (17.4 MB) / 0.69 s | 1.96 s | 2.14 s (29.6 MB) / 0.78 s |
+| `python3.13 hello.py`, cold | 2.30 s (11.9 MB) | 2.47 s | 3.24 s (15.9 MB), fresh DO |
+| `fib(25)` in Node / Bun / Deno, warm | 34 / 56 / 19 ms | | 67 / 121 / 60 ms |
+
+- **Lazy loading works.** Node's binary is 123 MB, yet `node --version` read 14 MB of it and a
+  warm run 4.5 MB. Bun's `--version` read 3.2 MB of 103 MB. Nothing is copied ahead.
+- **Memory.** Every runtime also passed with 128 MiB of guest memory (Node host). The host process
+  of a Node run held 300 to 450 MB RSS, kernel and V8 included. That is far above the 128 MB a
+  Workers isolate allows, so production on Cloudflare stays unproven (section 5).
+- **Python start-up.** The stripped stdlib ships no `.pyc` files, so each run compiles what it
+  imports: `python3.13 -c pass` took 0.5 s warm, 0.26 s with `PYTHONPYCACHEPREFIX` on a writable
+  directory. An image made for this should be precompiled (`compileall`).
+- **Alpine.** CPython (musl) ran there. The musl Bun failed to relocate `libstdc++` symbols, and the
+  shim installs that library with `apk` (sourced). Debian already carries it.
+- **Deno** needs a writable `DENO_DIR` (`/tmp/deno` here), since the mount is read-only.
+
+**Booting a distro inside a workerd DO** needed three workarounds:
+
+1. A string `distro` goes through `distroSpec`, which reads `location.href`, absent in workerd. A
+   disk spec or a `BlockDevice` avoids it.
+2. unkernel's HTTP disk (`HttpBase`, `js/core/block.ts` 1121-1231) fetches with `cache: "no-cache"`,
+   `"force-cache"` and `"reload"`. workerd refuses all three ("Unsupported cache mode"), every
+   block read then fails, and **the base shell boots instead, with no error reaching the caller**
+   (verified: erofs I/O errors in `dmesg`, a busybox userland). Wrapping `fetch` to drop `cache`
+   got the reads through, but that kernel then stalled after `Run /init`.
+3. What worked is a `BlockDevice` of our own over a FilesApi file (`filesApiDisk` in the
+   appendix): Debian booted in the DO in under 0.4 s, reading 4.3 MB of the 74 MB image. The root
+   image then goes through the same capability layer as the mounts.
+
+**The stall.** A kernel that keeps running in one DO stopped making progress: no new fetch, no
+console output, `kwtty` silent. Every request the server saw had completed, so the DO's `fetch`
+promise was what never settled. It happened after 79, 342 and about 1,500 requests in three runs,
+and never in plain Node with the same FilesApi over HTTP. Serialising the FilesApi's fetches got
+one kernel past 3,294 requests without a stall. Concurrent subrequests are the suspect: the 9p
+server runs up to 16 requests at once (sourced: `.agents/js.md`, Connection), and workerd caps
+the open connections of one request. Unconfirmed. Before an engine relies on this, reproduce it
+with a minimal JSPI-plus-fetch probe and report it to unkernel or workerd.
 
 ## How it would plug into cellb-containers (inference)
 
@@ -174,6 +254,11 @@ sandbox. The guest reaches the host only through the devices the host configures
 unless `net` is given. A runaway guest still holds its thread on workerd, so per-run Worker Loader
 isolates with `limits.cpuMs` are the place for untrusted code there, as for the other wasm engines.
 
+## Follow-up
+
+- statewalker/cellb.dev#256: the unkernel engine for cellb-containers, with these findings as
+  acceptance criteria (the workerd stall first).
+
 ## Upstream asks
 
 1. Resolve `bundledKernelUrl`/`bundledGlUrl`/`bundledVkShaderUrl` lazily, only when no `kernel`
@@ -182,6 +267,9 @@ isolates with `limits.cpuMs` are the place for untrusted code there, as for the 
    `Platform.spawnWorker`), so a host realm without a global `Worker` can still give one.
 3. An option to skip the JIT probe on hosts that refuse compiles, instead of a failed compile
    logged as an error per block.
+4. `HttpBase` without `fetch` cache modes where the runtime refuses them (workerd), and a distro
+   that fails to mount reported to `createKernel`'s caller, not booted around in silence.
+5. `distroSpec` resolving a relative URL only where `location` exists.
 
 ## Appendix: the FilesApi → unkernel `Fs` adapter (as run)
 
@@ -202,11 +290,12 @@ async function readAll(files, path) {
 }
 
 // direct: answer version 0, so the guest opens every file uncached and each read(2) reaches
-// the FilesApi (no guest page cache).
-export function filesApiFs(files, { readOnly = false, direct = false } = {}) {
+// the FilesApi (no guest page cache). fileMode: the permission bits files report (a FilesApi
+// stores none); 0o755 lets the guest run programs served from the FilesApi.
+export function filesApiFs(files, { readOnly = false, direct = false, fileMode = 0o644 } = {}) {
   const attrOf = (s) => s.kind === "directory"
     ? { type: "dir", mode: 0o755 }
-    : { type: "file", mode: 0o644, size: s.size, mtimeMs: s.lastModified, ...(direct ? { version: 0 } : {}) };
+    : { type: "file", mode: fileMode, size: s.size, mtimeMs: s.lastModified, ...(direct ? { version: 0 } : {}) };
   async function stat(path) {
     const s = await files.stats(path);
     if (!s) { if (path === "/") return { kind: "directory" }; throw new FsError("ENOENT"); }
@@ -298,6 +387,32 @@ export function filesApiFs(files, { readOnly = false, direct = false } = {}) {
   }
   return fs;
 }
+```
+
+A distro image as a read-only disk over one FilesApi file, so the root file system goes through
+the same capability layer (what booted Debian in the workerd DO):
+
+```js
+export async function filesApiDisk(files, path) {
+  const s = await files.stats(path);
+  if (s?.kind !== "file") throw new Error(`no disk image at ${path}`);
+  return {
+    size: s.size,
+    readOnly: true,
+    async read(off, views) { // one ranged FilesApi read per guest block request
+      const len = views.reduce((a, v) => a + v.length, 0), buf = new Uint8Array(len);
+      let o = 0;
+      for await (const c of files.read(path, { start: off, length: len })) {
+        buf.set(c.subarray(0, len - o), o); o += c.length; if (o >= len) break;
+      }
+      let p = 0;
+      for (const v of views) { v.set(buf.subarray(p, p + v.length)); p += v.length; }
+    },
+    write() { throw Object.assign(new Error("read-only disk"), { code: "EROFS" }); },
+  };
+}
+// createKernel({ kernel, distro: await filesApiDisk(images, "/debian.erofs"),
+//   mounts: { "/opt/rt": filesApiFs(runtimes, { readOnly: true, fileMode: 0o755 }) } })
 ```
 
 Use: `createKernel({ kernel, mounts: { "/mnt/f": filesApiFs(view) } })`, where `view` is the
