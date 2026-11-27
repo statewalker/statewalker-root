@@ -96,7 +96,7 @@ selected or attached).
 existing issue only if the new finding changes its scope or description, and link the existing
 issue instead.
 
-The pass's record and the ticket's handoff comment list every follow-up issue, new or existing.
+The pass's record and the ticket's handoff note list every follow-up issue, new or existing.
 
 ## Lockfile-only pull requests
 

@@ -7,6 +7,12 @@ belongs to it. GitHub allows a parent at most 100 sub-issues, so #283–#383 are
 #384–#398 start with `Part of #282`. A ticket's issue, not this file, says whether it is open, claimed or
 done.
 
+The handoff notes for #282 in [`docs/handoffs/`](../handoffs/README.md) (names `*.282-*`) say
+where the work stands and what comes next; the newest one (last in the index) is current. The
+[2026-11-27 01:54 note](../handoffs/2026-11-27.282-plan-webrun-vcs-parity-gaps-git.md) gives
+the standing rules for continuing the work in child sessions: the human's rules, the merge gate,
+the post-merge check and the release steps. Later notes keep them.
+
 When a ticket settles something differently from this file (a new blocker, a split, a different
 behaviour), the ticket wins. Record the decision on the ticket, or in an ADR when it is lasting,
 and update this file in the same pull request.
