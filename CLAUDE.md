@@ -136,7 +136,7 @@ decisions; each project keeps its own. See `docs/agents/domain.md`.
 
 ### Skills only a human can start
 
-`ask-matt`, `grill-me`, `grill-with-docs`, `handoff`, `implement`, `implement-spec`,
+`ask-matt`, `followup`, `grill-me`, `grill-with-docs`, `handoff`, `implement`, `implement-spec`,
 `improve-codebase-architecture`, `retro`, `setup-matt-pocock-skills`, `to-questionnaire`, `to-spec`,
 `to-tickets`, `triage`, `wait-what` and `wayfinder` are marked `disable-model-invocation`: the human
 types them (`/wayfinder statewalker-root#4`). In a session started with only a ticket, when the

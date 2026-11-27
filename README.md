@@ -13,8 +13,9 @@ development session starts, human or agent. No product code lives here.
 | Tools that manage the projects (clones, workspaces, package status) | [`tools/README.md`](tools/README.md) |
 | The reorganization plan | [`docs/refactoring/README.md`](docs/refactoring/README.md) |
 | Shared vocabulary and decisions | [`GLOSSARY.md`](GLOSSARY.md), [`docs/adr/`](docs/adr/README.md) |
-| Agent skills (from [mattpocock/skills](https://github.com/mattpocock/skills)) | [`.claude/skills/`](.claude/skills), pinned in `skills-lock.json` |
+| Agent skills (from [mattpocock/skills](https://github.com/mattpocock/skills); `followup` is this repository's own) | [`.claude/skills/`](.claude/skills), pinned in `skills-lock.json` |
 | Plan and progress | [GitHub issues](https://github.com/statewalker/statewalker-root/issues) |
 
-Update the skills with `npx skills@latest update` and review the diff like any other change.
+Update the skills with `npx skills@latest update` and review the diff like any other change. The
+`followup` skill is written here (`sourceType: local` in the lock) and is edited directly.
 CI (`.github/workflows/checks.yml`) runs `node tools/check-docs.mjs` (links, skills lock, registry) and the tests of the hooks and tools (`node --test .claude/hooks/*.test.mjs tools/test/*.test.mjs`).
