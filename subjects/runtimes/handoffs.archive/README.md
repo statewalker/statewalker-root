@@ -4,4 +4,4 @@ Notes of finished work, and notes replaced by a newer one, moved here unchanged 
 
 ## Notes
 
-None yet.
+- [2026-11-27.kitesurf-on-cellb](2026-11-27.kitesurf-on-cellb.md): no ticket, Kitesurf on CellB (Node and a browser tab), PDF via Page.printToPDF
