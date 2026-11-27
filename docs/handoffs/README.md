@@ -77,3 +77,6 @@ unchanged, and its header links the original.
 - [2026-11-27.kitesurf-on-cellb](2026-11-27.kitesurf-on-cellb.md): no ticket, Kitesurf on CellB (Node and a browser tab), PDF via Page.printToPDF
 - [2026-11-27.194-first-paid-wedge](2026-11-27.194-first-paid-wedge.md): #194, Which product is the first paid wedge? (recorded from its session; Q11–Q15 wait on the human)
 - [2026-11-27.69-clean-up-open-issues](2026-11-27.69-clean-up-open-issues.md): #69, Clean up the open issues across the projects (npm trusted publisher and httpeers#133 wait on the human)
+- [2026-11-27.webrun-vcs-399-sqlite-git-census](2026-11-27.webrun-vcs-399-sqlite-git-census.md): webrun-vcs#399, vcs-store-sql cannot hold git.git
+- [2026-11-27.cellb-dev-235-jsx-tsx-cells-source-maps](2026-11-27.cellb-dev-235-jsx-tsx-cells-source-maps.md): cellb.dev#235, jsx/tsx cells, Markdown positions and source maps in themed notebook pages
+- [2026-11-27.platform-logical-architecture](2026-11-27.platform-logical-architecture.md): no ticket, StateWalker Platform logical architecture document
