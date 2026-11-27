@@ -2,8 +2,9 @@
 
 Handoff notes for finished or cancelled work, moved here unchanged from
 [`docs/handoffs/`](../handoffs/README.md). The rule for when a note moves, and how, is in that README
-under **Archiving a note**. A note here is history: don't resume work from it without checking its
-ticket.
+under **Archiving a note**. A note here is either finished, or replaced by a newer note. Don't
+resume work from it without checking its ticket. A replaced note can still hold rules that its
+live successor in `docs/handoffs/` says still apply: follow them when the successor links here.
 
 Each line below is the note's index line from `docs/handoffs/README.md`, in the order the notes were
 written. The notes up to 2026-11-27 were handoff comments on their tickets, copied unchanged.
@@ -46,3 +47,9 @@ Archived on 2026-11-27 ([#452](https://github.com/statewalker/statewalker-root/i
 - [2026-11-25.259-server-half-tracer-notes-fragment-served](2026-11-25.259-server-half-tracer-notes-fragment-served.md): #259, Server-half tracer: the notes fragment DO served under /fragments/{id}/ on browser, CellB Node and wrangler dev
 - [2026-11-27.215-spec-empty-fragment-platform-kernel-core](2026-11-27.215-spec-empty-fragment-platform-kernel-core.md): #215, Spec: the empty fragment platform (kernel, core fragments, shell, demos)
 - [2026-11-27.444-followup-skill](2026-11-27.444-followup-skill.md): #444, Add /followup: resolve a set of follow-up issues across projects
+
+Archived on 2026-11-27 as replaced notes ([#452](https://github.com/statewalker/statewalker-root/issues/452)):
+
+- [2026-11-26.430-webrun-devtools-per-app-biscuit-capabilities](2026-11-26.430-webrun-devtools-per-app-biscuit-capabilities.md): #430, webrun-devtools: per-app Biscuit capabilities over webrun-wire, and the extension as an HTTPeers peer
+- [2026-11-27.282-plan-webrun-vcs-parity-gaps-git](2026-11-27.282-plan-webrun-vcs-parity-gaps-git.md): #282, Plan: webrun-vcs parity gaps from the git/JGit coverage tables (116 tickets, 6 waves)
+- [2026-11-27.282-plan-webrun-vcs-parity-gaps-git-0710](2026-11-27.282-plan-webrun-vcs-parity-gaps-git-0710.md): #282, Plan: webrun-vcs parity gaps from the git/JGit coverage tables (116 tickets, 6 waves)

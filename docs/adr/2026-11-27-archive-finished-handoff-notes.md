@@ -12,14 +12,18 @@ the work to continue had to check every ticket to tell the two kinds apart.
 
 ## Decision
 
-1. **Notes of finished or cancelled work move to `docs/handoffs.archive/`.** So do notes that a
-   newer note replaces, unless a live note still points to them as still applying.
-   `docs/handoffs/` then lists only live work. A closed ticket isn't enough on its own. A note
-   with open items that no open issue tracks (something running, a step waiting on the human,
-   work left) stays live until those items are done or filed.
+1. **A note moves to `docs/handoffs.archive/` only when its work is finished and its ticket is
+   closed, or when a newer note replaces it.** These are the human's conditions.
+   - A closed ticket isn't enough on its own. A note with open items that no open issue tracks
+     stays live until those items are done or filed: something running, a step waiting on the
+     human, or work left.
+   - A replaced note moves even if the newer note still relies on parts of it. The newer note's
+     link is repointed at the archive.
+   - `docs/handoffs/` then lists only live work.
 2. **The folder sits beside `docs/handoffs/`**, not inside it. Archived notes keep their relative
    links (`../adr/`, `../research/`) without an edit. Moving a note isn't editing it. The
-   write-once rule stands.
+   write-once rule stands, with one exception: when a note moves, a link to it in a live note gets
+   its target path changed to the archive.
 3. **The index line moves with the note**, unchanged, to `docs/handoffs.archive/README.md`.
 4. **Who archives:**
    - the session that closes a ticket, in the same root pull request;
