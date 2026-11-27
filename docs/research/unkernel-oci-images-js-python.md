@@ -49,6 +49,16 @@ Versions: unkernel `0.2.0-261126-fd204d3`, tabc at `fzakaria/tabc@9c38eb7`, Node
 - **Snapshots cut the cold start.** A warmed kernel snapshots in 31 to 39 ms into 18 to 21 MiB
   (3.8 MiB gzipped) and restores in 70 to 82 ms. The first Python run after a restore took 0.9 s,
   against 3.0 s cold (verified). That suits a DO that hibernates (inference).
+- **Pre-installed images, data on the FilesApi (section 8).** This is how containers are meant to
+  be used here. The runtime, its packages and the scripts are in the image, and the FilesApi
+  mounted at `/data` carries only the job's input and output.
+  - **Build without Docker (verified):** the guest runs the install steps over the base image,
+    and its overlay's upper directory is exported as one more layer tar into the image store.
+    That took 108 s for numpy (all of it `pip`) and 37 s for lodash.
+  - **Run:** each run touched the data FilesApi only for its own files (7 to 12 calls), and the
+    image never through it.
+  - **Workers beat processes:** with a long-lived worker process in the guest (numpy imported
+    once, 2.5 s), each job took **14 to 19 ms**, against 2.9 s for a fresh `python3` per job.
 - **Real package managers work, offline.** Inside the official images, `pip` installed `numpy` (a
   musl wheel with C extensions) and `requests`, and numpy then ran its native code. `npm` installed
   esbuild with its native arm64 binary, which Node then spawned. The packages came from a read-only
@@ -223,10 +233,8 @@ with no network.
   packages, not trees that need executables or links (`node_modules/.bin`, native packages that
   set the exec bit). Put those in the overlay, on a disk image, or in an image layer. Extending the
   adapter with a sidecar for modes and links would also work (inference).
-- **Install once, run many.** At 1 to 2 minutes an install, packages belong in an image build or
-  in a prepared layer (a FilesApi tree or tar indexed like the image's layers), mounted read-only
-  under each run. That is the layered-files pattern cellb-containers already uses
-  (`docs/layered-files.md` there) (inference).
+- **Install once, run many.** At 1 to 2 minutes an install, packages belong in the image, built
+  once (section 8 builds app images this way), never in a run.
 
 ### 5. Snapshots: cold start versus restore (verified)
 
@@ -319,6 +327,68 @@ cellb-containers' `docs/capacity.md` (Wasmer, measured).
 - Wasmer stays on cellb where it already runs, and is not needed where unkernel is offered.
 
 All three behind cellb-containers' `ContainerEngine` port, with the same FilesApi mounts.
+
+### 8. Pre-installed app images, the FilesApi for data only (verified)
+
+**The model.** The runtime, the packages and the scripts are prepared before a run and ship in
+the image. The FilesApi mounted in the guest carries only the data the scripts read and write.
+It gets no `node_modules`, no `site-packages` and no executables, so the FilesApi's lack of
+modes and symlinks (section 4) never matters.
+
+**Building an app image without Docker** (`oci/build.mjs`):
+
+1. Boot the base image (an official one from the registry) with its layers read-only, a tmpfs
+   overlay above, and the package source read-only at `/pkgs`.
+2. Write the scripts into the root.
+3. Run the install steps in the chroot (Dockerfile `RUN` lines, in effect).
+4. Tar the overlay's upper directory to the image store as one more layer. Mount points and
+   caches are removed first. Overlayfs whiteouts, character devices 0:0 in the upper directory,
+   are read back as deletions.
+5. The new image is the base's layers plus that layer, with the app's `Cmd` and `WorkingDir`, and
+   its index is written beside it.
+
+| App image | Base | Install steps | Build time | App layer |
+|---|---|---|---|---|
+| `app/py-stats` (numpy over a CSV) | `python:3.13-alpine` | `pip install --no-index numpy`, `python3 -m compileall /app` | 107.6 s (pip 104 s) | 76.4 MB |
+| `app/node-report` (lodash over JSON) | `node:24-alpine` | `npm install --offline lodash.tgz` | 37.5 s (npm 34.5 s) | 2.3 MB |
+| `app/bun-ts` (TypeScript word count) | `oven/bun:1-alpine` | none (the script only) | 0.8 s | 6 KB |
+
+The first export took 185 s for 76 MB because the `Fs` adapter grew its write buffer to the
+exact new size on every write, which is quadratic. Growing it geometrically brought that to
+1.2 s. The adapter in the first note's appendix has the fix.
+
+**Running them** with the image read-only from the store and a `MemFilesApi` at `/data` (guest
+128 MiB; numpy 256 MiB, below which OpenBLAS fails to load with "Out of memory"):
+
+| App | Cold run | Warm run | After snapshot + restore | Peak RSS | Calls to the data FilesApi per run |
+|---|---|---|---|---|---|
+| py-stats | 3.2 s | 2.9 s | 3.7 s (restore 92 ms) | 27.6 MiB | 8 to 12: `stats`, `read(/input.csv)`, `write(/result.json)` |
+| node-report | 2.7 s | 1.4 s | 2.7 s (restore 100 ms) | 56 MiB | 8 to 12: `read(/input.json)`, `write(/report.json)` |
+| bun-ts | 0.95 s | 0.23 s | 0.91 s (restore 138 ms) | 26 MiB | 7 to 12: `read(/input.txt)`, `write(/top.json)` |
+
+The data FilesApi saw nothing but the job's own files. Every image byte came from the image
+store. A restored kernel's first run is about as slow as a cold one, because a snapshot taken
+with `stop` drops the file caches. A snapshot only saves the boot, which is already about 0.2 s.
+
+**A long-lived worker instead of a process per job** (`oci/worker-jobs.mjs`). The image's
+`python3` runs a small loop that imports numpy once and then handles job names on its stdin, each
+job reading `/data/<job>.csv` and writing `/data/<job>.json`:
+
+| | Time |
+|---|---|
+| Worker start, numpy import included | 2,535 ms (once) |
+| First job | 159 ms |
+| Next jobs | 19, 16, 14, 14 ms |
+
+Each job's FilesApi calls were its own two files, about 11 calls. **For a DO this is the shape
+to use (inference):**
+
+- one kernel per DO;
+- the app's worker processes started from the image when the DO wakes;
+- jobs sent to them over stdin (or vsock), data through the FilesApi;
+- the kernel snapshotted with the worker idle, so that a hibernated DO wakes with numpy already
+  imported. That would need a snapshot without `stop`'s cache drop, and a worker the restore
+  keeps (the SDK keeps only detachable terminal sessions and 9p mounts). Not tested.
 
 ## Not checked
 
