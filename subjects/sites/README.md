@@ -22,7 +22,7 @@ The output lists, for this subject:
 ## Entry points (2026-11-27)
 
 - Map [statewalker-root#232](https://github.com/statewalker/statewalker-root/issues/232), one standard for every project site (`/wayfinder statewalker-root#232`).
-- The notebook work (cellb.dev#235, #236) runs in cellb.dev's tracker.
+- The notebook work runs in cellb.dev's tracker (cellb.dev#236 next). Its handoff note is in `runtimes`, cellb.dev's subject.
 
 ## Projects
 

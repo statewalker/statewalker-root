@@ -18,7 +18,7 @@ are placed where concurrent edits do not collide:
 | Handoff notes | `subjects/<s>/handoffs/YYYY-MM-DD.<note-name>.md` (`docs/handoffs/` for the process), one file each, linked from a ticket comment (`docs/process/handoffs.md`) | New files never conflict; a note is never edited after it merges. Notes of finished or replaced work move to the sibling `handoffs.archive/` |
 | Code | Pull requests in the project repositories | Never in this repository |
 | ADRs | `subjects/<s>/adr/YYYY-MM-DD-<slug>.md` for one subject, `docs/adr/` for the process or several subjects (`GLOSSARY-MAP.md`), one file each | New files never conflict |
-| Research | `subjects/<s>/research/<slug>.md` (`docs/research/` for the process), one file each | New files never conflict |
+| Research | `subjects/<s>/research/<slug>.md` (`docs/research/` for the process or several subjects), one file each | New files never conflict |
 | Subjects and their projects | `subjects/subjects.json`, `GLOSSARY-MAP.md`, `subjects/<s>/README.md` (`docs/process/subjects.md`) | Shared files: small edits, rebase before merging |
 | Out-of-scope records (`/triage`) | `.out-of-scope/<concept>.md`, one file each | New files never conflict |
 | Glossary, `CLAUDE.md`, process docs, skills, tools | Edited in this repository's PR | Shared files: keep the edit small, rebase just before merging |

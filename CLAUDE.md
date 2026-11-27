@@ -57,7 +57,7 @@ All under `github.com/statewalker/<name>`. Layers are computed from published `@
 dependencies; a project's published packages depend only on lower layers, so changes land and
 release bottom-up. Private packages may reach sideways: cellb.dev's depend on
 statewalker-knowledge and webrun-vcs, so cellb.dev must come after them. Inventory, apps and known problems:
-`docs/projects.md`. Each project's subject: `GLOSSARY-MAP.md`.
+`docs/projects.md`. Each project's subject: `subjects/subjects.json` (source of truth; `GLOSSARY-MAP.md` is its readable twin).
 
 | Layer | Project | What it holds |
 |---|---|---|
@@ -176,7 +176,7 @@ type the command instead.
   `wayfinder`'s "only `wayfinder:` labels".
   Triage labels stay off Wayfinder tickets.
 - **Wayfinder research lands as `subjects/<s>/research/<slug>.md`** (`docs/research/` for the
-  process), in the session's root pull request, not on a throwaway `research/*` branch. The charting session may resolve its own research
+  process or several subjects), in the session's root pull request, not on a throwaway `research/*` branch. The charting session may resolve its own research
   tickets (through subagents), the one exception to one ticket per session.
 - **Wayfinder tickets never take triage labels.** Where this repository's docs say to label a
   ticket `ready-for-human`, a Wayfinder ticket gets only the `Waiting on human: …` status comment

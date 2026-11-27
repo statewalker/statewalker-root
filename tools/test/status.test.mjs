@@ -58,6 +58,22 @@ test("classify: plans, taken, human, blocked, frontier and triage", () => {
   assert.equal(classify(issue(11, ["needs-triage"]), []).kind, "triage");
 });
 
+test("regression: a claimed, unblocked grilling still waits on the human (#194)", () => {
+  assert.equal(classify(issue(194, ["wayfinder:grilling"]), [comment("Claimed by session_x")]).kind, "human");
+});
+
+test("regression: a bare 'Claimed.' comment counts as a claim (#164)", () => {
+  assert.equal(classify(issue(164, ["ready-for-agent"], { assignees: [{ login: "a" }] }), [comment("Claimed. Building in ws/164")]).kind, "taken");
+});
+
+test("regression: unreadable comments are 'unknown', never the frontier", () => {
+  assert.equal(classify(issue(199, ["wayfinder:research"]), null).kind, "unknown");
+  const model = buildStatus({ subjects, issues: [issue(199, ["wayfinder:research", "subject:platform"])], comments: new Map([[199, null]]), handoffs: {} });
+  const platform = model.find((s) => s.id === "platform");
+  assert.equal(platform.frontier.length, 0);
+  assert.equal(platform.unknown.length, 1);
+});
+
 test("handoff index: the last line per ticket is the current note; 'no ticket' notes stay separate", () => {
   const text = [
     "# Handoff notes",
@@ -112,6 +128,18 @@ test("status.mjs: renders every subject from recorded responses", () => {
   assert.match(out, /#266[^\n]*claimed 2026-11-26/);
   assert.match(out, /## runtimes[\s\S]*Waiting on the human[\s\S]*#98/);
   assert.match(out, /## unsorted[\s\S]*#5/, "an issue with no subject is listed for labelling");
+});
+
+test("status.mjs: a failed comment fetch is reported, and the ticket stays off the frontier", () => {
+  const dir = fs.mkdtempSync(path.join(os.tmpdir(), "status-"));
+  const fixtures = path.join(dir, "fixtures.json");
+  const R = "repos/statewalker/statewalker-root";
+  fs.writeFileSync(fixtures, JSON.stringify({ [`${R}/issues?state=open`]: [issue(199, ["wayfinder:research", "subject:platform"], { comments: 2 })] }));
+  const r = spawnSync("node", [TOOL, "--fixtures", fixtures, "--no-projects", "platform"], { encoding: "utf8" });
+  assert.equal(r.status, 0, r.stderr);
+  assert.match(r.stderr, /comments of #199 unreadable/);
+  assert.match(r.stdout, /Status unknown[\s\S]*#199/);
+  assert.doesNotMatch(r.stdout, /Next for an agent/);
 });
 
 test("status.mjs: an unknown subject is refused", () => {

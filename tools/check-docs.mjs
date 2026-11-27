@@ -4,12 +4,14 @@
 //   2. skills-lock.json lists exactly the folders in .claude/skills/.
 //   3. repos.json parses and every entry is a statewalker GitHub URL.
 //   4. subjects/subjects.json: every project of repos.json is in exactly one subject; every subject
-//      has its folder, README.md and handoff indexes, and a row in GLOSSARY-MAP.md.
-//   5. Every handoff note is listed in its folder's index, and every index line names a note there.
+//      has its folder, README.md and handoff indexes, and a GLOSSARY-MAP.md row listing the same projects.
+//   5. Every handoff note is listed in its folder's index, every index line names a note there, and
+//      every line has the form tools/status.mjs parses.
 // Exits 1 and lists every problem when any check fails.
 import fs from "node:fs";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
+import { parseHandoffIndex } from "./lib/status.mjs";
 
 const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "..");
 const SKIP = new Set([".git", "node_modules", "repos", "ws", "notes"]);
@@ -80,7 +82,15 @@ for (const [id, s] of Object.entries(subjects)) {
 }
 for (const p of Object.keys(repos)) if (!owner.has(p)) problems.push(`subjects.json: project ${p} has no subject`);
 const map = fs.readFileSync(path.join(ROOT, "GLOSSARY-MAP.md"), "utf8");
-for (const id of Object.keys(subjects)) if (!map.includes(`| \`${id}\` |`)) problems.push(`GLOSSARY-MAP.md: no row for subject ${id}`);
+for (const [id, s] of Object.entries(subjects)) {
+  const row = map.split("\n").find((l) => l.startsWith(`| \`${id}\` |`));
+  if (!row) {
+    problems.push(`GLOSSARY-MAP.md: no row for subject ${id}`);
+    continue;
+  }
+  const listed = (row.split("|")[3] ?? "").split(",").map((x) => x.trim()).filter(Boolean).sort();
+  if (listed.join() !== [...s.projects].sort().join()) problems.push(`GLOSSARY-MAP.md: ${id}'s projects (${listed.join(", ")}) differ from subjects.json (${s.projects.join(", ")})`);
+}
 
 for (const s of Object.values(subjects)) {
   for (const kind of ["handoffs", "handoffs.archive"]) {
@@ -91,6 +101,8 @@ for (const s of Object.values(subjects)) {
     const files = fs.readdirSync(dir).filter((f) => f.endsWith(".md") && f !== "README.md");
     for (const f of files) if (!listed.has(f)) problems.push(`${s.folder}/${kind}/${f}: missing from its README.md index`);
     for (const f of listed) if (!files.includes(f)) problems.push(`${s.folder}/${kind}/README.md: lists ${f}, which is not in the folder`);
+    const parsed = parseHandoffIndex(index, "").length;
+    if (parsed !== listed.size) problems.push(`${s.folder}/${kind}/README.md: ${listed.size - parsed} line(s) not in the form "- [name](file): <#n | project#n | no ticket>, <title>"`);
   }
 }
 

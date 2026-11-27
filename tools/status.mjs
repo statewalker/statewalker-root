@@ -67,7 +67,10 @@ for (const i of issues) {
   if (!matters) continue;
   try {
     comments.set(i.number, source.list(`${REPO}/issues/${i.number}/comments`));
-  } catch {}
+  } catch (e) {
+    comments.set(i.number, null); // reported under "Status unknown", never on the frontier
+    console.error(`warning: comments of #${i.number} unreadable: ${e.message}`);
+  }
 }
 
 // Handoff indexes.
@@ -95,7 +98,7 @@ if (!flag("--no-projects")) {
 
 const model = buildStatus({ subjects, issues, comments, parents, handoffs, projects, only });
 if (flag("--json")) {
-  console.log(JSON.stringify(model.map((s) => ({ ...s, ...Object.fromEntries(["plans", "frontier", "human", "taken", "blocked", "triage", "other"].map((k) => [k, s[k].map((c) => ({ number: c.issue.number, title: c.issue.title, status: c.status?.word ?? null }))])) })), null, 2));
+  console.log(JSON.stringify(model.map((s) => ({ ...s, ...Object.fromEntries(["plans", "unknown", "frontier", "human", "taken", "blocked", "triage", "other"].map((k) => [k, s[k].map((c) => ({ number: c.issue.number, title: c.issue.title, status: c.status?.word ?? null }))])) })), null, 2));
 } else {
   console.log(renderStatus(model, { generatedAt: value("--now") ?? new Date().toISOString().slice(0, 16).replace("T", " ") + " UTC" }));
 }

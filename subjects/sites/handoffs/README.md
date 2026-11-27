@@ -5,4 +5,3 @@ The notes of work still in progress on this subject, one line per note, newest l
 ## Notes
 
 - [2026-11-27.232-project-sites-one-standard](2026-11-27.232-project-sites-one-standard.md): #232, Project sites: one standard for every statewalker site
-- [2026-11-27.cellb-dev-235-jsx-tsx-cells-source-maps](2026-11-27.cellb-dev-235-jsx-tsx-cells-source-maps.md): cellb.dev#235, jsx/tsx cells, Markdown positions and source maps in themed notebook pages

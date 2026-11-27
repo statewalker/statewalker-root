@@ -23,8 +23,9 @@ prints a summary table, then one section per subject:
 | Section | Meaning | What to do with it |
 |---|---|---|
 | **Plans** | open Wayfinder maps (`wayfinder:map`) and specs (title `Spec: …`), with how many of their tickets are done | the subject's entry points: read the plan before choosing a ticket. "All tickets done" means close the plan or add the next tickets |
+| **Status unknown** | tickets whose comments could not be read (the command also warns on stderr) | check them by hand before claiming; run again |
 | **Next for an agent** | free tickets with no open blocker: `ready-for-agent`, or `wayfinder:research` / `prototype` / `task` | claim one and start (`docs/agents/issue-tracker.md`, "Claiming a ticket") |
-| **Waiting on the human** | `ready-for-human`, a latest `Waiting on human:` comment, a ticket assigned with no claim, or an unblocked `wayfinder:grilling` | the human answers, decides, or comments `Resumed:` |
+| **Waiting on the human** | `ready-for-human`, a latest `Waiting on human:` comment, a ticket assigned with no claim, or an unblocked `wayfinder:grilling` (even while a session holds it: the grilling needs the human's answers) | the human answers, decides, or comments `Resumed:` |
 | **Taken** | the latest status comment is `Claimed by …` | leave it; a claim many days old may be a stalled session, which the human can release |
 | **Blocked** | an open blocking issue | work the blocker first |
 | **To triage** | `needs-triage`, `needs-info`, or no triage label | `/triage` gives it acceptance criteria and a label |

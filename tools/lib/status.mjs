@@ -5,13 +5,13 @@
 //   subject     a subject:<id> label; else the parent issue's subject; else area:root -> process;
 //               else the subjects of its repo:<name> labels (subjects/subjects.json); else unsorted
 //   plan        an open wayfinder:map, or a title starting "Spec:"
-//   status      the latest status comment decides: Claimed by -> taken, Waiting on human -> human,
+//   status      the latest status comment decides: Claimed (by …) -> taken, Waiting on human -> human,
 //               Released / Resumed -> free; ready-for-human -> human; assigned with no claim -> human
 //   frontier    free, no open blocker, and ready-for-agent or an agent-run wayfinder type
 //               (research, prototype, task)
 
 const STATUS_WORDS = [
-  ["claimed", /^\s*Claimed by\b/i],
+  ["claimed", /^\s*Claimed\b/i],
   ["waiting", /^\s*Waiting on human\b/i],
   ["released", /^\s*Released\b/i],
   ["resumed", /^\s*Resumed\b/i],
@@ -54,8 +54,9 @@ export function latestStatus(comments = []) {
 
 export const isPlan = (issue) => labelsOf(issue).includes("wayfinder:map") || /^Spec:/i.test(issue.title ?? "");
 
-/** One of: plan, taken, human, blocked, frontier, triage, waiting-plan, other. */
+/** One of: plan, unknown, taken, human, blocked, frontier, triage, other. `comments` null = unreadable. */
 export function classify(issue, comments) {
+  if (comments === null) return { issue, status: null, blocked: false, kind: "unknown" };
   const labels = labelsOf(issue);
   const status = latestStatus(comments);
   const blocked = (issue.issue_dependencies_summary?.blocked_by ?? 0) > 0;
@@ -66,6 +67,8 @@ export function classify(issue, comments) {
     (labels.includes("wayfinder:grilling") && !blocked);
   const base = { issue, status, blocked };
   if (isPlan(issue)) return { ...base, kind: "plan", human: status?.word === "waiting" || labels.includes("ready-for-human") };
+  // A grilling needs the human's answers even while a session holds it.
+  if (labels.includes("wayfinder:grilling") && !blocked) return { ...base, kind: "human" };
   if (status?.word === "claimed") return { ...base, kind: "taken" };
   if (human) return { ...base, kind: "human" };
   if (blocked) return { ...base, kind: "blocked" };
@@ -102,10 +105,10 @@ const day = (iso) => (iso ? iso.slice(0, 10) : "");
 export function buildStatus({ subjects, issues, comments, parents = [], handoffs, projects = {}, only }) {
   const byNumber = new Map([...parents, ...issues].map((i) => [i.number, i]));
   const ids = only?.length ? only : [...Object.keys(subjects), "unsorted"];
-  const out = Object.fromEntries(ids.map((id) => [id, { id, title: subjects[id]?.title ?? "Unsorted (no subject: label)", plans: [], frontier: [], human: [], taken: [], blocked: [], triage: [], other: [], notes: [], projects: [] }]));
+  const out = Object.fromEntries(ids.map((id) => [id, { id, title: subjects[id]?.title ?? "Unsorted (no subject: label)", plans: [], unknown: [], frontier: [], human: [], taken: [], blocked: [], triage: [], other: [], notes: [], projects: [] }]));
   const openNumbers = new Set(issues.map((i) => i.number));
   for (const issue of issues) {
-    const c = classify(issue, comments.get(issue.number));
+    const c = classify(issue, comments.has(issue.number) ? comments.get(issue.number) : undefined);
     for (const id of subjectsOf(issue, { subjects, byNumber })) {
       const s = out[id];
       if (!s) continue;
@@ -145,7 +148,7 @@ export function renderStatus(model, { generatedAt }) {
     L.push(`| ${s.id} | ${s.plans.length} | ${s.frontier.length} | ${human} | ${s.taken.length} | ${s.blocked.length} | ${s.triage.length} | ${s.notes.length} |`);
   }
   for (const s of model) {
-    const empty = !s.plans.length && !s.frontier.length && !s.human.length && !s.taken.length && !s.blocked.length && !s.triage.length && !s.notes.length;
+    const empty = !s.unknown.length && !s.plans.length && !s.frontier.length && !s.human.length && !s.taken.length && !s.blocked.length && !s.triage.length && !s.notes.length;
     if (s.id === "unsorted" && empty) continue;
     L.push("", `## ${s.id}: ${s.title}`, "");
     const section = (name, items, hint) => {
@@ -153,6 +156,7 @@ export function renderStatus(model, { generatedAt }) {
       L.push(`**${name}**${hint ? ` (${hint})` : ""}`, "", ...items.map(line), "");
     };
     section("Plans", s.plans, "maps and specs: the subject's entry points");
+    section("Status unknown", s.unknown, "its comments could not be read: check the ticket by hand before claiming it; run again");
     section("Next for an agent", s.frontier, "free, unblocked: claim one and start");
     section("Waiting on the human", [...new Map(s.human.map((c) => [c.issue.number, c])).values()], "answer, decide or hand back with `Resumed:`");
     section("Taken", s.taken, "claimed by a session; an old claim may be a stalled session");

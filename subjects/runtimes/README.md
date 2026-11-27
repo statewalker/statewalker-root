@@ -21,7 +21,7 @@ The output lists, for this subject:
 
 ## Entry points (2026-11-27)
 
-- There is no map yet. The open questions are root issues with no plan: #189 and #277 to #281. Their next step is triage (`/triage`), or a map (`/wayfinder`) once they form one destination.
+- There is no map yet. The open questions are root issues with no plan: #189, #277 and #278. Their next step is triage (`/triage`), or a map (`/wayfinder`) once they form one destination.
 - CellB's own bugs and features live in cellb.dev's tracker.
 
 ## Projects
