@@ -7,12 +7,11 @@ belongs to it. GitHub allows a parent at most 100 sub-issues, so #283–#383 are
 #384–#398 start with `Part of #282`. A ticket's issue, not this file, says whether it is open, claimed or
 done.
 
-Every ticket below is closed, and #282 with them. The work went on in webrun-vcs follow-up batches
-and releases. Where it stands, what runs now, what is proposed next for parity and what is left to
-the human are in the
-[latest handoff on #282](https://github.com/statewalker/statewalker-root/issues/282#issuecomment-7212210441).
-It builds on [the earlier handoff](https://github.com/statewalker/statewalker-root/issues/282#issuecomment-7207667206),
-which holds the rules for orchestrating child sessions.
+The handoff comments on [#282](https://github.com/statewalker/statewalker-root/issues/282) say
+where the work stands and what comes next; the newest one is current. The
+[2026-11-27 01:35 UTC handoff](https://github.com/statewalker/statewalker-root/issues/282#issuecomment-7207667206)
+gives the standing rules for continuing the work in child sessions: the human's rules, the merge
+gate, the post-merge check and the release steps. Later handoffs keep them.
 
 When a ticket settles something differently from this file (a new blocker, a split, a different
 behaviour), the ticket wins. Record the decision on the ticket, or in an ADR when it is lasting,
